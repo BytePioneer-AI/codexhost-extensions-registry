@@ -1,0 +1,174 @@
+name: Submission issue to PR
+
+on:
+  issues:
+    types: [opened, edited]
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: Submission issue number to process
+        required: true
+        type: number
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+concurrency:
+  group: submission-issue-${{ github.event.issue.number || inputs.issue_number }}
+  cancel-in-progress: true
+
+jobs:
+  submit:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.issue.state == 'open' &&
+       (startsWith(github.event.issue.title, '[Desktop extension]') ||
+        contains(github.event.issue.body, '### GitHub repository URL')))
+    runs-on: ubuntu-latest
+    env:
+      ISSUE_NUMBER: ${{ github.event.issue.number || inputs.issue_number }}
+      GH_TOKEN: ${{ github.token }}
+      GITHUB_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - run: npm ci --ignore-scripts
+
+      - name: Parse issue and update sources.json
+        id: prepare
+        continue-on-error: true
+        run: node scripts/issue-to-pr.mjs
+
+      - name: Comment parse error on issue
+        if: steps.prepare.outputs.status == 'error' || steps.prepare.outcome == 'failure'
+        env:
+          ERROR_MESSAGE: ${{ steps.prepare.outputs.error_message }}
+        run: |
+          {
+            echo "❌ **Automatic submission check failed / 自动投稿校验失败**"
+            echo ""
+            echo "Could not prepare a \`sources.json\` entry from this issue:"
+            echo ""
+            printf '> %s\n' "${ERROR_MESSAGE:-Unexpected error while parsing the submission issue.}"
+            echo ""
+            echo "Please make sure the **GitHub repository URL** field contains a valid public \`https://github.com/<owner>/<repo>\` URL with a valid \`manifest.json\` (in the latest Release \`.zip\` or on the default branch), then edit this issue to re-run automatically."
+            echo ""
+            echo "请确认 **GitHub repository URL** 为公开的 \`https://github.com/<owner>/<repo>\` 仓库地址且包含合法的 \`manifest.json\`，修改本 Issue 后会自动重新校验。"
+          } > error-comment.md
+          gh issue comment "$ISSUE_NUMBER" --body-file error-comment.md
+          exit 1
+
+      - name: Comment if already listed
+        if: steps.prepare.outputs.status == 'already-exists'
+        env:
+          EXTENSION_ID: ${{ steps.prepare.outputs.extension_id }}
+          REPOSITORY_URL: ${{ steps.prepare.outputs.repository_url }}
+        run: |
+          gh issue comment "$ISSUE_NUMBER" --body "ℹ️ \`$EXTENSION_ID\` ($REPOSITORY_URL) is already listed in \`sources.json\`. The catalog syncs automatically every 30 minutes."
+
+      - name: Validate updated sources.json
+        id: validate
+        if: steps.prepare.outputs.status == 'prepared'
+        continue-on-error: true
+        run: node validate-and-build-catalog.mjs --check-only 2>&1 | tee validate.log
+
+      - name: Publish safety report summary
+        if: always() && hashFiles('safety-report.md') != ''
+        run: cat safety-report.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload safety report artifact
+        if: always() && hashFiles('safety-report.md') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: safety-report-issue-${{ github.event.issue.number || inputs.issue_number }}
+          path: safety-report.md
+
+      - name: Comment validation failure on issue
+        if: steps.prepare.outputs.status == 'prepared' && steps.validate.outcome == 'failure'
+        run: |
+          {
+            echo "❌ **Extension validation failed / 插件自动校验未通过**"
+            echo ""
+            echo "Please fix the issues below in your repository, then edit this issue to re-run validation automatically:"
+            echo ""
+            echo '```text'
+            tail -n 60 validate.log
+            echo '```'
+            if test -f safety-report.md; then
+              echo ""
+              echo "<details><summary>Safety report</summary>"
+              echo ""
+              cat safety-report.md
+              echo ""
+              echo "</details>"
+            fi
+          } > comment.md
+          gh issue comment "$ISSUE_NUMBER" --body-file comment.md
+          exit 1
+
+      - name: Push branch and open or update PR
+        id: pr
+        if: steps.prepare.outputs.status == 'prepared' && steps.validate.outcome == 'success'
+        env:
+          EXTENSION_ID: ${{ steps.prepare.outputs.extension_id }}
+          REPOSITORY_URL: ${{ steps.prepare.outputs.repository_url }}
+        run: |
+          BRANCH="submission/issue-$ISSUE_NUMBER"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git checkout -B "$BRANCH"
+          git add -- sources.json
+          git commit -m "feat(registry): add $EXTENSION_ID (#$ISSUE_NUMBER)"
+          git push --force origin "HEAD:$BRANCH"
+
+          {
+            echo "Closes #$ISSUE_NUMBER"
+            echo ""
+            echo "- **Extension ID**: \`$EXTENSION_ID\`"
+            echo "- **Repository**: $REPOSITORY_URL"
+            echo "- **Validation**: \`node validate-and-build-catalog.mjs --check-only\` passed ✅"
+            echo ""
+            if test -f safety-report.md; then
+              cat safety-report.md
+            fi
+          } > pr-body.md
+
+          EXISTING_PR="$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number // empty')"
+          if [ -n "$EXISTING_PR" ]; then
+            gh pr edit "$EXISTING_PR" \
+              --title "feat(registry): add $EXTENSION_ID (#$ISSUE_NUMBER)" \
+              --body-file pr-body.md
+            PR_URL="$(gh pr view "$EXISTING_PR" --json url --jq '.url')"
+          else
+            PR_URL="$(gh pr create \
+              --base main \
+              --head "$BRANCH" \
+              --title "feat(registry): add $EXTENSION_ID (#$ISSUE_NUMBER)" \
+              --body-file pr-body.md)"
+          fi
+          echo "pr_url=$PR_URL" >> "$GITHUB_OUTPUT"
+
+      - name: Comment PR link on issue
+        if: steps.pr.outcome == 'success' && steps.pr.outputs.pr_url != ''
+        env:
+          EXTENSION_ID: ${{ steps.prepare.outputs.extension_id }}
+          PR_URL: ${{ steps.pr.outputs.pr_url }}
+        run: |
+          {
+            echo "✅ **Validation passed / 自动校验通过**"
+            echo ""
+            echo "Opened pull request for \`$EXTENSION_ID\`: $PR_URL"
+            echo ""
+            echo "Once a maintainer merges this PR, the extension will be published to \`catalog.json\` automatically."
+            echo "维护者合并该 PR 后，插件会自动同步上架到市场目录。"
+          } > pr-comment.md
+          gh issue comment "$ISSUE_NUMBER" --body-file pr-comment.md
