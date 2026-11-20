@@ -219,7 +219,16 @@ function formatCodeList(items, fallback = "无") {
   return items.map((item) => `\`${item}\``).join(" · ");
 }
 
-function buildPrPreview({ issueNumber, repository, id, manifest, iconUrl, screenshotUrls, releaseTag }) {
+function buildPrPreview({
+  issueNumber,
+  issueAuthorLogin,
+  repository,
+  id,
+  manifest,
+  iconUrl,
+  screenshotUrls,
+  releaseTag,
+}) {
   const name = pickLocalized(manifest.name);
   const primaryName = name.zh || name.en || id;
   const secondaryName = name.zh && name.en && name.zh !== name.en ? name.en : undefined;
@@ -263,6 +272,7 @@ function buildPrPreview({ issueNumber, repository, id, manifest, iconUrl, screen
   lines.push(
     "| 项目 | 内容 |",
     "| --- | --- |",
+    ...(issueAuthorLogin ? [`| 投稿者 | @${issueAuthorLogin} |`] : []),
     `| 仓库地址 | ${repository} |`,
     `| 发布来源 | ${releaseTag ? `Release \`${releaseTag}\`` : "默认分支源码"} |`,
     `| 分类 | ${formatCodeList(manifest.categories)} |`,
@@ -368,8 +378,19 @@ async function main() {
   data.sources.sort((a, b) => a.id.localeCompare(b.id));
   await writeFile(sourcesPath, `${JSON.stringify(data, null, 2)}\n`, "utf8");
 
+  const issueAuthorLogin =
+    typeof issue?.user?.login === "string" && /^[\w-]+$/u.test(issue.user.login)
+      ? issue.user.login
+      : "";
+  const issueAuthorId = Number.isInteger(issue?.user?.id) && issue.user.id > 0 ? issue.user.id : 0;
+  const issueAuthorEmail =
+    issueAuthorLogin && issueAuthorId
+      ? `${issueAuthorId}+${issueAuthorLogin}@users.noreply.github.com`
+      : "";
+
   const previewMarkdown = buildPrPreview({
     issueNumber,
+    issueAuthorLogin,
     repository,
     id,
     manifest,
@@ -382,6 +403,8 @@ async function main() {
   await setOutput("status", "prepared");
   await setOutput("extension_id", id);
   await setOutput("repository_url", repository);
+  await setOutput("issue_author_login", issueAuthorLogin);
+  await setOutput("issue_author_email", issueAuthorEmail);
   console.log(`Prepared sources.json entry and PR preview for ${id} (${repository}).`);
 }
 

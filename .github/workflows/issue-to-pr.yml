@@ -121,13 +121,22 @@ jobs:
         env:
           EXTENSION_ID: ${{ steps.prepare.outputs.extension_id }}
           REPOSITORY_URL: ${{ steps.prepare.outputs.repository_url }}
+          ISSUE_AUTHOR_LOGIN: ${{ steps.prepare.outputs.issue_author_login }}
+          ISSUE_AUTHOR_EMAIL: ${{ steps.prepare.outputs.issue_author_email }}
         run: |
           BRANCH="submission/issue-$ISSUE_NUMBER"
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git checkout -B "$BRANCH"
           git add -- sources.json
-          git commit -m "feat(registry): add $EXTENSION_ID (#$ISSUE_NUMBER)"
+          if [ -n "$ISSUE_AUTHOR_LOGIN" ] && [ -n "$ISSUE_AUTHOR_EMAIL" ]; then
+            git commit \
+              --author="$ISSUE_AUTHOR_LOGIN <$ISSUE_AUTHOR_EMAIL>" \
+              -m "feat(registry): add $EXTENSION_ID (#$ISSUE_NUMBER)" \
+              -m "Co-authored-by: $ISSUE_AUTHOR_LOGIN <$ISSUE_AUTHOR_EMAIL>"
+          else
+            git commit -m "feat(registry): add $EXTENSION_ID (#$ISSUE_NUMBER)"
+          fi
           git push --force origin "HEAD:$BRANCH"
 
           {
