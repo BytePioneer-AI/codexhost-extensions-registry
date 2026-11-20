@@ -100,12 +100,38 @@ function extractRepositoryUrl(issueBody) {
   };
 }
 
+function resolveReleaseImageUrl(release, owner, repo, relativePath) {
+  if (!release || !Array.isArray(release.assets)) return undefined;
+  const baseName = relativePath.split("/").at(-1);
+  const matches = release.assets.filter(({ name }) => name === baseName);
+  if (matches.length !== 1) return undefined;
+  const url = new URL(matches[0].browser_download_url);
+  if (
+    url.origin !== "https://github.com" ||
+    url.username ||
+    url.password ||
+    !url.pathname.toLowerCase().startsWith(`/${owner}/${repo}/releases/download/`.toLowerCase())
+  ) {
+    return undefined;
+  }
+  return url.href;
+}
+
+function resolveRawImageUrl(owner, repo, sha, relativePath) {
+  return `https://raw.githubusercontent.com/${owner}/${repo}/${sha}/${relativePath
+    .split("/")
+    .map(encodeURIComponent)
+    .join("/")}`;
+}
+
 async function resolveExtensionManifest(owner, repo) {
   const api = `https://api.github.com/repos/${owner}/${repo}`;
   const headers = authHeaders();
   const release = await loadGitHubJson(`${api}/releases/latest`, headers, true);
   let downloadUrl;
   let useApiHeaders = false;
+  let usedRelease;
+  let commitSha;
   if (release && !release.draft && !release.prerelease && Array.isArray(release.assets)) {
     const zipAssets = release.assets.filter(
       ({ name }) => typeof name === "string" && safeAssetName.test(name),
@@ -117,6 +143,7 @@ async function resolveExtensionManifest(owner, repo) {
     }
     if (zipAssets.length === 1) {
       downloadUrl = zipAssets[0].browser_download_url;
+      usedRelease = release;
     }
   }
   if (!downloadUrl) {
@@ -127,6 +154,7 @@ async function resolveExtensionManifest(owner, repo) {
     }
     downloadUrl = `${api}/zipball/${sha}`;
     useApiHeaders = true;
+    commitSha = sha;
   }
   const zip = await download(
     downloadUrl,
@@ -140,7 +168,149 @@ async function resolveExtensionManifest(owner, repo) {
   }
   const manifest = desktopExtensionManifestSchema.parse(JSON.parse(utf8.decode(manifestBytes)));
   const id = desktopExtensionIdSchema.parse(manifest.id);
-  return { id, manifest };
+
+  const resolveImage = (relativePath) =>
+    usedRelease
+      ? resolveReleaseImageUrl(usedRelease, owner, repo, relativePath)
+      : commitSha
+        ? resolveRawImageUrl(owner, repo, commitSha, relativePath)
+        : undefined;
+
+  const iconUrl = manifest.icon ? resolveImage(manifest.icon) : undefined;
+  const screenshotUrls = (manifest.screenshots ?? [])
+    .map((path) => resolveImage(path))
+    .filter(Boolean);
+
+  return { id, manifest, iconUrl, screenshotUrls, releaseTag: usedRelease?.tag_name };
+}
+
+function escapeHtml(text) {
+  return String(text ?? "")
+    .replace(/&/gu, "&amp;")
+    .replace(/</gu, "&lt;")
+    .replace(/>/gu, "&gt;")
+    .replace(/"/gu, "&quot;");
+}
+
+function pickLocalized(value) {
+  if (typeof value === "string") {
+    return { zh: value.trim(), en: undefined };
+  }
+  if (!value || typeof value !== "object") {
+    return { zh: undefined, en: undefined };
+  }
+  const zh =
+    (typeof value["zh-CN"] === "string" && value["zh-CN"].trim()) ||
+    (typeof value.zh === "string" && value.zh.trim()) ||
+    undefined;
+  const en =
+    (typeof value.en === "string" && value.en.trim()) ||
+    (typeof value["en-US"] === "string" && value["en-US"].trim()) ||
+    undefined;
+  if (!zh && !en) {
+    const first = Object.values(value).find((item) => typeof item === "string" && item.trim());
+    return { zh: first?.trim(), en: undefined };
+  }
+  return { zh, en };
+}
+
+function formatCodeList(items, fallback = "无") {
+  if (!Array.isArray(items) || items.length === 0) return fallback;
+  return items.map((item) => `\`${item}\``).join(" · ");
+}
+
+function buildPrPreview({ issueNumber, repository, id, manifest, iconUrl, screenshotUrls, releaseTag }) {
+  const name = pickLocalized(manifest.name);
+  const primaryName = name.zh || name.en || id;
+  const secondaryName = name.zh && name.en && name.zh !== name.en ? name.en : undefined;
+
+  const description = pickLocalized(manifest.description);
+  const details = pickLocalized(manifest.details);
+  const capabilities = [
+    manifest.desktop ? "前端 UI" : null,
+    manifest.backend ? "独立 Node 后端" : null,
+    manifest.settings ? "声明式设置" : null,
+  ].filter(Boolean);
+
+  const lines = [`Closes #${issueNumber}`, ""];
+
+  if (iconUrl) {
+    const titleHtml = secondaryName
+      ? `<strong>${escapeHtml(primaryName)}</strong>（${escapeHtml(secondaryName)}）`
+      : `<strong>${escapeHtml(primaryName)}</strong>`;
+    lines.push(
+      "<table>",
+      "  <tr>",
+      `    <td width="64" align="center"><img src="${escapeHtml(iconUrl)}" width="48" height="48" alt="${escapeHtml(id)}" /></td>`,
+      "    <td>",
+      `      ${titleHtml}<br/>`,
+      `      <code>${escapeHtml(id)}</code> · <code>v${escapeHtml(manifest.version)}</code>${manifest.author ? ` · 作者：<code>${escapeHtml(manifest.author)}</code>` : ""}`,
+      "    </td>",
+      "  </tr>",
+      "</table>",
+      "",
+    );
+  } else {
+    const titleText = secondaryName ? `${primaryName}（${secondaryName}）` : primaryName;
+    lines.push(
+      `## ${titleText}`,
+      "",
+      `\`${id}\` · \`v${manifest.version}\`${manifest.author ? ` · 作者：\`${manifest.author}\`` : ""}`,
+      "",
+    );
+  }
+
+  lines.push(
+    "| 项目 | 内容 |",
+    "| --- | --- |",
+    `| 仓库地址 | ${repository} |`,
+    `| 发布来源 | ${releaseTag ? `Release \`${releaseTag}\`` : "默认分支源码"} |`,
+    `| 分类 | ${formatCodeList(manifest.categories)} |`,
+    `| 占用槽位 | ${formatCodeList(manifest.slots)} |`,
+    `| 能力范围 | ${capabilities.length ? capabilities.join(" + ") : "仅声明"} |`,
+    "| 自动校验 | `node validate-and-build-catalog.mjs --check-only` 通过 ✅ |",
+    "",
+  );
+
+  if (description.zh || description.en) {
+    lines.push("### 简介", "");
+    if (description.zh) lines.push(description.zh, "");
+    if (description.en && description.en !== description.zh) {
+      lines.push(`> ${description.en}`, "");
+    }
+  }
+
+  if (details.zh || details.en) {
+    lines.push("### 详细介绍", "");
+    if (details.zh) {
+      lines.push(details.zh, "");
+    } else if (details.en) {
+      lines.push(details.en, "");
+    }
+    if (details.zh && details.en && details.en !== details.zh) {
+      lines.push(
+        "<details>",
+        "<summary>English details</summary>",
+        "",
+        details.en,
+        "",
+        "</details>",
+        "",
+      );
+    }
+  }
+
+  if (screenshotUrls.length > 0) {
+    lines.push(`### 预览截图（${screenshotUrls.length} 张）`, "");
+    for (let index = 0; index < screenshotUrls.length; index++) {
+      lines.push(
+        `<img src="${escapeHtml(screenshotUrls[index])}" alt="${escapeHtml(id)} screenshot ${index + 1}" width="420" />`,
+      );
+    }
+    lines.push("");
+  }
+
+  return `${lines.join("\n")}\n`;
 }
 
 async function setOutput(key, value) {
@@ -171,7 +341,10 @@ async function main() {
   }
 
   const { owner, repo, repository } = extractRepositoryUrl(issue.body);
-  const { id } = await resolveExtensionManifest(owner, repo);
+  const { id, manifest, iconUrl, screenshotUrls, releaseTag } = await resolveExtensionManifest(
+    owner,
+    repo,
+  );
 
   const sourcesPath = new URL("../sources.json", import.meta.url);
   const data = JSON.parse(await readFile(sourcesPath, "utf8"));
@@ -195,10 +368,21 @@ async function main() {
   data.sources.sort((a, b) => a.id.localeCompare(b.id));
   await writeFile(sourcesPath, `${JSON.stringify(data, null, 2)}\n`, "utf8");
 
+  const previewMarkdown = buildPrPreview({
+    issueNumber,
+    repository,
+    id,
+    manifest,
+    iconUrl,
+    screenshotUrls,
+    releaseTag,
+  });
+  await writeFile(new URL("../pr-preview.md", import.meta.url), previewMarkdown, "utf8");
+
   await setOutput("status", "prepared");
   await setOutput("extension_id", id);
   await setOutput("repository_url", repository);
-  console.log(`Prepared sources.json entry for ${id} (${repository}).`);
+  console.log(`Prepared sources.json entry and PR preview for ${id} (${repository}).`);
 }
 
 main().catch(async (error) => {

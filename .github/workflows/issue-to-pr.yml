@@ -131,14 +131,25 @@ jobs:
           git push --force origin "HEAD:$BRANCH"
 
           {
-            echo "Closes #$ISSUE_NUMBER"
-            echo ""
-            echo "- **Extension ID**: \`$EXTENSION_ID\`"
-            echo "- **Repository**: $REPOSITORY_URL"
-            echo "- **Validation**: \`node validate-and-build-catalog.mjs --check-only\` passed ✅"
-            echo ""
+            if test -f pr-preview.md; then
+              cat pr-preview.md
+            else
+              echo "Closes #$ISSUE_NUMBER"
+              echo ""
+              echo "- **Extension ID**: \`$EXTENSION_ID\`"
+              echo "- **Repository**: $REPOSITORY_URL"
+              echo "- **Validation**: \`node validate-and-build-catalog.mjs --check-only\` passed ✅"
+              echo ""
+            fi
             if test -f safety-report.md; then
+              echo "---"
+              echo ""
+              echo "<details>"
+              echo "<summary>安全扫描报告 / Safety report</summary>"
+              echo ""
               cat safety-report.md
+              echo ""
+              echo "</details>"
             fi
           } > pr-body.md
 
@@ -148,17 +159,19 @@ jobs:
               --title "feat(registry): add $EXTENSION_ID (#$ISSUE_NUMBER)" \
               --body-file pr-body.md
             PR_URL="$(gh pr view "$EXISTING_PR" --json url --jq '.url')"
+            echo "pr_created=false" >> "$GITHUB_OUTPUT"
           else
             PR_URL="$(gh pr create \
               --base main \
               --head "$BRANCH" \
               --title "feat(registry): add $EXTENSION_ID (#$ISSUE_NUMBER)" \
               --body-file pr-body.md)"
+            echo "pr_created=true" >> "$GITHUB_OUTPUT"
           fi
           echo "pr_url=$PR_URL" >> "$GITHUB_OUTPUT"
 
       - name: Comment PR link on issue
-        if: steps.pr.outcome == 'success' && steps.pr.outputs.pr_url != ''
+        if: steps.pr.outcome == 'success' && steps.pr.outputs.pr_created == 'true' && steps.pr.outputs.pr_url != ''
         env:
           EXTENSION_ID: ${{ steps.prepare.outputs.extension_id }}
           PR_URL: ${{ steps.pr.outputs.pr_url }}
