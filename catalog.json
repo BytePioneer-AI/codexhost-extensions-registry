@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-01-01T00:00:00.000Z",
+  "generatedAt": "2026-11-20T12:21:16.091Z",
   "extensions": [
     {
       "id": "sidebar-delegation-badges",
@@ -19,11 +19,19 @@
       },
       "author": "codexhost",
       "repository": "https://github.com/BytePioneer-AI/codex-host",
-      "categories": ["interface", "workflow"],
+      "stars": 0,
+      "categories": [
+        "interface",
+        "workflow"
+      ],
       "trustTier": "official",
       "downloadUrl": "https://github.com/BytePioneer-AI/codexhost-extensions-registry/releases/download/desktop-extensions-v1/sidebar-delegation-badges.zip",
       "sha256": "1fd7ee6e08ff6e4fd28eebe59bc735a7929e4f95b5ba23b54d879fa21a483bb6",
-      "slots": ["sidebar.thread-badge"]
+      "slots": [
+        "sidebar.thread-badge"
+      ],
+      "publishedAt": "2026-11-20T12:21:09Z",
+      "updatedAt": "2026-11-20T12:21:09Z"
     },
     {
       "id": "sidebar-thread-tree",
@@ -42,11 +50,20 @@
       },
       "author": "codexhost",
       "repository": "https://github.com/BytePioneer-AI/codex-host",
-      "categories": ["interface", "workflow"],
+      "stars": 0,
+      "categories": [
+        "interface",
+        "workflow"
+      ],
       "trustTier": "official",
       "downloadUrl": "https://github.com/BytePioneer-AI/codexhost-extensions-registry/releases/download/desktop-extensions-v1/sidebar-thread-tree.zip",
       "sha256": "996fb2203026b46547ddb4654ed99fde55838f318f80c379afc5d43ed05cb520",
-      "slots": ["sidebar.thread-badge", "sidebar.thread-layout"]
+      "slots": [
+        "sidebar.thread-badge",
+        "sidebar.thread-layout"
+      ],
+      "publishedAt": "2026-11-20T12:21:09Z",
+      "updatedAt": "2026-11-20T12:21:09Z"
     }
   ]
 }
