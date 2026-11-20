@@ -1,4 +1,10 @@
 {
   "schemaVersion": 1,
-  "sources": []
+  "sources": [
+    {
+      "id": "sidebar-thread-tree",
+      "repository": "https://github.com/sduhantao-maker/codexhost-sidebar-thread-tree",
+      "trustTier": "community"
+    }
+  ]
 }
