@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-11-21T02:04:31.553Z",
+  "generatedAt": "2026-11-21T02:52:32.541Z",
   "extensions": [
     {
       "id": "sidebar-thread-tree",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "name": {
         "en": "Sidebar Thread Tree",
         "zh-CN": "侧栏委派树"
@@ -20,27 +20,27 @@
       "author": "sduhantao-maker",
       "repository": "https://github.com/sduhantao-maker/codexhost-sidebar-thread-tree",
       "stars": 1,
-      "downloads": 2,
+      "downloads": 7,
       "categories": [
         "interface",
         "workflow"
       ],
       "trustTier": "community",
-      "icon": "https://github.com/sduhantao-maker/codexhost-sidebar-thread-tree/releases/download/v0.1.1/icon.png",
+      "icon": "https://github.com/sduhantao-maker/codexhost-sidebar-thread-tree/releases/download/v0.1.2/icon.png",
       "screenshots": [
-        "https://github.com/sduhantao-maker/codexhost-sidebar-thread-tree/releases/download/v0.1.1/expanded.png",
-        "https://github.com/sduhantao-maker/codexhost-sidebar-thread-tree/releases/download/v0.1.1/collapsed.png",
-        "https://github.com/sduhantao-maker/codexhost-sidebar-thread-tree/releases/download/v0.1.1/hover.png",
-        "https://github.com/sduhantao-maker/codexhost-sidebar-thread-tree/releases/download/v0.1.1/dark.png"
+        "https://github.com/sduhantao-maker/codexhost-sidebar-thread-tree/releases/download/v0.1.2/expanded.png",
+        "https://github.com/sduhantao-maker/codexhost-sidebar-thread-tree/releases/download/v0.1.2/collapsed.png",
+        "https://github.com/sduhantao-maker/codexhost-sidebar-thread-tree/releases/download/v0.1.2/hover.png",
+        "https://github.com/sduhantao-maker/codexhost-sidebar-thread-tree/releases/download/v0.1.2/dark.png"
       ],
-      "downloadUrl": "https://github.com/sduhantao-maker/codexhost-sidebar-thread-tree/releases/download/v0.1.1/sidebar-thread-tree.zip",
-      "sha256": "aa45195c8b21a36134f6ce503b9388c1759e9935e06d75675534b91d174fd4b1",
+      "downloadUrl": "https://github.com/sduhantao-maker/codexhost-sidebar-thread-tree/releases/download/v0.1.2/sidebar-thread-tree.zip",
+      "sha256": "acbd25ec22adde433d5e9a0558d4f6f857d4c51af12c70973ee25842e2ee6def",
       "slots": [
         "sidebar.thread-badge",
         "sidebar.thread-layout"
       ],
       "publishedAt": "2026-11-20T16:00:04Z",
-      "updatedAt": "2026-11-20T16:00:04Z"
+      "updatedAt": "2026-11-21T02:37:33Z"
     }
   ]
 }
