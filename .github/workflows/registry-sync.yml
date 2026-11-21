@@ -69,3 +69,4 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git commit -m 'chore: sync Desktop extensions catalog'
           git push origin HEAD:main
+          curl -fsS "https://purge.jsdelivr.net/gh/${{ github.repository }}@main/catalog.json" || true

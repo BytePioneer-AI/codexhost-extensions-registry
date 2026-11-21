@@ -6,8 +6,8 @@
 
 ## 作者发布要求
 
-- **默认分支源码**：在公开仓库根目录提交 `manifest.json`、`desktop.script` 声明的构建后 JS，以及声明的样式、Logo 和截图。不需要手动打包 Release；校验器不负责编译 `.ts`。索引只接受仓库主页；用户直接安装时也可以使用 `/tree/<ref>/<subdir>` 链接。
-- **Release ZIP**：在公开稳定 Release 上传构建好的 `.zip` 资产。包根目录或唯一的顶层目录下须有 `manifest.json` 和声明的入口 JS、样式、Logo 和截图。Release 有多个 ZIP 资产时在 `sources[].asset` 指定文件名。
+- **Release ZIP（推荐）**：在公开稳定 Release 上传构建好的 `.zip` 资产。包根目录或唯一的顶层目录下须有 `manifest.json` 和声明的入口 JS、样式、Logo 和截图。Release 有多个 ZIP 资产时在 `sources[].asset` 指定文件名。使用 Release 可以明确区分开发分支提交与正式稳定版（`draft` 和 `prerelease` 不会被收录）。
+- **默认分支源码（无 Release 时兜底）**：在公开仓库根目录提交 `manifest.json`、`desktop.script` 声明的构建后 JS，以及声明的样式、Logo 和截图。不需要手动打包 Release；校验器不负责编译 `.ts`。索引只接受仓库主页；用户直接安装时也可以使用 `/tree/<ref>/<subdir>` 链接。
 - `name` 和 `description` 必须有非空 `en` 和 `zh-CN`；`details` 若提供也须双语；`author` 必填。ZIP 字节变化时须递增 manifest `version`；源码模式下，即使只改变仓库中的文档，也会改变 zipball。
 - `categories` 可省略或填 `[]` 表示未分类。按主要用途选择且不重复：`appearance`（外观主题）、`interface`（界面增强）、`workflow`（效率与协作）、`analytics`（数据与统计）、`integrations`（外部集成）、`tools`（实用工具）。不接受其他值。
 - 可选 Logo（`icon`）≤ 128 KiB；截图每张 ≤ 512 KiB，最多 4 张。均只接受 PNG、JPEG 或 WebP，扩展名须匹配文件签名。Release 模式另上传同一图片作为单独资产，资产名为路径的最后一段；源码模式使用固定到同一 commit 的 Raw URL。校验器比对公开图片 URL 和 ZIP 中的字节。使用 Logo 前请确认读取索引的客户端支持 `icon`；旧客户端的严格校验会拒绝带此字段的索引。
@@ -36,3 +36,16 @@
 3. 在索引仓库 **Settings → Secrets and variables → Actions → Variables** 添加 `STATS_URL`，值为 Worker 的 HTTPS 根地址（不带 `/stats.json`）。在要上报的 codexhost Host／Console 进程中，将 `CODEXHOST_DESKTOP_EXTENSIONS_STATS_URL` 指向同一地址。定时同步会把 `/stats.json` 中有效的非负整数合并到 `catalog.json` 的可选 `downloads` 字段；无数据或 Worker 不可用时省略该字段，不影响同步。启用前请确认读取该索引的客户端已支持 `downloads`，旧客户端的严格校验会拒绝带此字段的索引。
 
 只统计从索引成功完成的安装（含重装和更新）；客户端只发送扩展 ID，不发送账号、设备 ID 或请求体。Worker 仅接受小写字母、数字及单连字符分段的 ID，含 `.` 或 `_` 的扩展不会计数。该接口公开，KV 是最终一致的，并发和写入限额可能导致漏计，公开请求也可能抬高计数；这是下载量参考，不是精确或唯一用户统计。费用为零的前提是留在 Cloudflare Free 计划额度内。
+
+### 可选：启用 5 分钟无状态自动同步检测
+
+同一 Worker 附带 `[triggers] crons = ["*/5 * * * *"]`，每 5 分钟无状态比对 `sources.json` 中各扩展的最新 Release ZIP（无 Release 时比对默认分支最新 commit）与当前 `catalog.json` 的 `downloadUrl`，仅在包地址变化时触发 `registry-sync.yml`（推送后自动刷新 jsDelivr 缓存）。
+
+开启方式：创建一个仅含目标索引仓库 **Actions: Read and write** 权限的 Fine-grained PAT，在 `worker/` 目录执行：
+
+```sh
+npx wrangler secret put GITHUB_TOKEN
+npx wrangler deploy
+```
+
+未配置 `GITHUB_TOKEN` 时该定时检测自动跳过，不影响统计接口。
