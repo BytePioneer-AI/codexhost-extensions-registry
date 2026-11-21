@@ -234,7 +234,98 @@ async function validateSource(source, previous, starsByRepository, downloads) {
   if (asset?.digest != null && asset.digest !== `sha256:${sha256}`)
     throw new Error("Release SHA-256 does not match GitHub's digest");
   const files = readDesktopExtensionZip(zip);
-  const manifest = desktopExtensionManifestSchema.parse(
+const v1Shape = desktopExtensionManifestSchema.shape;
+const portablePath = z
+  .string()
+  .min(1)
+  .max(255)
+  .refine(
+    (p) =>
+      !p.startsWith("/") &&
+      !p.includes("\\") &&
+      !p.split("/").some((part) => !part || part === "." || part === ".." || /[. ]$/u.test(part)) &&
+      !/[\x00-\x1f\x7f<>"|*]/u.test(p),
+    "Expected a portable relative resource path",
+  );
+const manifestV2Schema = z
+  .strictObject({
+    manifestVersion: z.literal(2),
+    id: v1Shape.id,
+    name: v1Shape.name,
+    version: v1Shape.version,
+    description: v1Shape.description,
+    details: v1Shape.details,
+    author: v1Shape.author,
+    repository: v1Shape.repository,
+    icon: v1Shape.icon,
+    screenshots: v1Shape.screenshots,
+    categories: v1Shape.categories,
+    settingsSchema: v1Shape.settingsSchema,
+    slots: v1Shape.slots,
+    desktop: z
+      .strictObject({
+        apiVersion: z.literal(1),
+        script: portablePath,
+        style: portablePath.optional(),
+      })
+      .optional(),
+    web: z
+      .strictObject({
+        apiVersion: z.literal(1),
+        entry: portablePath.refine((p) => p.endsWith(".mjs"), "Expected a .mjs entry").optional(),
+        style: portablePath.refine((p) => p.endsWith(".css"), "Expected a .css style").optional(),
+      })
+      .refine(({ entry, style }) => entry !== undefined || style !== undefined, "Expected a Web script or style")
+      .optional(),
+    backend: z
+      .strictObject({
+        apiVersion: z.literal(1),
+        entry: portablePath.refine((p) => p.endsWith(".mjs"), "Expected a .mjs entry"),
+        targets: z.array(z.enum(["desktop", "web"])).min(1).max(2).optional(),
+      })
+      .optional(),
+  })
+  .refine(
+    (m) => Boolean(m.desktop || m.web || (m.backend?.targets && m.backend.targets.length > 0)),
+    "Expected a desktop, Web, or explicitly targeted backend entry",
+  );
+
+function parseManifest(raw) {
+  if (raw && typeof raw === "object" && raw.manifestVersion === 2) {
+    return manifestV2Schema.parse(raw);
+  }
+  return desktopExtensionManifestSchema.parse(raw);
+}
+
+function resolveV2TargetsAndApis(manifest) {
+  if (manifest.manifestVersion === 1) {
+    return {
+      targets: ["desktop"],
+      apis: {
+        desktop: manifest.desktopApi,
+        ...(manifest.backend ? { backend: 1 } : {}),
+      },
+    };
+  }
+  const backendTargets = manifest.backend
+    ? (manifest.backend.targets ?? [
+        ...(manifest.desktop ? ["desktop"] : []),
+        ...(manifest.web ? ["web"] : []),
+      ])
+    : [];
+  const targets = [
+    ...(manifest.desktop || backendTargets.includes("desktop") ? ["desktop"] : []),
+    ...(manifest.web || backendTargets.includes("web") ? ["web"] : []),
+  ];
+  const apis = {
+    ...(targets.includes("desktop") ? { desktop: manifest.desktop?.apiVersion ?? 1 } : {}),
+    ...(targets.includes("web") ? { web: manifest.web?.apiVersion ?? 1 } : {}),
+    ...(manifest.backend ? { backend: manifest.backend.apiVersion } : {}),
+  };
+  return { targets, apis };
+}
+
+  const manifest = parseManifest(
     JSON.parse(
       utf8.decode(getResource(files, "manifest.json", DESKTOP_EXTENSION_MANIFEST_MAX_BYTES)),
     ),
@@ -254,16 +345,29 @@ async function validateSource(source, previous, starsByRepository, downloads) {
       throw new Error(
         `Missing entry file ${script}. Commit the built JavaScript entry or publish a Release .zip.`,
       );
-    const source = utf8.decode(getResource(files, script, DESKTOP_EXTENSION_SCRIPT_MAX_BYTES));
-    new Script(`(function(define) { "use strict";\n${source}\n})`);
+    const sourceCode = utf8.decode(getResource(files, script, DESKTOP_EXTENSION_SCRIPT_MAX_BYTES));
+    new Script(`(function(define) { "use strict";\n${sourceCode}\n})`);
     if (style) utf8.decode(getResource(files, style, DESKTOP_EXTENSION_STYLE_MAX_BYTES));
   }
-  if (manifest.backend)
-    utf8.decode(getResource(files, manifest.backend.script, DESKTOP_EXTENSION_SCRIPT_MAX_BYTES));
+  if (manifest.manifestVersion === 2 && manifest.web) {
+    const { entry, style } = manifest.web;
+    if (entry) {
+      if (!files.has(entry)) throw new Error(`Missing Web entry file ${entry}.`);
+      utf8.decode(getResource(files, entry, DESKTOP_EXTENSION_SCRIPT_MAX_BYTES));
+    }
+    if (style) {
+      if (!files.has(style)) throw new Error(`Missing Web style file ${style}.`);
+      utf8.decode(getResource(files, style, DESKTOP_EXTENSION_STYLE_MAX_BYTES));
+    }
+  }
+  const backendScript = manifest.manifestVersion === 2 ? manifest.backend?.entry : manifest.backend?.script;
+  if (backendScript)
+    utf8.decode(getResource(files, backendScript, DESKTOP_EXTENSION_SCRIPT_MAX_BYTES));
   for (const [file, bytes] of files) {
     if (
       file !== manifest.desktop?.script &&
-      file !== manifest.backend?.script &&
+      file !== (manifest.manifestVersion === 2 ? manifest.web?.entry : undefined) &&
+      file !== backendScript &&
       !/\.[cm]?[jt]sx?$/iu.test(file)
     )
       continue;
@@ -300,7 +404,7 @@ async function validateSource(source, previous, starsByRepository, downloads) {
   const repositoryKey = api.toLowerCase();
   if (!starsByRepository.has(repositoryKey))
     starsByRepository.set(repositoryKey, await readRepositoryStars(api, headers));
-  return desktopExtensionCatalogEntrySchema.parse({
+  const baseEntry = desktopExtensionCatalogEntrySchema.parse({
     id: manifest.id,
     version: manifest.version,
     name: manifest.name,
@@ -321,6 +425,17 @@ async function validateSource(source, previous, starsByRepository, downloads) {
     updatedAt: date,
     minCodexHostVersion: source.minCodexHostVersion,
   });
+  const { targets, apis } = resolveV2TargetsAndApis(manifest);
+  const v2Entry = {
+    ...baseEntry,
+    format: "codexhost",
+    targets,
+    apis,
+  };
+  return {
+    v1Entry: manifest.manifestVersion === 1 ? baseEntry : undefined,
+    v2Entry,
+  };
 }
 
 function inline(text) {
@@ -336,13 +451,15 @@ export async function buildCatalog({
   checkOnly = false,
 } = {}) {
   const report = [
-    "# Desktop extension safety report",
+    "# Desktop & Web extension safety report",
     "",
     "ZIP integrity, bundle layout, metadata, images and static patterns only. Passing is not a code audit or sandbox.",
     "",
   ];
   const catalogPath = new URL("catalog.json", directory);
+  const catalogV2Path = new URL("catalog.v2.json", directory);
   const entries = [];
+  const entriesV2 = [];
   const starsByRepository = new Map();
   let failed = false;
   try {
@@ -355,37 +472,61 @@ export async function buildCatalog({
         if (error.code !== "ENOENT") throw error;
         return undefined;
       });
-    const existing = new Map(previous?.extensions.map((entry) => [entry.id, entry]));
+    const previousV2 = await readFile(catalogV2Path, "utf8")
+      .then((data) => JSON.parse(data))
+      .catch((error) => {
+        if (error.code !== "ENOENT") throw error;
+        return undefined;
+      });
+    const existing = new Map(
+      (previousV2?.extensions ?? previous?.extensions ?? []).map((entry) => [entry.id, entry]),
+    );
     const counts = checkOnly ? undefined : await readDownloadCounts();
     for (const source of [...sources].sort((a, b) => a.id.localeCompare(b.id, "en"))) {
       try {
         const count = counts && Object.hasOwn(counts, source.id) ? counts[source.id] : undefined;
         const { data: downloads } =
           desktopExtensionCatalogEntrySchema.shape.downloads.safeParse(count);
-        const entry = await validateSource(
+        const { v1Entry, v2Entry } = await validateSource(
           source,
           existing.get(source.id),
           starsByRepository,
           downloads,
         );
-        entries.push(entry);
+        if (v1Entry) entries.push(v1Entry);
+        entriesV2.push(v2Entry);
         report.push(
-          `- PASS — ${inline(entry.id)} ${inline(entry.version)} (${entry.trustTier}) · ${inline(source.repository)} · ${inline(entry.downloadUrl)} · SHA-256: ${entry.sha256}`,
+          `- PASS — ${inline(v2Entry.id)} ${inline(v2Entry.version)} (${v2Entry.trustTier}, ${v2Entry.targets.join("+")}) · ${inline(source.repository)} · ${inline(v2Entry.downloadUrl)} · SHA-256: ${v2Entry.sha256}`,
         );
       } catch (error) {
         failed = true;
         report.push(`- FAIL — ${inline(source.id)}: ${inline(error.message)}`);
       }
     }
+    const now = new Date().toISOString();
     if (!failed && !checkOnly && JSON.stringify(entries) !== JSON.stringify(previous?.extensions)) {
       const catalog = desktopExtensionCatalogSchema.parse({
         schemaVersion: 1,
-        generatedAt: new Date().toISOString(),
+        generatedAt: now,
         extensions: entries,
       });
       const temporary = new URL("catalog.json.tmp", directory);
       await writeFile(temporary, `${JSON.stringify(catalog, null, 2)}\n`);
       await rename(temporary, catalogPath);
+    }
+    if (
+      !failed &&
+      !checkOnly &&
+      JSON.stringify(entriesV2) !== JSON.stringify(previousV2?.extensions)
+    ) {
+      const catalogV2 = {
+        schemaVersion: 2,
+        generatedAt: now,
+        extensions: entriesV2,
+      };
+      const temporaryV2 = new URL("catalog.v2.json.tmp", directory);
+      await writeFile(temporaryV2, `${JSON.stringify(catalogV2, null, 2)}\n`);
+      await rename(temporaryV2, catalogV2Path);
     }
   } catch (error) {
     failed = true;

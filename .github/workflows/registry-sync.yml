@@ -63,10 +63,11 @@ jobs:
           path: safety-report.md
       - name: Publish catalog if changed
         run: |
-          git add -- catalog.json
-          git diff --cached --quiet -- catalog.json && exit 0
+          git add -- catalog.json catalog.v2.json
+          git diff --cached --quiet -- catalog.json catalog.v2.json && exit 0
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git commit -m 'chore: sync Desktop extensions catalog'
+          git commit -m 'chore: sync Desktop & Web extensions catalog'
           git push origin HEAD:main
           curl -fsS "https://purge.jsdelivr.net/gh/${{ github.repository }}@main/catalog.json" || true
+          curl -fsS "https://purge.jsdelivr.net/gh/${{ github.repository }}@main/catalog.v2.json" || true
