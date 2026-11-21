@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-11-21T17:45:53.117Z",
+  "generatedAt": "2026-11-21T23:00:00.612Z",
   "extensions": [
     {
       "id": "sidebar-thread-tree",
@@ -20,7 +20,7 @@
       "author": "sduhantao-maker",
       "repository": "https://github.com/sduhantao-maker/codexhost-sidebar-thread-tree",
       "stars": 2,
-      "downloads": 35,
+      "downloads": 36,
       "categories": [
         "interface",
         "workflow"
