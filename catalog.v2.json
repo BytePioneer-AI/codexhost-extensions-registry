@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-22T04:07:53.097Z",
+  "generatedAt": "2026-11-22T04:11:19.381Z",
   "extensions": [
     {
       "id": "focus-pomodoro",
@@ -45,7 +45,7 @@
     },
     {
       "id": "prompt-vault",
-      "version": "1.3.0",
+      "version": "1.3.1",
       "name": {
         "en": "Prompt Vault",
         "zh-CN": "本地提示词库"
@@ -66,14 +66,15 @@
         "workflow"
       ],
       "trustTier": "community",
+      "icon": "https://github.com/BytePioneer-AI/codexhost-ext-prompt-vault/releases/download/v1.3.1/icon.png",
       "screenshots": [
-        "https://github.com/BytePioneer-AI/codexhost-ext-prompt-vault/releases/download/v1.3.0/prompt-vault-workspace.png"
+        "https://github.com/BytePioneer-AI/codexhost-ext-prompt-vault/releases/download/v1.3.1/prompt-vault-workspace.png"
       ],
-      "downloadUrl": "https://github.com/BytePioneer-AI/codexhost-ext-prompt-vault/releases/download/v1.3.0/prompt-vault.zip",
-      "sha256": "2c4989b1c82ff909738e68a78a4329bbe0ae8329def97e67047b6b5db04229f0",
+      "downloadUrl": "https://github.com/BytePioneer-AI/codexhost-ext-prompt-vault/releases/download/v1.3.1/prompt-vault.zip",
+      "sha256": "ddeb7bc4bdcc220876bbaa42f4ca2afb188f306faa674722af628e3c82798b9e",
       "slots": [],
       "publishedAt": "2026-11-22T03:06:35Z",
-      "updatedAt": "2026-11-22T04:07:34Z",
+      "updatedAt": "2026-11-22T04:11:03Z",
       "format": "codexhost",
       "targets": [
         "desktop",
