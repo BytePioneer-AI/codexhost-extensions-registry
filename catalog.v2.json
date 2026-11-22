@@ -1,21 +1,21 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-22T03:09:29.977Z",
+  "generatedAt": "2026-11-22T03:23:28.854Z",
   "extensions": [
     {
       "id": "prompt-vault",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "name": {
         "en": "Prompt Vault",
         "zh-CN": "本地提示词库"
       },
       "description": {
-        "en": "Local Markdown prompt library backed by the shared Host process. Search, edit, tag, and copy real .md files from Desktop or Web.",
-        "zh-CN": "基于共享 Host 后台的本机 Markdown 提示词库：直接读写本地 .md 文件，在 Desktop 与 Web 端统一检索、编辑、按标签筛选与一键复制。"
+        "en": "Save, search, tag, and copy your favorite AI prompts locally across Desktop and Web.",
+        "zh-CN": "把常用的 AI 提问模板存在本机，随时搜索、按标签整理并一键复制，桌面端与网页端自动同步同一份内容。"
       },
       "details": {
-        "en": "### Features\n\n- **Real local Markdown files**: Stores each prompt as a portable `.md` file with YAML frontmatter (`title`, `tags`, `updatedAt`).\n- **Shared Host Backend**: Runs a single Node.js backend process inside the shared Host, serving both Desktop and Web views.\n- **Custom Vault Directory**: Defaults to `<dataDir>/prompts`, or point it to any local Obsidian/Git folder in Settings.\n- **Safe Slug & Atomic Writes**: Rejects path traversal and writes files atomically.",
-        "zh-CN": "### 功能特性\n\n- **真实本机 Markdown 存储**：每条提示词保存为带 YAML frontmatter（`title`、`tags`、`updatedAt`）的标准 `.md` 文件。\n- **共享 Host 后台**：由共享 Host 单例托管 Node.js 后端进程，Desktop 与 Web 多标签页共用同一实例。\n- **自定义目录**：默认保存在 `<dataDir>/prompts`，也可在设置中指定本机 Obsidian 或 Git 仓库目录。\n- **安全校验与原子写入**：严格校验 slug 防止路径穿越，通过临时文件原子替换落盘。"
+        "en": "### Highlights\n\n- **Stored locally on your device**: Every prompt stays on your computer as a clean plain-text note and is shared across Desktop and Web.\n- **Fast search & tags**: Find prompts instantly by title, tag, or content and copy with one click.\n- **Optional custom folder**: Works out of the box with zero setup, or point it to your own local notes folder in Preferences.",
+        "zh-CN": "### 特点\n\n- **本机私密保存**：所有提示词都保存在你自己的电脑里，桌面端和网页端打开自动同步，无需云端账号。\n- **快速检索与复用**：支持按标题、标签或正文即时搜索，点一下即可复制使用。\n- **开箱即用**：默认零配置直接使用，也可以在偏好设置里指定自己的本地笔记文件夹。"
       },
       "author": "codexhost",
       "repository": "https://github.com/BytePioneer-AI/codexhost-ext-prompt-vault",
@@ -26,13 +26,13 @@
       ],
       "trustTier": "community",
       "screenshots": [
-        "https://github.com/BytePioneer-AI/codexhost-ext-prompt-vault/releases/download/v1.0.0/prompt-vault-workspace.png"
+        "https://github.com/BytePioneer-AI/codexhost-ext-prompt-vault/releases/download/v1.1.0/prompt-vault-workspace.png"
       ],
-      "downloadUrl": "https://github.com/BytePioneer-AI/codexhost-ext-prompt-vault/releases/download/v1.0.0/prompt-vault.zip",
-      "sha256": "7d5f3a9c177ecb7203d821a0c33efe00fea47f996f754ab4a96d20dc0268da8c",
+      "downloadUrl": "https://github.com/BytePioneer-AI/codexhost-ext-prompt-vault/releases/download/v1.1.0/prompt-vault.zip",
+      "sha256": "de6a4e8579d7b7a5d012a7079fe61e987d03b137bb67e6d4c3fa9450678ae3d4",
       "slots": [],
       "publishedAt": "2026-11-22T03:06:35Z",
-      "updatedAt": "2026-11-22T03:06:35Z",
+      "updatedAt": "2026-11-22T03:20:16Z",
       "format": "codexhost",
       "targets": [
         "desktop",
