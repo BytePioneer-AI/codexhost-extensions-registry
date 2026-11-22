@@ -1,21 +1,21 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-22T04:11:19.381Z",
+  "generatedAt": "2026-11-22T04:18:31.134Z",
   "extensions": [
     {
       "id": "focus-pomodoro",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "name": {
         "en": "Focus Pomodoro",
         "zh-CN": "专注番茄钟"
       },
       "description": {
-        "en": "A floating Pomodoro timer and full workspace page with a shared countdown and task note. No backend process.",
-        "zh-CN": "从主页面悬浮胶囊或独立页管理番茄计时；倒计时和任务备注实时同步，无需后台进程。"
+        "en": "Calm Pomodoro timer with a draggable edge-docking capsule and minimalist focus studio page across Codex Desktop and CH Web.",
+        "zh-CN": "轻量优雅的专注番茄钟：支持自由拖动与贴边半隐的主页面悬浮胶囊，以及沉浸式独立计时页，倒计时与任务备注实时同步。"
       },
       "details": {
-        "en": "- Use the floating capsule to start or pause without leaving the conversation. Open the full page for presets and a larger timer.\n- Timer state, notes, and daily completions are stored in localStorage and shared between views in the same browser. Refreshing preserves the countdown.\n- Configure Focus / Short Break / Long Break durations in shared Host extension settings.",
-        "zh-CN": "- 无需离开对话即可在悬浮胶囊开始或暂停，打开独立页可查看大计时盘和调整预设。\n- 浏览器 localStorage 保存倒计时、任务备注和每日完成数，在同一浏览器的两个视图间同步，刷新后可续计。\n- 专注 / 短休 / 长休时长通过共享 Host 插件设置保存。"
+        "en": "### Highlights\n\n- **Draggable & Edge-Docking Capsule**: Drag the compact timer pill anywhere on your workspace; dock it near the left or right edge to tuck away neatly.\n- **Nearby Quick Popover**: Click the capsule to switch modes, edit your current focus task, or pause without leaving your conversation.\n- **Minimal Focus Studio Page**: Clean 60-tick dial, mode-adaptive palette, 4-round focus rhythm tracker, and custom duration presets.",
+        "zh-CN": "### 特点\n\n- **自由拖动与贴边半隐胶囊**：聊天页悬浮胶囊可拖到屏幕任意位置，贴近左右边缘自动半收起不挡内容，悬停顺滑探出。\n- **附近轻量控制浮窗**：点击胶囊在附近弹出紧凑控制窗，随时切模式、改专注备注、开始或暂停，全程不离开对话。\n- **极简专注独立页**：精密 60 刻度计时盘、随模式柔和变色、4 轮今日节奏指示与自定义预设时长。"
       },
       "author": "codexhost",
       "repository": "https://github.com/BytePioneer-AI/codexhost-ext-focus-pomodoro",
@@ -24,15 +24,16 @@
         "tools"
       ],
       "trustTier": "community",
+      "icon": "https://github.com/BytePioneer-AI/codexhost-ext-focus-pomodoro/releases/download/v1.2.0/icon.png",
       "screenshots": [
-        "https://github.com/BytePioneer-AI/codexhost-ext-focus-pomodoro/releases/download/v1.1.0/pomodoro-workspace.png",
-        "https://github.com/BytePioneer-AI/codexhost-ext-focus-pomodoro/releases/download/v1.1.0/pomodoro-widget.png"
+        "https://github.com/BytePioneer-AI/codexhost-ext-focus-pomodoro/releases/download/v1.2.0/pomodoro-workspace.png",
+        "https://github.com/BytePioneer-AI/codexhost-ext-focus-pomodoro/releases/download/v1.2.0/pomodoro-widget.png"
       ],
-      "downloadUrl": "https://github.com/BytePioneer-AI/codexhost-ext-focus-pomodoro/releases/download/v1.1.0/focus-pomodoro.zip",
-      "sha256": "f4fe8398111703a32eac56a4113be96acbba6103f3df91e3bb93fbbe52c85d99",
+      "downloadUrl": "https://github.com/BytePioneer-AI/codexhost-ext-focus-pomodoro/releases/download/v1.2.0/focus-pomodoro.zip",
+      "sha256": "f1c3504e5c66e758dade34094985c494a2ea531c9f9fb27925c606e16480f133",
       "slots": [],
       "publishedAt": "2026-11-22T03:06:34Z",
-      "updatedAt": "2026-11-22T03:06:34Z",
+      "updatedAt": "2026-11-22T04:18:17Z",
       "format": "codexhost",
       "targets": [
         "desktop",
