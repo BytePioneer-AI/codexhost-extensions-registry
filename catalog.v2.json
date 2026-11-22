@@ -1,7 +1,48 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-22T03:04:56.953Z",
+  "generatedAt": "2026-11-22T03:09:29.977Z",
   "extensions": [
+    {
+      "id": "prompt-vault",
+      "version": "1.0.0",
+      "name": {
+        "en": "Prompt Vault",
+        "zh-CN": "本地提示词库"
+      },
+      "description": {
+        "en": "Local Markdown prompt library backed by the shared Host process. Search, edit, tag, and copy real .md files from Desktop or Web.",
+        "zh-CN": "基于共享 Host 后台的本机 Markdown 提示词库：直接读写本地 .md 文件，在 Desktop 与 Web 端统一检索、编辑、按标签筛选与一键复制。"
+      },
+      "details": {
+        "en": "### Features\n\n- **Real local Markdown files**: Stores each prompt as a portable `.md` file with YAML frontmatter (`title`, `tags`, `updatedAt`).\n- **Shared Host Backend**: Runs a single Node.js backend process inside the shared Host, serving both Desktop and Web views.\n- **Custom Vault Directory**: Defaults to `<dataDir>/prompts`, or point it to any local Obsidian/Git folder in Settings.\n- **Safe Slug & Atomic Writes**: Rejects path traversal and writes files atomically.",
+        "zh-CN": "### 功能特性\n\n- **真实本机 Markdown 存储**：每条提示词保存为带 YAML frontmatter（`title`、`tags`、`updatedAt`）的标准 `.md` 文件。\n- **共享 Host 后台**：由共享 Host 单例托管 Node.js 后端进程，Desktop 与 Web 多标签页共用同一实例。\n- **自定义目录**：默认保存在 `<dataDir>/prompts`，也可在设置中指定本机 Obsidian 或 Git 仓库目录。\n- **安全校验与原子写入**：严格校验 slug 防止路径穿越，通过临时文件原子替换落盘。"
+      },
+      "author": "codexhost",
+      "repository": "https://github.com/BytePioneer-AI/codexhost-ext-prompt-vault",
+      "stars": 0,
+      "categories": [
+        "tools",
+        "workflow"
+      ],
+      "trustTier": "community",
+      "screenshots": [
+        "https://github.com/BytePioneer-AI/codexhost-ext-prompt-vault/releases/download/v1.0.0/prompt-vault-workspace.png"
+      ],
+      "downloadUrl": "https://github.com/BytePioneer-AI/codexhost-ext-prompt-vault/releases/download/v1.0.0/prompt-vault.zip",
+      "sha256": "7d5f3a9c177ecb7203d821a0c33efe00fea47f996f754ab4a96d20dc0268da8c",
+      "slots": [],
+      "publishedAt": "2026-11-22T03:06:35Z",
+      "updatedAt": "2026-11-22T03:06:35Z",
+      "format": "codexhost",
+      "targets": [
+        "desktop",
+        "web"
+      ],
+      "apis": {
+        "page": 1,
+        "backend": 1
+      }
+    },
     {
       "id": "sidebar-delegation-badges",
       "version": "0.1.1",
@@ -20,6 +61,7 @@
       "author": "lpmasser",
       "repository": "https://github.com/lpmasser/codexhost-sidebar-delegation-badges",
       "stars": 0,
+      "downloads": 1,
       "categories": [
         "interface",
         "workflow"
