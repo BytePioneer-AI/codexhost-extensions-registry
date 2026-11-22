@@ -214,6 +214,114 @@ async function selectPackage(source, { owner, repo, api, headers }) {
   };
 }
 
+const v1Shape = desktopExtensionManifestSchema.shape;
+const portablePath = z
+  .string()
+  .min(1)
+  .max(255)
+  .refine(
+    (p) =>
+      !p.startsWith("/") &&
+      !p.includes("\\") &&
+      !p.split("/").some((part) => !part || part === "." || part === ".." || /[. ]$/u.test(part)) &&
+      !/[\x00-\x1f\x7f<>"|*]/u.test(p),
+    "Expected a portable relative resource path",
+  );
+const moduleEntry = portablePath.refine((p) => p.endsWith(".mjs"), "Expected a .mjs entry");
+const cssStyle = portablePath.refine((p) => p.endsWith(".css"), "Expected a .css style");
+const frontendEntry = { apiVersion: z.literal(1), entry: moduleEntry, style: cssStyle.optional() };
+const titleText = z.string().trim().min(1).max(128);
+const canonicalPath = (path) => path.normalize("NFC").toLowerCase();
+const manifestV2Schema = z
+  .strictObject({
+    manifestVersion: z.literal(2),
+    id: v1Shape.id,
+    name: v1Shape.name,
+    version: v1Shape.version,
+    description: v1Shape.description,
+    details: v1Shape.details,
+    author: v1Shape.author,
+    repository: v1Shape.repository,
+    icon: v1Shape.icon,
+    screenshots: v1Shape.screenshots,
+    categories: v1Shape.categories,
+    settingsSchema: v1Shape.settingsSchema,
+    slots: v1Shape.slots,
+    page: z
+      .strictObject({ ...frontendEntry, title: z.strictObject({ en: titleText, "zh-CN": titleText }).optional() })
+      .optional(),
+    widget: z.strictObject(frontendEntry).optional(),
+    desktop: z
+      .strictObject({
+        apiVersion: z.literal(1),
+        script: portablePath,
+        style: portablePath.optional(),
+      })
+      .optional(),
+    web: z
+      .strictObject({
+        apiVersion: z.literal(1),
+        entry: moduleEntry.optional(),
+        style: cssStyle.optional(),
+      })
+      .refine(({ entry, style }) => entry !== undefined || style !== undefined, "Expected a Web script or style")
+      .optional(),
+    backend: z
+      .strictObject({
+        apiVersion: z.literal(1),
+        entry: moduleEntry,
+        targets: z.array(z.enum(["desktop", "web"])).min(1).max(2).optional(),
+      })
+      .optional(),
+  })
+  .refine(
+    ({ page, widget, desktop, web, backend }) => Boolean(page || widget || desktop || web || backend),
+    "Expected at least one page, widget, desktop, Web, or backend entry",
+  )
+  .refine(
+    ({ page, widget, web, backend }) =>
+      !backend || [page?.entry, widget?.entry, web?.entry].every(
+        (entry) => entry === undefined || canonicalPath(entry) !== canonicalPath(backend.entry),
+      ),
+    { path: ["backend", "entry"], message: "A backend entry cannot also be a frontend entry" },
+  );
+
+export function parseManifest(raw) {
+  if (raw && typeof raw === "object" && raw.manifestVersion === 2) {
+    return manifestV2Schema.parse(raw);
+  }
+  return desktopExtensionManifestSchema.parse(raw);
+}
+
+function resolveV2TargetsAndApis(manifest) {
+  if (manifest.manifestVersion === 1) {
+    return {
+      targets: ["desktop"],
+      apis: {
+        desktop: manifest.desktopApi,
+        ...(manifest.backend ? { backend: 1 } : {}),
+      },
+    };
+  }
+  const { page, widget, desktop, web, backend } = manifest;
+  const unified = page || widget || (backend && !desktop && !web);
+  const backendTargets = backend?.targets ?? [];
+  // Preserve target/API inference for older v2 packages with an explicitly targeted backend.
+  const desktopApi = desktop?.apiVersion ?? (!unified && backendTargets.includes("desktop") ? 1 : undefined);
+  const webApi = web?.apiVersion ?? (!unified && backendTargets.includes("web") ? 1 : undefined);
+  const targets = unified
+    ? ["desktop", "web"]
+    : [...(desktopApi ? ["desktop"] : []), ...(webApi ? ["web"] : [])];
+  const apis = {
+    ...(page ? { page: page.apiVersion } : {}),
+    ...(widget ? { widget: widget.apiVersion } : {}),
+    ...(desktopApi ? { desktop: desktopApi } : {}),
+    ...(webApi ? { web: webApi } : {}),
+    ...(backend ? { backend: backend.apiVersion } : {}),
+  };
+  return { targets, apis };
+}
+
 async function validateSource(source, previous, starsByRepository, downloads) {
   const [, owner, repositoryName] = github.exec(source.repository);
   const repo = repositoryName.replace(/\.git$/iu, "");
@@ -234,97 +342,6 @@ async function validateSource(source, previous, starsByRepository, downloads) {
   if (asset?.digest != null && asset.digest !== `sha256:${sha256}`)
     throw new Error("Release SHA-256 does not match GitHub's digest");
   const files = readDesktopExtensionZip(zip);
-const v1Shape = desktopExtensionManifestSchema.shape;
-const portablePath = z
-  .string()
-  .min(1)
-  .max(255)
-  .refine(
-    (p) =>
-      !p.startsWith("/") &&
-      !p.includes("\\") &&
-      !p.split("/").some((part) => !part || part === "." || part === ".." || /[. ]$/u.test(part)) &&
-      !/[\x00-\x1f\x7f<>"|*]/u.test(p),
-    "Expected a portable relative resource path",
-  );
-const manifestV2Schema = z
-  .strictObject({
-    manifestVersion: z.literal(2),
-    id: v1Shape.id,
-    name: v1Shape.name,
-    version: v1Shape.version,
-    description: v1Shape.description,
-    details: v1Shape.details,
-    author: v1Shape.author,
-    repository: v1Shape.repository,
-    icon: v1Shape.icon,
-    screenshots: v1Shape.screenshots,
-    categories: v1Shape.categories,
-    settingsSchema: v1Shape.settingsSchema,
-    slots: v1Shape.slots,
-    desktop: z
-      .strictObject({
-        apiVersion: z.literal(1),
-        script: portablePath,
-        style: portablePath.optional(),
-      })
-      .optional(),
-    web: z
-      .strictObject({
-        apiVersion: z.literal(1),
-        entry: portablePath.refine((p) => p.endsWith(".mjs"), "Expected a .mjs entry").optional(),
-        style: portablePath.refine((p) => p.endsWith(".css"), "Expected a .css style").optional(),
-      })
-      .refine(({ entry, style }) => entry !== undefined || style !== undefined, "Expected a Web script or style")
-      .optional(),
-    backend: z
-      .strictObject({
-        apiVersion: z.literal(1),
-        entry: portablePath.refine((p) => p.endsWith(".mjs"), "Expected a .mjs entry"),
-        targets: z.array(z.enum(["desktop", "web"])).min(1).max(2).optional(),
-      })
-      .optional(),
-  })
-  .refine(
-    (m) => Boolean(m.desktop || m.web || (m.backend?.targets && m.backend.targets.length > 0)),
-    "Expected a desktop, Web, or explicitly targeted backend entry",
-  );
-
-function parseManifest(raw) {
-  if (raw && typeof raw === "object" && raw.manifestVersion === 2) {
-    return manifestV2Schema.parse(raw);
-  }
-  return desktopExtensionManifestSchema.parse(raw);
-}
-
-function resolveV2TargetsAndApis(manifest) {
-  if (manifest.manifestVersion === 1) {
-    return {
-      targets: ["desktop"],
-      apis: {
-        desktop: manifest.desktopApi,
-        ...(manifest.backend ? { backend: 1 } : {}),
-      },
-    };
-  }
-  const backendTargets = manifest.backend
-    ? (manifest.backend.targets ?? [
-        ...(manifest.desktop ? ["desktop"] : []),
-        ...(manifest.web ? ["web"] : []),
-      ])
-    : [];
-  const targets = [
-    ...(manifest.desktop || backendTargets.includes("desktop") ? ["desktop"] : []),
-    ...(manifest.web || backendTargets.includes("web") ? ["web"] : []),
-  ];
-  const apis = {
-    ...(targets.includes("desktop") ? { desktop: manifest.desktop?.apiVersion ?? 1 } : {}),
-    ...(targets.includes("web") ? { web: manifest.web?.apiVersion ?? 1 } : {}),
-    ...(manifest.backend ? { backend: manifest.backend.apiVersion } : {}),
-  };
-  return { targets, apis };
-}
-
   const manifest = parseManifest(
     JSON.parse(
       utf8.decode(getResource(files, "manifest.json", DESKTOP_EXTENSION_MANIFEST_MAX_BYTES)),
@@ -349,15 +366,12 @@ function resolveV2TargetsAndApis(manifest) {
     new Script(`(function(define) { "use strict";\n${sourceCode}\n})`);
     if (style) utf8.decode(getResource(files, style, DESKTOP_EXTENSION_STYLE_MAX_BYTES));
   }
-  if (manifest.manifestVersion === 2 && manifest.web) {
-    const { entry, style } = manifest.web;
-    if (entry) {
-      if (!files.has(entry)) throw new Error(`Missing Web entry file ${entry}.`);
-      utf8.decode(getResource(files, entry, DESKTOP_EXTENSION_SCRIPT_MAX_BYTES));
-    }
-    if (style) {
-      if (!files.has(style)) throw new Error(`Missing Web style file ${style}.`);
-      utf8.decode(getResource(files, style, DESKTOP_EXTENSION_STYLE_MAX_BYTES));
+  if (manifest.manifestVersion === 2) {
+    for (const frontend of [manifest.page, manifest.widget, manifest.web]) {
+      if (!frontend) continue;
+      const { entry, style } = frontend;
+      if (entry) utf8.decode(getResource(files, entry, DESKTOP_EXTENSION_SCRIPT_MAX_BYTES));
+      if (style) utf8.decode(getResource(files, style, DESKTOP_EXTENSION_STYLE_MAX_BYTES));
     }
   }
   const backendScript = manifest.manifestVersion === 2 ? manifest.backend?.entry : manifest.backend?.script;

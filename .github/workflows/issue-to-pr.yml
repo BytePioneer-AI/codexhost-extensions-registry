@@ -79,6 +79,7 @@ jobs:
         id: validate
         if: steps.prepare.outputs.status == 'prepared'
         continue-on-error: true
+        shell: bash
         run: node validate-and-build-catalog.mjs --check-only 2>&1 | tee validate.log
 
       - name: Publish safety report summary

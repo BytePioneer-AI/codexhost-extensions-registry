@@ -3,10 +3,10 @@ import {
   DESKTOP_EXTENSION_MANIFEST_MAX_BYTES,
   DESKTOP_EXTENSION_ZIP_MAX_BYTES,
   desktopExtensionIdSchema,
-  desktopExtensionManifestSchema,
   isGitHubDesktopExtensionZipballUrl,
   readDesktopExtensionZip,
 } from "../runtime.mjs";
+import { parseManifest } from "../validate-and-build-catalog.mjs";
 
 const githubRepoPattern =
   /https:\/\/github\.com\/([\w-]+)\/([\w-][\w.-]*?)(?:\.git)?(?:[/?#][^\s)\]>]*)?(?=[\s)\]>]|$)/iu;
@@ -166,7 +166,7 @@ async function resolveExtensionManifest(owner, repo) {
   if (!manifestBytes || manifestBytes.length > DESKTOP_EXTENSION_MANIFEST_MAX_BYTES) {
     throw new Error("Missing or oversized manifest.json in the extension package.");
   }
-  const manifest = desktopExtensionManifestSchema.parse(JSON.parse(utf8.decode(manifestBytes)));
+  const manifest = parseManifest(JSON.parse(utf8.decode(manifestBytes)));
   const id = desktopExtensionIdSchema.parse(manifest.id);
 
   const resolveImage = (relativePath) =>
@@ -236,9 +236,11 @@ function buildPrPreview({
   const description = pickLocalized(manifest.description);
   const details = pickLocalized(manifest.details);
   const capabilities = [
-    manifest.desktop ? "前端 UI" : null,
+    manifest.page ? "工作区页面" : null,
+    manifest.widget ? "悬浮组件" : null,
+    manifest.desktop || manifest.web ? "前端 UI" : null,
     manifest.backend ? "独立 Node 后端" : null,
-    manifest.settings ? "声明式设置" : null,
+    manifest.settingsSchema?.length ? "声明式设置" : null,
   ].filter(Boolean);
 
   const lines = [`Closes #${issueNumber}`, ""];
