@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-22T04:18:31.134Z",
+  "generatedAt": "2026-11-22T11:52:54.852Z",
   "extensions": [
     {
       "id": "focus-pomodoro",
@@ -105,7 +105,7 @@
       "author": "lpmasser",
       "repository": "https://github.com/lpmasser/codexhost-sidebar-delegation-badges",
       "stars": 0,
-      "downloads": 1,
+      "downloads": 11,
       "categories": [
         "interface",
         "workflow"
@@ -144,7 +144,7 @@
       "author": "sduhantao-maker",
       "repository": "https://github.com/sduhantao-maker/codexhost-sidebar-thread-tree",
       "stars": 2,
-      "downloads": 39,
+      "downloads": 45,
       "categories": [
         "interface",
         "workflow"
