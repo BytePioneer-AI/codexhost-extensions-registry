@@ -1,21 +1,21 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-22T03:23:28.854Z",
+  "generatedAt": "2026-11-22T03:39:34.440Z",
   "extensions": [
     {
       "id": "prompt-vault",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "name": {
         "en": "Prompt Vault",
         "zh-CN": "本地提示词库"
       },
       "description": {
-        "en": "Save, search, tag, and copy your favorite AI prompts locally across Desktop and Web.",
-        "zh-CN": "把常用的 AI 提问模板存在本机，随时搜索、按标签整理并一键复制，桌面端与网页端自动同步同一份内容。"
+        "en": "Lightweight local prompt library with an instant chat quick-picker (Alt+P / ⌥P) that inserts reusable {{variable}} prompts straight into your composer.",
+        "zh-CN": "轻量级本机提示词库：聊天时按 ⌥P / Alt+P 或点悬浮按钮原地呼出速查框，选中直接插入对话输入框，支持 {{变量}} 填空与置顶管理。"
       },
       "details": {
-        "en": "### Highlights\n\n- **Stored locally on your device**: Every prompt stays on your computer as a clean plain-text note and is shared across Desktop and Web.\n- **Fast search & tags**: Find prompts instantly by title, tag, or content and copy with one click.\n- **Optional custom folder**: Works out of the box with zero setup, or point it to your own local notes folder in Preferences.",
-        "zh-CN": "### 特点\n\n- **本机私密保存**：所有提示词都保存在你自己的电脑里，桌面端和网页端打开自动同步，无需云端账号。\n- **快速检索与复用**：支持按标题、标签或正文即时搜索，点一下即可复制使用。\n- **开箱即用**：默认零配置直接使用，也可以在偏好设置里指定自己的本地笔记文件夹。"
+        "en": "### Highlights\n\n- **Insert without leaving your chat**: Press `⌥P` (macOS) / `Alt+P` or click the compact floating trigger on any page to open the Spotlight quick-picker and insert a prompt straight into the composer.\n- **Smart `{{variable}}` templates**: Use `{{topic}}` or `{{tone}}` placeholders in any prompt — fill them inline right before inserting.\n- **Minimal auto-save manager**: Clean two-column Notes-style library with pinning, tags, instant search, and automatic saving.\n- **Local & cross-shell**: Stored privately on your computer and shared live across Codex Desktop and CH Web.",
+        "zh-CN": "### 特点\n\n- **不离开对话页，直接插入输入框**：聊天时按 `⌥P`（macOS）/ `Alt+P` 或点击右下角轻巧悬浮按钮，原地弹出速查框，回车直接填入当前聊天输入框。\n- **支持 `{{变量}}` 填空模板**：在提示词里写 `{{主题}}`、`{{语气}}` 等占位符，呼出时顺手填完即刻生成完整提示词。\n- **极简自动保存管理页**：清爽的笔记风格排版，支持置顶常用、标签整理、输入即自动保存。\n- **本机私密存储**：所有内容只保存在自己电脑里，Codex Desktop 与 CH Web 实时共用同一份词库。"
       },
       "author": "codexhost",
       "repository": "https://github.com/BytePioneer-AI/codexhost-ext-prompt-vault",
@@ -26,13 +26,13 @@
       ],
       "trustTier": "community",
       "screenshots": [
-        "https://github.com/BytePioneer-AI/codexhost-ext-prompt-vault/releases/download/v1.1.0/prompt-vault-workspace.png"
+        "https://github.com/BytePioneer-AI/codexhost-ext-prompt-vault/releases/download/v1.2.0/prompt-vault-workspace.png"
       ],
-      "downloadUrl": "https://github.com/BytePioneer-AI/codexhost-ext-prompt-vault/releases/download/v1.1.0/prompt-vault.zip",
-      "sha256": "de6a4e8579d7b7a5d012a7079fe61e987d03b137bb67e6d4c3fa9450678ae3d4",
+      "downloadUrl": "https://github.com/BytePioneer-AI/codexhost-ext-prompt-vault/releases/download/v1.2.0/prompt-vault.zip",
+      "sha256": "877867cd00cd3dd4a65be2f911ff3f7eb523a9032eba2ec6e3c5d17918f2b8c7",
       "slots": [],
       "publishedAt": "2026-11-22T03:06:35Z",
-      "updatedAt": "2026-11-22T03:20:16Z",
+      "updatedAt": "2026-11-22T03:38:42Z",
       "format": "codexhost",
       "targets": [
         "desktop",
@@ -40,6 +40,7 @@
       ],
       "apis": {
         "page": 1,
+        "widget": 1,
         "backend": 1
       }
     },
