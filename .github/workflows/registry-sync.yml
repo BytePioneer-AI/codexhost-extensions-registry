@@ -5,7 +5,13 @@ on:
     branches: [main]
   push:
     branches: [main]
-    paths: [sources.json]
+    paths:
+      - 'sources/**'
+      - validate-and-build-catalog.mjs
+      - runtime.mjs
+      - package.json
+      - package-lock.json
+      - .github/workflows/registry-sync.yml
   schedule:
     - cron: "*/30 * * * *"
   workflow_dispatch:

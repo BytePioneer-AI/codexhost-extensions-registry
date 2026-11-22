@@ -43,7 +43,7 @@ jobs:
 
       - run: npm ci --ignore-scripts
 
-      - name: Parse issue and update sources.json
+      - name: Parse issue and create the extension source file
         id: prepare
         continue-on-error: true
         run: node scripts/issue-to-pr.mjs
@@ -56,7 +56,7 @@ jobs:
           {
             echo "❌ **Automatic submission check failed / 自动投稿校验失败**"
             echo ""
-            echo "Could not prepare a \`sources.json\` entry from this issue:"
+            echo "Could not prepare a \`sources/<id>.json\` entry from this issue:"
             echo ""
             printf '> %s\n' "${ERROR_MESSAGE:-Unexpected error while parsing the submission issue.}"
             echo ""
@@ -73,9 +73,18 @@ jobs:
           EXTENSION_ID: ${{ steps.prepare.outputs.extension_id }}
           REPOSITORY_URL: ${{ steps.prepare.outputs.repository_url }}
         run: |
-          gh issue comment "$ISSUE_NUMBER" --body "ℹ️ \`$EXTENSION_ID\` ($REPOSITORY_URL) is already listed in \`sources.json\`. The catalog syncs automatically every 30 minutes."
+          gh issue comment "$ISSUE_NUMBER" --body "ℹ️ \`$EXTENSION_ID\` ($REPOSITORY_URL) is already listed in \`sources/$EXTENSION_ID.json\`. The catalog syncs automatically every 30 minutes."
 
-      - name: Validate updated sources.json
+      - name: Comment duplicate extension ID on issue
+        if: steps.prepare.outputs.status == 'id-conflict'
+        env:
+          EXTENSION_ID: ${{ steps.prepare.outputs.extension_id }}
+          EXISTING_REPOSITORY_URL: ${{ steps.prepare.outputs.repository_url }}
+        run: |
+          gh issue comment "$ISSUE_NUMBER" --body "❌ Duplicate extension ID \`$EXTENSION_ID\`: \`sources/$EXTENSION_ID.json\` already belongs to $EXISTING_REPOSITORY_URL. Use a different ID in your manifest and edit this issue to retry."
+          exit 1
+
+      - name: Validate sources directory
         id: validate
         if: steps.prepare.outputs.status == 'prepared'
         continue-on-error: true
@@ -129,7 +138,7 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git checkout -B "$BRANCH"
-          git add -- sources.json
+          git add -- "sources/$EXTENSION_ID.json"
           if [ -n "$ISSUE_AUTHOR_LOGIN" ] && [ -n "$ISSUE_AUTHOR_EMAIL" ]; then
             git commit \
               --author="$ISSUE_AUTHOR_LOGIN <$ISSUE_AUTHOR_EMAIL>" \

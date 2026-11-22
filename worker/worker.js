@@ -21,20 +21,31 @@ function githubHeaders(token, accept = "application/vnd.github+json") {
   };
 }
 
-async function fetchGitHubJson(url, token, { missingOk = false } = {}) {
-  const response = await fetch(url, { headers: githubHeaders(token) });
+async function fetchGitHubJson(url, token, { missingOk = false, accept } = {}) {
+  const response = await fetch(url, { headers: githubHeaders(token, accept) });
   if (missingOk && response.status === 404) return undefined;
   if (!response.ok) throw new Error(`GitHub API ${response.status}: ${url}`);
   return response.json();
 }
 
-async function fetchRepoFileJson(repo, path, token) {
-  const response = await fetch(
-    `https://api.github.com/repos/${repo}/contents/${path}?ref=main`,
-    { headers: githubHeaders(token, "application/vnd.github.raw+json") },
-  );
-  if (!response.ok) throw new Error(`GitHub contents ${response.status}: ${path}`);
-  return response.json();
+async function readSources(repo, token) {
+  const api = `https://api.github.com/repos/${repo}`;
+  const files = await fetchGitHubJson(`${api}/contents/sources?ref=main`, token);
+  if (!Array.isArray(files)) throw new Error("Expected a sources directory");
+  return Promise.all(files.filter(({ name }) => name.endsWith(".json")).map(async (file) => {
+    const { name, sha, type } = file;
+    if (type !== "file" || !/^[a-f0-9]{40}$/u.test(sha)) {
+      throw new Error(`Invalid source file: ${name}`);
+    }
+    // Read the listed blob, even if main advances while the files are loading.
+    const source = await fetchGitHubJson(`${api}/git/blobs/${sha}`, token, {
+      accept: "application/vnd.github.raw+json",
+    });
+    if (typeof source?.id !== "string" || name !== `${source.id}.json`) {
+      throw new Error(`Source ID does not match filename: ${name}`);
+    }
+    return source;
+  }));
 }
 
 async function resolveExpectedDownloadUrl(source, token) {
@@ -76,12 +87,12 @@ async function checkAndDispatchSync(env) {
   const registryRepo = env.REGISTRY_REPO || "BytePioneer-AI/codexhost-extensions-registry";
   const workflow = env.REGISTRY_WORKFLOW || "registry-sync.yml";
 
-  const [sourcesDoc, catalogDoc] = await Promise.all([
-    fetchRepoFileJson(registryRepo, "sources.json", token),
-    fetchRepoFileJson(registryRepo, "catalog.json", token),
+  const [sources, catalogDoc] = await Promise.all([
+    readSources(registryRepo, token),
+    fetchGitHubJson(`https://api.github.com/repos/${registryRepo}/contents/catalog.v2.json?ref=main`, token, {
+      accept: "application/vnd.github.raw+json",
+    }),
   ]);
-
-  const sources = Array.isArray(sourcesDoc?.sources) ? sourcesDoc.sources : [];
   const entries = Array.isArray(catalogDoc?.extensions) ? catalogDoc.extensions : [];
   const currentUrls = new Map(entries.map((entry) => [entry.id, entry.downloadUrl]));
   const sourceIds = new Set(sources.map((source) => source.id));

@@ -1,12 +1,12 @@
 # codexhost Desktop 扩展索引
 
-这是可独立部署的市场元数据仓库，不负责构建第三方代码。`sources.json` 是审核过的来源清单；`catalog.json` 是客户端读取的生成结果。作者使用 Issue Form **只提交公开 GitHub 仓库 URL**；管理员从 Release ZIP 或默认分支的 `manifest.json` 读取扩展 ID，以 `community` 身份把来源加入 PR。首次上架的目标是人工花 10 秒查看 Actions 安检报告再点 Merge：确认仓库、作者、ID、档位与包都符合预期；遇到警告、可疑代码或不熟悉的发布者，应进一步审查而不是盲点 Merge。`official` 只由维护者赋予自己管理的来源。
+这是可独立部署的市场元数据仓库，不负责构建第三方代码。`sources/` 是审核过的来源清单，每个扩展独占一个 `sources/<id>.json`；`catalog.json`（v1）和 `catalog.v2.json` 是客户端读取的生成结果。并行投稿不同扩展时，PR 各自只新增一个文件，不会争用同一份清单。作者使用 Issue Form **只提交公开 GitHub 仓库 URL**；管理员从 Release ZIP 或默认分支的 `manifest.json` 读取扩展 ID，以 `community` 身份把来源加入 PR。首次上架的目标是人工花 10 秒查看 Actions 安检报告再点 Merge：确认仓库、作者、ID、档位与包都符合预期；遇到警告、可疑代码或不熟悉的发布者，应进一步审查而不是盲点 Merge。`official` 只由维护者赋予自己管理的来源。
 
-每 30 分钟自动同步已登记来源的最新版本和 GitHub Star 数。`main` 上的 `sources.json` 发生变更时立即触发同步，也可手动运行 `Desktop extension registry`。Star 数取自 `sources.json` 登记的仓库；无法读取有效计数时省略 `stars`，不影响扩展包校验。优先使用最新稳定 Release 的 ZIP 资产；没有 Release 或没有 ZIP 资产时，验证默认分支的源码 zipball，并将索引的下载链接固定到已校验的 commit。若配置了 `sources[].asset`，则要求该 Release 资产存在，不回退。只有所有来源的扩展包通过校验且 `catalog.json` 内容确有变化时才提交并推送；校验失败时保留上一份有效索引，维护者可从运行记录下载 `safety-report.md` 定位失败的来源。此流程只更新索引，**不会自动在用户设备上更新或启用扩展**。SHA-256 校验下载完整性，不证明代码可信；静态检查不是代码审计或沙箱。
+每 30 分钟自动同步已登记来源的最新版本和 GitHub Star 数。`main` 上的 `sources/` 发生变更时立即触发同步，也可手动运行 `Desktop extension registry`。Star 数取自 `sources/` 登记的仓库；无法读取有效计数时省略 `stars`，不影响扩展包校验。优先使用最新稳定 Release 的 ZIP 资产；没有 Release 或没有 ZIP 资产时，验证默认分支的源码 zipball，并将索引的下载链接固定到已校验的 commit。若来源文件配置了 `asset`，则要求该 Release 资产存在，不回退。只有所有来源的扩展包通过校验且生成的目录内容确有变化时才提交并推送；校验失败时保留上一份有效索引，维护者可从运行记录下载 `safety-report.md` 定位失败的来源。此流程只更新索引，**不会自动在用户设备上更新或启用扩展**。SHA-256 校验下载完整性，不证明代码可信；静态检查不是代码审计或沙箱。
 
 ## 作者发布要求
 
-- **Release ZIP（推荐）**：在公开稳定 Release 上传构建好的 `.zip` 资产。包根目录或唯一的顶层目录下须有 `manifest.json` 和声明的入口 JS、样式、Logo 和截图。Release 有多个 ZIP 资产时在 `sources[].asset` 指定文件名。使用 Release 可以明确区分开发分支提交与正式稳定版（`draft` 和 `prerelease` 不会被收录）。
+- **Release ZIP（推荐）**：在公开稳定 Release 上传构建好的 `.zip` 资产。包根目录或唯一的顶层目录下须有 `manifest.json` 和声明的入口 JS、样式、Logo 和截图。Release 有多个 ZIP 资产时在 `sources/<id>.json` 的 `asset` 字段指定文件名。使用 Release 可以明确区分开发分支提交与正式稳定版（`draft` 和 `prerelease` 不会被收录）。
 - **默认分支源码（无 Release 时兜底）**：在公开仓库根目录提交 `manifest.json`、`desktop.script` 声明的构建后 JS，以及声明的样式、Logo 和截图。不需要手动打包 Release；校验器不负责编译 `.ts`。索引只接受仓库主页；用户直接安装时也可以使用 `/tree/<ref>/<subdir>` 链接。
 - `name` 和 `description` 必须有非空 `en` 和 `zh-CN`；`details` 若提供也须双语；`author` 必填。ZIP 字节变化时须递增 manifest `version`；源码模式下，即使只改变仓库中的文档，也会改变 zipball。
 - `categories` 可省略或填 `[]` 表示未分类。按主要用途选择且不重复：`appearance`（外观主题）、`interface`（界面增强）、`workflow`（效率与协作）、`analytics`（数据与统计）、`integrations`（外部集成）、`tools`（实用工具）。不接受其他值。
@@ -15,7 +15,7 @@
 
 ## 迁移到独立仓库
 
-1. 在 `BytePioneer-AI/codexhost-extensions-registry` 的 `main` 根目录放置本模板的 `README.md`、`sources.json`、`catalog.json`、`package*.json`、`runtime.mjs` 和 `validate-and-build-catalog.mjs`。将 `templates/submit-extension.yml` 放到 `.github/ISSUE_TEMPLATE/`，将 `templates/registry-sync.yml` 放到 `.github/workflows/`。不要把运行生成的 `safety-report.md` 提交到仓库。`runtime.mjs` 从 Host 契约和 ZIP 解析器生成；如契约变更，在 codexhost 工作树执行 `node tools/export-desktop-extension-registry.mjs` 后更新此文件。
+1. 在 `BytePioneer-AI/codexhost-extensions-registry` 的 `main` 根目录放置本模板的 `README.md`、`sources/`、`catalog.json`、`catalog.v2.json`、`package*.json`、`runtime.mjs` 和 `validate-and-build-catalog.mjs`。将 `templates/submit-extension.yml` 放到 `.github/ISSUE_TEMPLATE/`，将 `templates/registry-sync.yml` 放到 `.github/workflows/`。不要把运行生成的 `safety-report.md` 提交到仓库。`runtime.mjs` 从 Host 契约和 ZIP 解析器生成；如契约变更，在 codexhost 工作树执行 `node tools/export-desktop-extension-registry.mjs` 后更新此文件。
 2. 两条官方示例共用索引仓库作为 Release 源，以 `asset` 区分。先在 codexhost 工作树生成种子资产，并核对输出的 SHA-256 与随模板提供的 `catalog.json` 一致：
 
    ```sh
@@ -23,11 +23,11 @@
    node tools/build-desktop-extension-seeds.mjs /absolute/path/to/seed-assets
    ```
 
-   将两个 ZIP 原样附到该独立仓库的首个公开稳定 Release `desktop-extensions-v1`（资产 URL 已写在种子索引中）。发布前内置目录只展示元数据，远端资产尚不可下载。今后若在索引仓库发新的官方 Release，仍需上传两个条目的最新 ZIP，包括未变化的那一个；其他扩展各自维护其发布仓库。如果资产移至别处，先一起更新 `sources.json`、独立索引及 Host 回退元数据，不要用占位 hash 替代实际校验值。
-3. 以 Node 24 执行 `npm ci --ignore-scripts`、`node validate-and-build-catalog.mjs --check-only`，检查报告。去掉 `--check-only` 时才生成 `catalog.json`，无变化则不改其时间戳。提交来源变更的 PR 使用只读 token，不要改成 `pull_request_target` 执行投稿代码。为定时工作流允许专用机器人账号写 `main` 上的生成索引（若分支保护禁止机器人提交，需要调整仓库发布策略）。
+   将两个 ZIP 原样附到该独立仓库的首个公开稳定 Release `desktop-extensions-v1`（资产 URL 已写在种子索引中）。发布前内置目录只展示元数据，远端资产尚不可下载。今后若在索引仓库发新的官方 Release，仍需上传两个条目的最新 ZIP，包括未变化的那一个；其他扩展各自维护其发布仓库。如果资产移至别处，先一起更新对应的 `sources/<id>.json`、独立索引及 Host 回退元数据，不要用占位 hash 替代实际校验值。
+3. 以 Node 24 执行 `npm ci --ignore-scripts`、`node validate-and-build-catalog.mjs --check-only`，检查报告。去掉 `--check-only` 时才生成 `catalog.json` 和 `catalog.v2.json`，无变化则不改其时间戳。校验器默认读取仓库的 `sources/`，也可用 `--sources <dir-or-file>` 指定其他目录、单条来源 JSON 或旧版 `{ "schemaVersion": 1, "sources": [...] }` 文件。提交来源变更的 PR 使用只读 token，不要改成 `pull_request_target` 执行投稿代码。为定时工作流允许专用机器人账号写 `main` 上的生成索引（若分支保护禁止机器人提交，需要调整仓库发布策略）。
 4. 触发一次同步并确认 `catalog.json` 可从 `raw.githubusercontent.com/.../main/catalog.json` 公开读取。客户端以 jsDelivr 为备用，可用 `CODEXHOST_DESKTOP_EXTENSIONS_CATALOG_URL` 指向测试索引。
 
-`sources.json` 每一项登记 `id`、公开的 `repository`、可选的精确 `asset` 文件名、可选 `trustTier`（默认 `community`）和 `minCodexHostVersion`。要下架扩展，审查后从清单移除；合并到 `main` 后会自动同步，已安装的副本由用户自行卸载。
+每个 `sources/<id>.json` 只包含一个对象，登记 `id`、公开的 `repository`，以及可选的精确 `asset` 文件名、`trustTier`（默认 `community`）和 `minCodexHostVersion`。文件名必须与 `id` 完全一致，不允许重复 ID。要下架扩展，审查后删除对应的文件；合并到 `main` 后会自动同步，已安装的副本由用户自行卸载。
 
 ## 可选：用 Cloudflare 免费额度统计下载量
 
@@ -39,7 +39,7 @@
 
 ### 可选：启用 5 分钟无状态自动同步检测
 
-同一 Worker 附带 `[triggers] crons = ["*/5 * * * *"]`，每 5 分钟无状态比对 `sources.json` 中各扩展的最新 Release ZIP（无 Release 时比对默认分支最新 commit）与当前 `catalog.json` 的 `downloadUrl`，仅在包地址变化时触发 `registry-sync.yml`（推送后自动刷新 jsDelivr 缓存）。
+同一 Worker 附带 `[triggers] crons = ["*/5 * * * *"]`，每 5 分钟无状态比对 `sources/` 中各扩展的最新 Release ZIP（无 Release 时比对默认分支最新 commit）与当前 `catalog.v2.json` 的 `downloadUrl`，在发现包地址变化或来源下架时触发 `registry-sync.yml`（推送后自动刷新 jsDelivr 缓存）。已经部署旧版 Worker 的维护者需重新部署 `worker/`，使定时检测改读新结构。
 
 开启方式：创建一个仅含目标索引仓库 **Actions: Read and write** 权限的 Fine-grained PAT，在 `worker/` 目录执行：
 

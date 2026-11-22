@@ -1,4 +1,4 @@
-import { readFile, writeFile } from "node:fs/promises";
+import { writeFile } from "node:fs/promises";
 import {
   DESKTOP_EXTENSION_MANIFEST_MAX_BYTES,
   DESKTOP_EXTENSION_ZIP_MAX_BYTES,
@@ -6,7 +6,7 @@ import {
   isGitHubDesktopExtensionZipballUrl,
   readDesktopExtensionZip,
 } from "../runtime.mjs";
-import { parseManifest } from "../validate-and-build-catalog.mjs";
+import { loadSources, parseManifest } from "../validate-and-build-catalog.mjs";
 
 const githubRepoPattern =
   /https:\/\/github\.com\/([\w-]+)\/([\w-][\w.-]*?)(?:\.git)?(?:[/?#][^\s)\]>]*)?(?=[\s)\]>]|$)/iu;
@@ -138,7 +138,7 @@ async function resolveExtensionManifest(owner, repo) {
     );
     if (zipAssets.length > 1) {
       throw new Error(
-        "Multiple Release .zip assets found; keep a single .zip asset in the latest Release or submit a PR with sources[].asset set.",
+        "Multiple Release .zip assets found; keep a single .zip asset in the latest Release or submit a PR setting asset in sources/<id>.json.",
       );
     }
     if (zipAssets.length === 1) {
@@ -358,27 +358,32 @@ async function main() {
     repo,
   );
 
-  const sourcesPath = new URL("../sources.json", import.meta.url);
-  const data = JSON.parse(await readFile(sourcesPath, "utf8"));
-  const existing = data.sources.find(
-    (entry) =>
-      entry.id === id || entry.repository.toLowerCase() === repository.toLowerCase(),
-  );
+  const sourcesDirectory = new URL("../sources/", import.meta.url);
+  const sources = await loadSources(sourcesDirectory);
+  const sameRepository = (entry) => entry.repository.toLowerCase() === repository.toLowerCase();
+  const existingId = sources.find((entry) => entry.id === id);
+  if (existingId && !sameRepository(existingId)) {
+    await setOutput("status", "id-conflict");
+    await setOutput("extension_id", id);
+    await setOutput("repository_url", existingId.repository);
+    console.log(`Duplicate extension ID ${id}: sources/${id}.json already belongs to ${existingId.repository}.`);
+    return;
+  }
+  const existing = existingId ?? sources.find(sameRepository);
   if (existing) {
     await setOutput("status", "already-exists");
     await setOutput("extension_id", existing.id);
     await setOutput("repository_url", existing.repository);
-    console.log(`Extension ${existing.id} (${existing.repository}) is already in sources.json.`);
+    console.log(`Extension ${existing.id} (${existing.repository}) is already listed in sources/${existing.id}.json.`);
     return;
   }
 
-  data.sources.push({
-    id,
-    repository,
-    trustTier: "community",
+  const source = { id, repository, trustTier: "community" };
+  const filename = `${id}.json`;
+  await writeFile(new URL(filename, sourcesDirectory), `${JSON.stringify(source, null, 2)}\n`, {
+    encoding: "utf8",
+    flag: "wx",
   });
-  data.sources.sort((a, b) => a.id.localeCompare(b.id));
-  await writeFile(sourcesPath, `${JSON.stringify(data, null, 2)}\n`, "utf8");
 
   const issueAuthorLogin =
     typeof issue?.user?.login === "string" && /^[\w-]+$/u.test(issue.user.login)
@@ -407,7 +412,7 @@ async function main() {
   await setOutput("repository_url", repository);
   await setOutput("issue_author_login", issueAuthorLogin);
   await setOutput("issue_author_email", issueAuthorEmail);
-  console.log(`Prepared sources.json entry and PR preview for ${id} (${repository}).`);
+  console.log(`Prepared sources/${filename} and PR preview for ${id} (${repository}).`);
 }
 
 main().catch(async (error) => {

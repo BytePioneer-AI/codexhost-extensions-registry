@@ -8,9 +8,8 @@ workers_dev = true
 binding = "STATS_KV"
 id = "YOUR_KV_NAMESPACE_ID"
 
-# Stateless 5-minute update watcher: compares each source's latest Release ZIP
-# (or default-branch HEAD commit when no Release exists) against catalog.json
-# and dispatches registry-sync.yml only when a package URL changes.
+# Stateless 5-minute update watcher: compares sources/ against catalog.v2.json
+# and dispatches registry-sync.yml when a package URL changes or a source is removed.
 # Requires `npx wrangler secret put GITHUB_TOKEN` (fine-grained PAT with
 # Actions: Read and write on the registry repository).
 [triggers]

@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
-import { readFile, rename, writeFile } from "node:fs/promises";
-import { pathToFileURL } from "node:url";
+import { lstat, readFile, readdir, rename, writeFile } from "node:fs/promises";
+import { join, resolve } from "node:path";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { Script } from "node:vm";
 import { z } from "zod";
 import {
@@ -28,23 +29,60 @@ const githubHeaders = {
   "user-agent": "codexhost-desktop-extension-registry",
 };
 const safeAssetName = /^[\w.-]+\.zip$/iu;
-const sourcesSchema = z
-  .strictObject({
-    schemaVersion: z.literal(1),
-    sources: z.array(
-      z.strictObject({
-        id: desktopExtensionIdSchema,
-        repository: z.string().regex(github),
-        asset: z.string().regex(safeAssetName).optional(),
-        trustTier: z.enum(["official", "community"]).default("community"),
-        minCodexHostVersion: z.string().min(1).optional(),
-      }),
-    ),
-  })
-  .refine(
-    ({ sources }) => new Set(sources.map(({ id }) => id)).size === sources.length,
-    "Duplicate source IDs",
-  );
+const sourceSchema = z.strictObject({
+  id: desktopExtensionIdSchema,
+  repository: z.string().regex(github),
+  asset: z.string().regex(safeAssetName).optional(),
+  trustTier: z.enum(["official", "community"]).default("community"),
+  minCodexHostVersion: z.string().min(1).optional(),
+});
+const legacySourcesSchema = z.strictObject({
+  schemaVersion: z.literal(1),
+  sources: z.array(sourceSchema),
+});
+
+async function readSourceJson(path, parse) {
+  try {
+    return parse(JSON.parse(await readFile(path, "utf8")));
+  } catch (error) {
+    throw new Error(`${path}: ${error.message}`, { cause: error });
+  }
+}
+
+export async function loadSources(input = new URL("sources/", import.meta.url)) {
+  const path = resolve(input instanceof URL ? fileURLToPath(input) : input);
+  const info = await lstat(path);
+  const ids = new Set();
+  const sources = [];
+  function add(source, filename) {
+    if (ids.has(source.id)) throw new Error(`Duplicate source ID: ${source.id}`);
+    if (filename !== undefined && filename !== `${source.id}.json`)
+      throw new Error(`Source ID ${source.id} does not match filename ${filename}`);
+    ids.add(source.id);
+    sources.push(source);
+  }
+
+  if (info.isDirectory()) {
+    const files = await readdir(path, { withFileTypes: true });
+    files.sort((a, b) => a.name.localeCompare(b.name, "en"));
+    for (const file of files) {
+      if (!file.name.toLowerCase().endsWith(".json")) continue;
+      const id = file.name.slice(0, -5);
+      if (!file.isFile() || !file.name.endsWith(".json") || !desktopExtensionIdSchema.safeParse(id).success)
+        throw new Error(`Invalid source filename (expected a regular <id>.json file): ${file.name}`);
+      add(await readSourceJson(join(path, file.name), (doc) => sourceSchema.parse(doc)), file.name);
+    }
+  } else if (info.isFile()) {
+    const entries = await readSourceJson(path, (doc) => {
+      if (doc && Object.hasOwn(doc, "sources")) return legacySourcesSchema.parse(doc).sources;
+      return [sourceSchema.parse(doc)];
+    });
+    for (const source of entries) add(source);
+  } else {
+    throw new Error(`Expected a sources directory or JSON file: ${path}`);
+  }
+  return sources.sort((a, b) => a.id.localeCompare(b.id, "en"));
+}
 const digest = (bytes) => createHash("sha256").update(bytes).digest("hex");
 const utf8 = new TextDecoder("utf-8", { fatal: true });
 const assetOrigins = new Set([
@@ -189,7 +227,7 @@ async function selectPackage(source, { owner, repo, api, headers }) {
         (!source.asset || name === source.asset),
     );
     if (zipAssets.length > 1)
-      throw new Error("Multiple Release .zip assets; set sources[].asset to disambiguate");
+      throw new Error("Multiple Release .zip assets; set asset in the source entry to disambiguate");
     const [asset] = zipAssets;
     if (asset)
       return {
@@ -347,7 +385,7 @@ async function validateSource(source, previous, starsByRepository, downloads) {
       utf8.decode(getResource(files, "manifest.json", DESKTOP_EXTENSION_MANIFEST_MAX_BYTES)),
     ),
   );
-  if (manifest.id !== source.id) throw new Error("Manifest id does not match sources.json");
+  if (manifest.id !== source.id) throw new Error("Manifest id does not match the source entry");
   if (manifest.version !== manifest.version.trim())
     throw new Error("Manifest version has surrounding whitespace");
   if (
@@ -462,6 +500,7 @@ function inline(text) {
 
 export async function buildCatalog({
   directory = new URL("./", import.meta.url),
+  sourcesPath = new URL("sources/", directory),
   checkOnly = false,
 } = {}) {
   const report = [
@@ -477,9 +516,7 @@ export async function buildCatalog({
   const starsByRepository = new Map();
   let failed = false;
   try {
-    const { sources } = sourcesSchema.parse(
-      JSON.parse(await readFile(new URL("sources.json", directory), "utf8")),
-    );
+    const sources = await loadSources(sourcesPath);
     const previous = await readFile(catalogPath, "utf8")
       .then((data) => desktopExtensionCatalogSchema.parse(JSON.parse(data)))
       .catch((error) => {
@@ -496,7 +533,7 @@ export async function buildCatalog({
       (previousV2?.extensions ?? previous?.extensions ?? []).map((entry) => [entry.id, entry]),
     );
     const counts = checkOnly ? undefined : await readDownloadCounts();
-    for (const source of [...sources].sort((a, b) => a.id.localeCompare(b.id, "en"))) {
+    for (const source of sources) {
       try {
         const count = counts && Object.hasOwn(counts, source.id) ? counts[source.id] : undefined;
         const { data: downloads } =
@@ -553,9 +590,19 @@ export async function buildCatalog({
 
 if (process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url) {
   const args = process.argv.slice(2);
-  if (args.length > 1 || (args.length && args[0] !== "--check-only"))
-    throw new Error("Usage: node validate-and-build-catalog.mjs [--check-only]");
-  const { failed, markdown } = await buildCatalog({ checkOnly: args.length > 0 });
+  let checkOnly = false;
+  let sourcesPath;
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i];
+    if (arg === "--check-only" && !checkOnly) {
+      checkOnly = true;
+    } else if (arg === "--sources" && sourcesPath === undefined && args[i + 1] && !args[i + 1].startsWith("--")) {
+      sourcesPath = args[++i];
+    } else {
+      throw new Error("Usage: node validate-and-build-catalog.mjs [--check-only] [--sources <dir-or-file>]");
+    }
+  }
+  const { failed, markdown } = await buildCatalog({ sourcesPath, checkOnly });
   if (failed) process.exitCode = 1;
   console.log(markdown);
 }
