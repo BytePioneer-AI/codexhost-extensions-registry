@@ -1,7 +1,48 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-22T03:39:34.440Z",
+  "generatedAt": "2026-11-22T03:46:47.407Z",
   "extensions": [
+    {
+      "id": "focus-pomodoro",
+      "version": "1.1.0",
+      "name": {
+        "en": "Focus Pomodoro",
+        "zh-CN": "专注番茄钟"
+      },
+      "description": {
+        "en": "A floating Pomodoro timer and full workspace page with a shared countdown and task note. No backend process.",
+        "zh-CN": "从主页面悬浮胶囊或独立页管理番茄计时；倒计时和任务备注实时同步，无需后台进程。"
+      },
+      "details": {
+        "en": "- Use the floating capsule to start or pause without leaving the conversation. Open the full page for presets and a larger timer.\n- Timer state, notes, and daily completions are stored in localStorage and shared between views in the same browser. Refreshing preserves the countdown.\n- Configure Focus / Short Break / Long Break durations in shared Host extension settings.",
+        "zh-CN": "- 无需离开对话即可在悬浮胶囊开始或暂停，打开独立页可查看大计时盘和调整预设。\n- 浏览器 localStorage 保存倒计时、任务备注和每日完成数，在同一浏览器的两个视图间同步，刷新后可续计。\n- 专注 / 短休 / 长休时长通过共享 Host 插件设置保存。"
+      },
+      "author": "codexhost",
+      "repository": "https://github.com/BytePioneer-AI/codexhost-ext-focus-pomodoro",
+      "stars": 0,
+      "categories": [
+        "tools"
+      ],
+      "trustTier": "community",
+      "screenshots": [
+        "https://github.com/BytePioneer-AI/codexhost-ext-focus-pomodoro/releases/download/v1.1.0/pomodoro-workspace.png",
+        "https://github.com/BytePioneer-AI/codexhost-ext-focus-pomodoro/releases/download/v1.1.0/pomodoro-widget.png"
+      ],
+      "downloadUrl": "https://github.com/BytePioneer-AI/codexhost-ext-focus-pomodoro/releases/download/v1.1.0/focus-pomodoro.zip",
+      "sha256": "f4fe8398111703a32eac56a4113be96acbba6103f3df91e3bb93fbbe52c85d99",
+      "slots": [],
+      "publishedAt": "2026-11-22T03:06:34Z",
+      "updatedAt": "2026-11-22T03:06:34Z",
+      "format": "codexhost",
+      "targets": [
+        "desktop",
+        "web"
+      ],
+      "apis": {
+        "page": 1,
+        "widget": 1
+      }
+    },
     {
       "id": "prompt-vault",
       "version": "1.2.0",
