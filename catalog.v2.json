@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-23T06:32:58.541Z",
+  "generatedAt": "2026-11-23T08:06:20.935Z",
   "extensions": [
     {
       "id": "focus-pomodoro",
@@ -177,7 +177,7 @@
     },
     {
       "id": "the-althing",
-      "version": "1.0.5",
+      "version": "1.0.6",
       "name": {
         "en": "The Althing",
         "zh-CN": "议事厅"
@@ -187,29 +187,29 @@
         "zh-CN": "在 CodexHost 项目中召集专家议会并发布研究结论。"
       },
       "details": {
-        "en": "### Inside the council\n\n- Convene a panel from the harnesses and models available on your Host. Give each expert a role and choose a moderator.\n- Follow opening statements, peer critiques and rebuttals in the agenda discussion. Open a delegated thread to inspect its work.\n- Publish agenda conclusions and final reports. Download a standalone publication or transfer the complete council as a portable ZIP.",
-        "zh-CN": "### 在议事厅中\n\n- 从本机可用的智能体和模型中选出专家与主持人，为每位专家指定研究角色。\n- 按议程跟进独立分析、交叉质询与反驳，打开子会话查看实时进展。\n- 发布议程结论和总报告，下载独立出版物，或通过 ZIP 在不同主机之间迁移完整议题。"
+        "en": "### Inside the council\n\n- Start with `/althing` in Desktop or Web chat. Ask the moderator to propose an agenda for your topic.\n- Convene a panel from the harnesses and models available on your Host. Give each expert a role and choose a moderator.\n- Follow opening statements, peer critiques and rebuttals in the agenda discussion. Open a delegated thread to inspect its work.\n- Publish agenda conclusions and final reports. Download a standalone publication or transfer the complete council as a portable ZIP.",
+        "zh-CN": "### 在议事厅中\n\n- 在桌面或网页聊天框输入 `/althing` 发起会议，可请主持模型按主题拟订议程。\n- 从本机可用的智能体和模型中选出专家与主持人，为每位专家指定研究角色。\n- 按议程跟进独立分析、交叉质询与反驳，打开子会话查看实时进展。\n- 发布议程结论和总报告，下载独立出版物，或通过 ZIP 在不同主机之间迁移完整议题。"
       },
       "author": "mythezone",
       "repository": "https://github.com/mythezone/codexhost-ext-the-althing",
-      "stars": 1,
+      "stars": 3,
       "categories": [
         "workflow",
         "tools"
       ],
       "trustTier": "community",
-      "icon": "https://github.com/mythezone/codexhost-ext-the-althing/releases/download/v1.0.5/icon.png",
+      "icon": "https://github.com/mythezone/codexhost-ext-the-althing/releases/download/v1.0.6/icon.png",
       "screenshots": [
-        "https://github.com/mythezone/codexhost-ext-the-althing/releases/download/v1.0.5/hub.webp",
-        "https://github.com/mythezone/codexhost-ext-the-althing/releases/download/v1.0.5/overview.webp",
-        "https://github.com/mythezone/codexhost-ext-the-althing/releases/download/v1.0.5/discussion.webp",
-        "https://github.com/mythezone/codexhost-ext-the-althing/releases/download/v1.0.5/report-reader.webp"
+        "https://github.com/mythezone/codexhost-ext-the-althing/releases/download/v1.0.6/hub.webp",
+        "https://github.com/mythezone/codexhost-ext-the-althing/releases/download/v1.0.6/overview.webp",
+        "https://github.com/mythezone/codexhost-ext-the-althing/releases/download/v1.0.6/discussion.webp",
+        "https://github.com/mythezone/codexhost-ext-the-althing/releases/download/v1.0.6/report-reader.webp"
       ],
-      "downloadUrl": "https://github.com/mythezone/codexhost-ext-the-althing/releases/download/v1.0.5/the-althing.zip",
-      "sha256": "bbf2180f20491f63dfdff2a696a71da264f16a04d4dad27764caa041aae9c17e",
+      "downloadUrl": "https://github.com/mythezone/codexhost-ext-the-althing/releases/download/v1.0.6/the-althing.zip",
+      "sha256": "80d7487d5d2d654df110655e11dc2840588e137d30d3f2970f406db6412765e2",
       "slots": [],
       "publishedAt": "2026-11-23T04:21:59Z",
-      "updatedAt": "2026-11-23T04:21:59Z",
+      "updatedAt": "2026-11-23T07:32:37Z",
       "format": "codexhost",
       "targets": [
         "desktop",
