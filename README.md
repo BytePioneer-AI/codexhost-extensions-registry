@@ -1,51 +1,221 @@
-# codexhost Desktop 扩展索引
+# CodexHost Extensions Registry / CodexHost 扩展市场索引
 
-这是可独立部署的市场元数据仓库，不负责构建第三方代码。`sources/` 是审核过的来源清单，每个扩展独占一个 `sources/<id>.json`；`catalog.json`（v1）和 `catalog.v2.json` 是客户端读取的生成结果。并行投稿不同扩展时，PR 各自只新增一个文件，不会争用同一份清单。作者使用 Issue Form **只提交公开 GitHub 仓库 URL**；管理员从 Release ZIP 或默认分支的 `manifest.json` 读取扩展 ID，以 `community` 身份把来源加入 PR。首次上架的目标是人工花 10 秒查看 Actions 安检报告再点 Merge：确认仓库、作者、ID、档位与包都符合预期；遇到警告、可疑代码或不熟悉的发布者，应进一步审查而不是盲点 Merge。`official` 只由维护者赋予自己管理的来源。
+[CodexHost](https://github.com/BytePioneer-AI/codex-host)（Codex Desktop & CH Web）官方公开扩展市场元数据仓库。
 
-每 30 分钟自动同步已登记来源的最新版本和 GitHub Star 数。`main` 上的 `sources/` 发生变更时立即触发同步，也可手动运行 `Desktop extension registry`。Star 数取自 `sources/` 登记的仓库；无法读取有效计数时省略 `stars`，不影响扩展包校验。优先使用最新稳定 Release 的 ZIP 资产；没有 Release 或没有 ZIP 资产时，验证默认分支的源码 zipball，并将索引的下载链接固定到已校验的 commit。若来源文件配置了 `asset`，则要求该 Release 资产存在，不回退。只有所有来源的扩展包通过校验且生成的目录内容确有变化时才提交并推送；校验失败时保留上一份有效索引，维护者可从运行记录下载 `safety-report.md` 定位失败的来源。此流程只更新索引，**不会自动在用户设备上更新或启用扩展**。SHA-256 校验下载完整性，不证明代码可信；静态检查不是代码审计或沙箱。
+本仓库**仅维护审核通过的扩展来源清单与自动生成的市场目录**，不托管、不编译第三方源码。
 
-## 作者发布要求
+- **快速导航**：[工作原理](#工作原理) · [投稿上架](#投稿上架) · [发布版本更新](#发布版本更新) · [扩展包与校验要求](#扩展包与校验要求) · [仓库结构与目录地址](#仓库结构与目录地址) · [维护者指南](#维护者指南) · [English Guide](#english-guide)
 
-- **Release ZIP（推荐）**：在公开稳定 Release 上传构建好的 `.zip` 资产。包根目录或唯一的顶层目录下须有 `manifest.json` 和声明的入口 JS、样式、Logo 和截图。Release 有多个 ZIP 资产时在 `sources/<id>.json` 的 `asset` 字段指定文件名。使用 Release 可以明确区分开发分支提交与正式稳定版（`draft` 和 `prerelease` 不会被收录）。
-- **默认分支源码（无 Release 时兜底）**：在公开仓库根目录提交 `manifest.json`、`desktop.script` 声明的构建后 JS，以及声明的样式、Logo 和截图。不需要手动打包 Release；校验器不负责编译 `.ts`。索引只接受仓库主页；用户直接安装时也可以使用 `/tree/<ref>/<subdir>` 链接。
-- `name` 和 `description` 必须有非空 `en` 和 `zh-CN`；`details` 若提供也须双语；`author` 必填。ZIP 字节变化时须递增 manifest `version`；源码模式下，即使只改变仓库中的文档，也会改变 zipball。
-- `categories` 可省略或填 `[]` 表示未分类。按主要用途选择且不重复：`appearance`（外观主题）、`interface`（界面增强）、`workflow`（效率与协作）、`analytics`（数据与统计）、`integrations`（外部集成）、`tools`（实用工具）。不接受其他值。
-- 可选 Logo（`icon`）≤ 128 KiB；截图每张 ≤ 512 KiB，最多 4 张。均只接受 PNG、JPEG 或 WebP，扩展名须匹配文件签名。Release 模式另上传同一图片作为单独资产，资产名为路径的最后一段；源码模式使用固定到同一 commit 的 Raw URL。校验器比对公开图片 URL 和 ZIP 中的字节。使用 Logo 前请确认读取索引的客户端支持 `icon`；旧客户端的严格校验会拒绝带此字段的索引。
-- ZIP 仅支持 STORE/DEFLATE；不允许链接、特殊文件、越界或冲突路径，并有防解压炸弹和内存耗尽的护栏。CI 记录 ZIP 的 SHA-256（GitHub 提供 Release 资产 digest 时对照），按 Desktop v1 契约校验 manifest，并静态阻拦 `eval`、`new Function`、`child_process` 等模式。扩展代码不会在 CI 中执行。
+---
 
-## 迁移到独立仓库
+## 工作原理
 
-1. 在 `BytePioneer-AI/codexhost-extensions-registry` 的 `main` 根目录放置本模板的 `README.md`、`sources/`、`catalog.json`、`catalog.v2.json`、`package*.json`、`runtime.mjs` 和 `validate-and-build-catalog.mjs`。将 `templates/submit-extension.yml` 放到 `.github/ISSUE_TEMPLATE/`，将 `templates/registry-sync.yml` 放到 `.github/workflows/`。不要把运行生成的 `safety-report.md` 提交到仓库。`runtime.mjs` 从 Host 契约和 ZIP 解析器生成；如契约变更，在 codexhost 工作树执行 `node tools/export-desktop-extension-registry.mjs` 后更新此文件。
-2. 两条官方示例共用索引仓库作为 Release 源，以 `asset` 区分。先在 codexhost 工作树生成种子资产，并核对输出的 SHA-256 与随模板提供的 `catalog.json` 一致：
+```text
+开发者提交 GitHub 仓库 URL（Issue Form）
+  │
+  ▼  GitHub Actions: Submission issue to PR
+自动读取 manifest.json → 执行格式与静态安全校验 → 生成 sources/<id>.json PR + 安全报告
+  │
+  ▼  维护者人工复核后合并 PR
+  │
+  ▼  GitHub Actions: Desktop extension registry（变更即时触发 + 每 30 分钟定时同步）
+校验全部来源 → 生成 catalog.v2.json / catalog.json → 自动刷新 jsDelivr CDN 缓存
+  │
+  ▼
+CodexHost Desktop / CH Web 插件中心展示列表与更新提示
+```
 
+> **重要说明**：市场同步仅更新索引目录，**不会在用户设备上静默安装、升级或启用扩展**。SHA-256 用于校验下载完整性，静态扫描用于拦截高危模式，均不等同于完整代码审计或运行沙箱。
+
+---
+
+## 投稿上架
+
+### 方式一：通过 Issue 表单全自动投稿（推荐）
+
+1. 打开 [**提交扩展 Issue 表单**](https://github.com/BytePioneer-AI/codexhost-extensions-registry/issues/new?template=submit-extension.yml)。
+2. 只需填写公开的 GitHub 仓库主页地址（例如 `https://github.com/<owner>/<repo>`）。
+3. 提交后，`Submission issue to PR` 工作流会自动完成：
+   - 从最新稳定 Release 的 `.zip`（无 Release 时回退到默认分支）读取 `manifest.json`；
+   - 运行完整契约校验与静态安全扫描；
+   - 自动创建 `sources/<id>.json` 的 PR 并把链接评论回 Issue。
+4. 若校验未通过，Bot 会在 Issue 下直接列出具体错误；修改扩展仓库后**编辑该 Issue** 即可自动重新校验。
+5. 维护者复核 PR 与 `safety-report.md` 并合并后，扩展会自动上架到市场目录。
+
+### 方式二：直接提交 PR
+
+在 `sources/` 目录新增一个以扩展 ID 命名的独立 JSON 文件 `sources/<id>.json`（每个扩展独占一个文件，并行投稿互不冲突）：
+
+```json
+{
+  "id": "my-extension",
+  "repository": "https://github.com/owner/my-extension",
+  "trustTier": "community"
+}
+```
+
+字段说明：
+
+| 字段 | 必填 | 说明 |
+| --- | --- | --- |
+| `id` | 是 | 必须与文件名 `<id>.json` 及 `manifest.json` 中的 `id` 完全一致，不可重复。 |
+| `repository` | 是 | 公开 GitHub 仓库主页 URL（`https://github.com/<owner>/<repo>`）。 |
+| `asset` | 否 | 精确指定 Release 中的 `.zip` 文件名；仅在 Release 包含多个 `.zip` 资产时需要。 |
+| `trustTier` | 否 | 默认 `community`；`official` 仅由维护者授予官方维护来源。 |
+| `minCodexHostVersion` | 否 | 可选最低兼容的 CodexHost 版本号。 |
+
+---
+
+## 发布版本更新
+
+扩展上架后，**无需再向本仓库提 PR**，只需在扩展自己的仓库发布新版本即可：
+
+| 发布方式 | 做法 | 适用场景 |
+| --- | --- | --- |
+| **正式 GitHub Release（推荐）** | 递增 `manifest.json` 的 `version` → 创建公开正式 Release（非 Draft / Pre-release）→ 上传**唯一 1 个**构建好的 `.zip` 资产（若声明了 `icon` / `screenshots`，同步上传同名图片资产） | 明确区分开发提交与正式版，推荐绝大多数扩展使用 |
+| **默认分支源码（无 Release 时兜底）** | 递增 `manifest.json` 的 `version` → 直接推送到默认分支（需包含构建后的入口 JS 与资源文件） | 轻量纯前端脚本，未创建过 Release 时自动固定到已校验 commit |
+
+**更新何时对用户可见？**
+
+1. 市场工作流每 **30 分钟**自动同步一次（若部署了可选 Cloudflare Worker 检测，最快 **5 分钟**内自动触发），同步完成后会自动清理 jsDelivr 缓存；
+2. CodexHost 客户端本地缓存市场目录 **5 分钟**，用户点击插件中心右上角「刷新」即可立即看到版本更新提示。
+
+> **注意**：只要 ZIP 字节发生变化就**必须递增 `manifest.json` 中的 `version`**（版本号不变但内容变化会被校验器拒绝）；源码模式下即使只修改 README 也会改变 zipball 字节。
+
+---
+
+## 扩展包与校验要求
+
+扩展开发规范请参考 CodexHost 主仓库文档与 [Host 扩展开发指南](https://github.com/BytePioneer-AI/codex-host/blob/main/docs/architecture/desktop-ui-extensions.md)。
+
+### 1. 支持的扩展入口（`manifestVersion: 2`）
+
+统一扩展至少声明以下入口之一，客户端按入口自动适配 Desktop 与 CH Web：
+
+| 入口 | 用途 | 适用端 |
+| --- | --- | --- |
+| `page` | 跨端独立管理页（ESM `.mjs` + 可选 `.css`） | Codex Desktop & CH Web |
+| `widget` | 主窗口常驻悬浮挂件（Shadow DOM） | Codex Desktop & CH Web |
+| `desktop` | Codex Desktop 宿主 DOM 注入（经典 `.js`） | Codex Desktop |
+| `web` | CH Web 宿主注入（ESM `.mjs` / 纯 `.css`） | CH Web |
+| `backend` | 共享 Host 托管的单实例 Node 后端（`.mjs`） | Codex Desktop & CH Web |
+
+> 同时兼容旧版 `manifestVersion: 1` Desktop 扩展（自动写入 `catalog.json` 与 `catalog.v2.json`）。
+
+### 2. Manifest 必填与分类规范
+
+- `name`、`description` 须提供非空 `en` 与 `zh-CN` 双语文案（`details` 若提供也须双语）；`author`、`version` 必填。
+- `categories` 可省略或填 `[]`，允许值（不可重复）：
+  - `appearance`（外观主题）
+  - `interface`（界面增强）
+  - `workflow`（效率与协作）
+  - `analytics`（数据与统计）
+  - `integrations`（外部集成）
+  - `tools`（实用工具）
+
+### 3. 资源与打包限制
+
+| 项目 | 限制与要求 |
+| --- | --- |
+| ZIP 结构 | 根目录或唯一顶层目录下须含 `manifest.json` 及声明的入口与资源；仅支持 `STORE` / `DEFLATE`，禁止符号链接、越界路径与特殊文件 |
+| `icon`（可选） | ≤ `128 KiB`，仅 PNG / JPEG / WebP，扩展名须匹配文件头签名 |
+| `screenshots`（可选） | 最多 **4 张**，每张 ≤ `512 KiB`，仅 PNG / JPEG / WebP，扩展名须匹配文件头签名 |
+| Release 图片资产 | Release 模式下需将 `icon` 与 `screenshots` 对应的原图作为同名独立资产上传（资产名为路径最后一段），校验器会逐字节核对与 ZIP 内一致；源码模式自动使用固定 commit 的 Raw URL |
+| 安全静态检查 | CI 不执行扩展代码；记录并核对 ZIP 的 SHA-256，静态阻拦 `eval(`、`new Function`、`child_process` 等高危模式 |
+
+---
+
+## 仓库结构与目录地址
+
+```text
+.
+├── sources/                         # 审核通过的扩展来源（每个扩展一个 <id>.json）
+├── catalog.v2.json                  # 自动生成：v2 统一扩展目录（Desktop + Web）
+├── catalog.json                     # 自动生成：v1 兼容扩展目录
+├── validate-and-build-catalog.mjs   # 来源校验、安全扫描与目录生成脚本
+├── runtime.mjs                      # 由 codexhost 导出的契约校验与 ZIP 解析器
+├── scripts/issue-to-pr.mjs          # Issue 表单自动转 PR 脚本
+├── worker/                          # 可选：Cloudflare Worker（下载量统计 & 5 分钟更新检测）
+└── .github/
+    ├── ISSUE_TEMPLATE/submit-extension.yml
+    └── workflows/
+        ├── issue-to-pr.yml          # 投稿 Issue 自动校验并建 PR
+        └── registry-sync.yml        # PR 检查 & 定时/触发同步目录
+```
+
+客户端公开读取地址（支持 GitHub Raw 与 jsDelivr 并发竞速）：
+
+- **GitHub Raw**：`https://raw.githubusercontent.com/BytePioneer-AI/codexhost-extensions-registry/main/catalog.v2.json`
+- **jsDelivr 镜像**：`https://cdn.jsdelivr.net/gh/BytePioneer-AI/codexhost-extensions-registry@main/catalog.v2.json`
+- 本地调试测试索引时，可设置环境变量 `CODEXHOST_DESKTOP_EXTENSIONS_CATALOG_URL` 覆盖默认地址。
+
+---
+
+## 维护者指南
+
+### 日常审核与同步
+
+- **审核投稿 PR**：检查 Actions 产物或 PR 折叠区中的 `safety-report.md`，确认仓库归属、作者、扩展 ID、`trustTier` 与代码行为无异常后再合并（不要盲点 Merge）。
+- **下架扩展**：删除对应的 `sources/<id>.json` 并合并至 `main`，同步工作流会自动从目录移除（用户已安装的本地副本需自行卸载）。
+- **手动触发同步**：在仓库 **Actions → Desktop extension registry → Run workflow** 可立即同步最新 Release，无需等待 30 分钟定时任务。
+- **本地验证**：
+  ```sh
+  # 需要 Node 24+
+  npm ci --ignore-scripts
+  node validate-and-build-catalog.mjs --check-only
+  ```
+  去掉 `--check-only` 会重新生成 `catalog.json` 与 `catalog.v2.json`（无变更时不修改时间戳）。校验失败时工作流会保留上一份有效目录，可从运行记录下载 `safety-report.md` 排查。
+- **更新契约运行时**：当主仓库扩展契约变更时，在 `codex-host` 仓库执行 `node tools/export-desktop-extension-registry.mjs` 导出最新 `runtime.mjs` 同步至本仓库。
+
+<details>
+<summary>可选部署：Cloudflare Worker（下载量统计 &amp; 5 分钟自动更新检测）</summary>
+
+#### 1. 统计扩展安装/更新次数（Cloudflare Free 额度）
+
+1. 进入 `worker/` 目录，登录并创建 KV 命名空间：
    ```sh
-   npx tsc -b packages/harness-plugin-files
-   node tools/build-desktop-extension-seeds.mjs /absolute/path/to/seed-assets
+   npx wrangler login
+   npx wrangler kv namespace create STATS_KV
    ```
+   将返回的 Namespace `id` 填入 `worker/wrangler.toml`。
+2. 部署并验证健康检查：
+   ```sh
+   npx wrangler deploy
+   ```
+   访问 `https://<your-worker>.workers.dev/health` 确认返回 `{ "ok": true }`。
+3. 在本仓库 **Settings → Secrets and variables → Actions → Variables** 新增变量 `STATS_URL`（填 Worker 根地址，不带 `/stats.json`）；在 CodexHost Host/Console 进程配置相同的 `CODEXHOST_DESKTOP_EXTENSIONS_STATS_URL`。
+4. 仅统计从市场成功完成的安装/更新，客户端只上报扩展 ID（不含账号或设备信息），属于参考计数而非精确去重统计。
 
-   将两个 ZIP 原样附到该独立仓库的首个公开稳定 Release `desktop-extensions-v1`（资产 URL 已写在种子索引中）。发布前内置目录只展示元数据，远端资产尚不可下载。今后若在索引仓库发新的官方 Release，仍需上传两个条目的最新 ZIP，包括未变化的那一个；其他扩展各自维护其发布仓库。如果资产移至别处，先一起更新对应的 `sources/<id>.json`、独立索引及 Host 回退元数据，不要用占位 hash 替代实际校验值。
-3. 以 Node 24 执行 `npm ci --ignore-scripts`、`node validate-and-build-catalog.mjs --check-only`，检查报告。去掉 `--check-only` 时才生成 `catalog.json` 和 `catalog.v2.json`，无变化则不改其时间戳。校验器默认读取仓库的 `sources/`，也可用 `--sources <dir-or-file>` 指定其他目录、单条来源 JSON 或旧版 `{ "schemaVersion": 1, "sources": [...] }` 文件。提交来源变更的 PR 使用只读 token，不要改成 `pull_request_target` 执行投稿代码。为定时工作流允许专用机器人账号写 `main` 上的生成索引（若分支保护禁止机器人提交，需要调整仓库发布策略）。
-4. 触发一次同步并确认 `catalog.json` 可从 `raw.githubusercontent.com/.../main/catalog.json` 公开读取。客户端以 jsDelivr 为备用，可用 `CODEXHOST_DESKTOP_EXTENSIONS_CATALOG_URL` 指向测试索引。
+#### 2. 启用 5 分钟无状态自动同步检测
 
-每个 `sources/<id>.json` 只包含一个对象，登记 `id`、公开的 `repository`，以及可选的精确 `asset` 文件名、`trustTier`（默认 `community`）和 `minCodexHostVersion`。文件名必须与 `id` 完全一致，不允许重复 ID。要下架扩展，审查后删除对应的文件；合并到 `main` 后会自动同步，已安装的副本由用户自行卸载。
+同一 Worker 内置 `crons = ["*/5 * * * *"]`，每 5 分钟比对 `sources/` 中各扩展的最新 Release ZIP（或默认分支 commit）与当前 `catalog.v2.json` 的 `downloadUrl`，一旦发现新版本或来源下架即自动触发 `registry-sync.yml` 并刷新 jsDelivr 缓存。
 
-## 可选：用 Cloudflare 免费额度统计下载量
-
-1. 在 Cloudflare Free 账号下，进入本模板的 `worker/`，运行 `npx wrangler login` 和 `npx wrangler kv namespace create STATS_KV`，将返回的 Namespace ID 填入 `worker/wrangler.toml` 的 `id`。
-2. 在同一目录运行 `npx wrangler deploy`，用部署返回的 `https://…workers.dev/health` 检查是否返回 `{ "ok": true }`。Worker 没有运行时依赖，只在 KV 中保存按扩展 ID 聚合的计数。
-3. 在索引仓库 **Settings → Secrets and variables → Actions → Variables** 添加 `STATS_URL`，值为 Worker 的 HTTPS 根地址（不带 `/stats.json`）。在要上报的 codexhost Host／Console 进程中，将 `CODEXHOST_DESKTOP_EXTENSIONS_STATS_URL` 指向同一地址。定时同步会把 `/stats.json` 中有效的非负整数合并到 `catalog.json` 的可选 `downloads` 字段；无数据或 Worker 不可用时省略该字段，不影响同步。启用前请确认读取该索引的客户端已支持 `downloads`，旧客户端的严格校验会拒绝带此字段的索引。
-
-只统计从索引成功完成的安装（含重装和更新）；客户端只发送扩展 ID，不发送账号、设备 ID 或请求体。Worker 仅接受小写字母、数字及单连字符分段的 ID，含 `.` 或 `_` 的扩展不会计数。该接口公开，KV 是最终一致的，并发和写入限额可能导致漏计，公开请求也可能抬高计数；这是下载量参考，不是精确或唯一用户统计。费用为零的前提是留在 Cloudflare Free 计划额度内。
-
-### 可选：启用 5 分钟无状态自动同步检测
-
-同一 Worker 附带 `[triggers] crons = ["*/5 * * * *"]`，每 5 分钟无状态比对 `sources/` 中各扩展的最新 Release ZIP（无 Release 时比对默认分支最新 commit）与当前 `catalog.v2.json` 的 `downloadUrl`，在发现包地址变化或来源下架时触发 `registry-sync.yml`（推送后自动刷新 jsDelivr 缓存）。已经部署旧版 Worker 的维护者需重新部署 `worker/`，使定时检测改读新结构。
-
-开启方式：创建一个仅含目标索引仓库 **Actions: Read and write** 权限的 Fine-grained PAT，在 `worker/` 目录执行：
+开启方式：创建一个仅拥有本仓库 **Actions: Read and write** 权限的 Fine-grained PAT，在 `worker/` 目录执行：
 
 ```sh
 npx wrangler secret put GITHUB_TOKEN
 npx wrangler deploy
 ```
 
-未配置 `GITHUB_TOKEN` 时该定时检测自动跳过，不影响统计接口。
+未配置 `GITHUB_TOKEN` 时自动跳过检测，不影响下载统计接口。
+
+</details>
+
+---
+
+## English Guide
+
+**CodexHost Extensions Registry** is the public metadata catalog for **Codex Desktop** and **CH Web** extensions (`manifestVersion: 2` unified extensions and legacy `v1` Desktop extensions). It stores verified source descriptors under `sources/<id>.json` and publishes machine-readable `catalog.v2.json` / `catalog.json` indexes via GitHub Actions.
+
+### Submit an Extension
+
+1. Open the [**Submit Extension Issue Form**](https://github.com/BytePioneer-AI/codexhost-extensions-registry/issues/new?template=submit-extension.yml) and enter your public GitHub repository URL (`https://github.com/<owner>/<repo>`).
+2. GitHub Actions automatically reads `manifest.json` from your latest stable Release `.zip` (or default branch if no Release exists), runs schema & static safety checks, and opens a PR adding `sources/<id>.json`.
+3. Once a maintainer reviews the safety report and merges the PR, your extension is published to the marketplace catalog automatically.
+
+### Publish an Update
+
+- **Recommended (Release ZIP)**: Bump `version` in `manifest.json`, publish a public non-prerelease GitHub Release, and attach a single `.zip` archive (plus matching `icon` / `screenshots` image assets if declared).
+- **Fallback (Default Branch)**: If your repo has no Release, bump `version` and push built files to the default branch.
+- The catalog syncs every **30 minutes** (or within **5 minutes** when the optional Cloudflare Worker cron is enabled) and automatically purges jsDelivr cache. Clients refresh on demand or after their 5-minute local cache expires.
+- **Note**: Registry updates never auto-install or auto-update extensions on user devices.
