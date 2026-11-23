@@ -1,7 +1,48 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-23T08:06:20.935Z",
+  "generatedAt": "2026-11-23T15:21:58.441Z",
   "extensions": [
+    {
+      "id": "ch-context",
+      "version": "0.3.2",
+      "name": {
+        "en": "Context Insights",
+        "zh-CN": "上下文洞察"
+      },
+      "description": {
+        "en": "Read-only context, usage and conversation inspection for CodexHost Web.",
+        "zh-CN": "在 CodexHost Web 中只读查看上下文、用量、消息、工具与文件活动。"
+      },
+      "details": {
+        "en": "Enable this Web-only extension and open Context Insights from the sidebar. Choose a conversation to inspect confirmed Host usage, a linked activity timeline and categorized rich-text records. Includes raw text, command/file links and Host-reported relationships. Unknown data remains unavailable; exact prompt composition and historical request-token charts are not inferred. No backend process or external telemetry. Screenshots use synthetic test data. Desktop is not supported by this entry.",
+        "zh-CN": "启用后从侧栏进入“上下文洞察”，选择会话即可查看宿主上报的真实用量、联动时间线与分类富文本记录。支持原文、命令和文件跳转，以及宿主上报的会话关系。缺失数据保持未知，不推测完整提示词组成或历史逐请求 Token 曲线。无后台进程，不向外部发送遥测。截图使用测试数据。此入口仅支持 CH Web，不支持 Desktop。"
+      },
+      "author": "ABC-xiaoxuan",
+      "repository": "https://github.com/ABC-xiaoxuan/ch-context",
+      "stars": 0,
+      "categories": [
+        "analytics",
+        "interface"
+      ],
+      "trustTier": "community",
+      "icon": "https://github.com/ABC-xiaoxuan/ch-context/releases/download/v0.3.2/icon.png",
+      "screenshots": [
+        "https://github.com/ABC-xiaoxuan/ch-context/releases/download/v0.3.2/preview.png",
+        "https://github.com/ABC-xiaoxuan/ch-context/releases/download/v0.3.2/preview-dark.png"
+      ],
+      "downloadUrl": "https://github.com/ABC-xiaoxuan/ch-context/releases/download/v0.3.2/ch-context-0.3.2.zip",
+      "sha256": "5540bcae39e43e0223baae4cbc8df2a154eccc8998688655802399e39fd2366c",
+      "slots": [],
+      "publishedAt": "2026-11-23T15:06:28Z",
+      "updatedAt": "2026-11-23T15:06:28Z",
+      "format": "codexhost",
+      "targets": [
+        "web"
+      ],
+      "apis": {
+        "web": 1
+      }
+    },
     {
       "id": "focus-pomodoro",
       "version": "1.3.0",
@@ -177,7 +218,7 @@
     },
     {
       "id": "the-althing",
-      "version": "1.0.6",
+      "version": "1.0.8",
       "name": {
         "en": "The Althing",
         "zh-CN": "议事厅"
@@ -187,8 +228,8 @@
         "zh-CN": "在 CodexHost 项目中召集专家议会并发布研究结论。"
       },
       "details": {
-        "en": "### Inside the council\n\n- Start with `/althing` in Desktop or Web chat. Ask the moderator to propose an agenda for your topic.\n- Convene a panel from the harnesses and models available on your Host. Give each expert a role and choose a moderator.\n- Follow opening statements, peer critiques and rebuttals in the agenda discussion. Open a delegated thread to inspect its work.\n- Publish agenda conclusions and final reports. Download a standalone publication or transfer the complete council as a portable ZIP.",
-        "zh-CN": "### 在议事厅中\n\n- 在桌面或网页聊天框输入 `/althing` 发起会议，可请主持模型按主题拟订议程。\n- 从本机可用的智能体和模型中选出专家与主持人，为每位专家指定研究角色。\n- 按议程跟进独立分析、交叉质询与反驳，打开子会话查看实时进展。\n- 发布议程结论和总报告，下载独立出版物，或通过 ZIP 在不同主机之间迁移完整议题。"
+        "en": "### Inside the council\n\n- Start with `/althing` in Desktop or Web chat. Ask the moderator to propose an agenda for your topic.\n- Convene a panel from the harnesses and models available on your Host. Pick the Host’s collaboration defaults or assign agents, models, thinking levels and roles in the wizard or expert roster.\n- Follow opening statements, peer critiques and rebuttals in the agenda discussion. Open a delegated thread to inspect its work.\n- Publish agenda conclusions and final reports. Download a standalone publication or transfer the complete council as a portable ZIP.\n- Follow the Host language or choose English, Simplified Chinese, Traditional Chinese, Japanese or Korean in plugin settings.",
+        "zh-CN": "### 在议事厅中\n\n- 在桌面或网页聊天框输入 `/althing` 发起会议，可请主持模型按主题拟订议程。\n- 从本机可用的智能体和模型中选出专家与主持人，可一键加入已就绪的协作专家，也可在向导或专家名册中手动配置 Agent、模型、推理强度和会议角色。\n- 按议程跟进独立分析、交叉质询与反驳，打开子会话查看实时进展。\n- 发布议程结论和总报告，下载独立出版物，或通过 ZIP 在不同主机之间迁移完整议题。\n- 界面可跟随宿主语言，也可在插件设置中选择英语、简体中文、繁体中文、日语或韩语。"
       },
       "author": "mythezone",
       "repository": "https://github.com/mythezone/codexhost-ext-the-althing",
@@ -198,18 +239,18 @@
         "tools"
       ],
       "trustTier": "community",
-      "icon": "https://github.com/mythezone/codexhost-ext-the-althing/releases/download/v1.0.6/icon.png",
+      "icon": "https://github.com/mythezone/codexhost-ext-the-althing/releases/download/v1.0.8/icon.png",
       "screenshots": [
-        "https://github.com/mythezone/codexhost-ext-the-althing/releases/download/v1.0.6/hub.webp",
-        "https://github.com/mythezone/codexhost-ext-the-althing/releases/download/v1.0.6/overview.webp",
-        "https://github.com/mythezone/codexhost-ext-the-althing/releases/download/v1.0.6/discussion.webp",
-        "https://github.com/mythezone/codexhost-ext-the-althing/releases/download/v1.0.6/report-reader.webp"
+        "https://github.com/mythezone/codexhost-ext-the-althing/releases/download/v1.0.8/hub.webp",
+        "https://github.com/mythezone/codexhost-ext-the-althing/releases/download/v1.0.8/overview.webp",
+        "https://github.com/mythezone/codexhost-ext-the-althing/releases/download/v1.0.8/discussion.webp",
+        "https://github.com/mythezone/codexhost-ext-the-althing/releases/download/v1.0.8/report-reader.webp"
       ],
-      "downloadUrl": "https://github.com/mythezone/codexhost-ext-the-althing/releases/download/v1.0.6/the-althing.zip",
-      "sha256": "80d7487d5d2d654df110655e11dc2840588e137d30d3f2970f406db6412765e2",
+      "downloadUrl": "https://github.com/mythezone/codexhost-ext-the-althing/releases/download/v1.0.8/the-althing.zip",
+      "sha256": "a9fc91643b1c0415b869c87fd753f3756e1e65368cfbee90214e4a988c98dc78",
       "slots": [],
       "publishedAt": "2026-11-23T04:21:59Z",
-      "updatedAt": "2026-11-23T07:32:37Z",
+      "updatedAt": "2026-11-23T09:40:28Z",
       "format": "codexhost",
       "targets": [
         "desktop",
