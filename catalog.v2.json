@@ -1,7 +1,52 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-24T04:57:07.128Z",
+  "generatedAt": "2026-11-24T08:09:05.131Z",
   "extensions": [
+    {
+      "id": "auto-archive-guard",
+      "version": "1.2.0",
+      "name": {
+        "en": "Auto Archive & Keep Guard",
+        "zh-CN": "自动归档与常驻保护"
+      },
+      "description": {
+        "en": "Automatically archive inactive sessions older than N days with a configurable grace delay, while letting you mark any session as permanently protected from its More menu.",
+        "zh-CN": "按设定天数自动归档长期不活跃的会话（支持扫描后延迟 X 分钟缓冲归档），并在每个会话的「更多」菜单中添加常驻「防止自动归档」保护开关。"
+      },
+      "details": {
+        "en": "## Features\n\n- **Scheduled Auto-Archive with Grace Delay**: Runs inside the shared CodexHost backend to scan inactive sessions older than a configurable threshold (default: **3 days**, scanned every **1440 min / 24h**) and waits a configurable grace window (default: **30 minutes**) before archiving so you always have time to protect important threads.\n- **Per-Session Protection in More Menu**: Adds a persistent **Keep from Auto-Archive** toggle directly into every session's `...` **More** menu (and right-click menu) in both **Codex Desktop** and **CodexHost Web**, with a shield indicator on protected rows.\n- **Safety Guards**: Never archives currently running/waiting sessions, skips pinned sessions by default, supports dry-run previews, live grace-period countdowns, and an archive history log with one-click restore.\n- **Cross-Platform Management Page & Floating Widget**: Manage retention days, grace delay, review pending countdowns, toggle permanent protection in bulk, or restore recently archived threads from Desktop or Web.\n\n## How It Works\n\n1. Enable the plugin and review the default rules (3 days retention, 1440 min scan interval, 30 min grace delay) in **Plugin Details**, the **Auto Archive** management page, or the floating widget.\n2. Open any session's `...` menu in the sidebar and toggle **Keep from Auto-Archive** to protect important threads permanently (or cancel any pending grace countdown).\n3. When an automated scan detects eligible stale threads, they enter the grace countdown queue and are archived automatically once the grace window elapses unless protected or reactivated.",
+        "zh-CN": "## 核心功能\n\n- **定时自动归档 + 延迟缓冲期**：依托共享 CodexHost 单实例后端运行，按设定天数阈值定时扫描不活跃会话（默认 **3 天**、每 **1440 分钟 / 24 小时**扫描一次）；扫描到超期会话后默认延迟 **30 分钟**再正式归档，期间可随时一键保护取消归档。\n- **会话「更多」菜单常驻防归档**：在 **Codex Desktop** 与 **CodexHost Web** 的每个会话「更多（`...`）」菜单（及右键菜单）中常驻注入 **防止自动归档** 开关，并在受保护的会话行显示盾牌标识，永久规避自动归档。\n- **多重安全保护**：自动跳过正在运行或等待回复的会话，默认跳过置顶会话，支持试运行（Dry Run）预览、待归档倒计时展示，以及归档日志内一键恢复并加护。\n- **跨端独立管理页 + 主窗口悬浮挂件**：在 Desktop 与 Web 统一管理归档天数、延迟归档分钟数、筛选倒计时/超期会话、批量配置常驻保护或恢复已归档会话。\n\n## 使用方式\n\n1. 启用插件后，默认规则为 **3 天阈值 / 1440 分钟扫描间隔 / 扫描后延迟 30 分钟归档 / 跳过置顶**，可在「插件详情」、独立管理页或右下角挂件中随时调整。\n2. 点击侧边栏任意会话的 `...` 更多按钮（或右键菜单），开启 **防止自动归档** 即可永久保护该会话（若已在倒计时队列中会自动撤回）。\n3. 自动扫描命中超期空闲会话后，会先进入宽限倒计时队列，待设定分钟数到期并复核无新增活跃/未受保护后才正式归档。"
+      },
+      "author": "biground",
+      "repository": "https://github.com/biground/codexhost-plugin-auto-archive",
+      "stars": 0,
+      "categories": [
+        "workflow",
+        "tools"
+      ],
+      "trustTier": "community",
+      "icon": "https://github.com/biground/codexhost-plugin-auto-archive/releases/download/v1.2.0/icon.png",
+      "screenshots": [
+        "https://github.com/biground/codexhost-plugin-auto-archive/releases/download/v1.2.0/preview-page.png"
+      ],
+      "downloadUrl": "https://github.com/biground/codexhost-plugin-auto-archive/releases/download/v1.2.0/auto-archive-guard-1.2.0.zip",
+      "sha256": "6be707ab5a4f68fb2d4fb57464e05e6a6081490887cb14581346d4f91d946f80",
+      "slots": [],
+      "publishedAt": "2026-11-24T07:40:53Z",
+      "updatedAt": "2026-11-24T07:40:53Z",
+      "format": "codexhost",
+      "targets": [
+        "desktop",
+        "web"
+      ],
+      "apis": {
+        "page": 1,
+        "widget": 1,
+        "desktop": 1,
+        "web": 1,
+        "backend": 1
+      }
+    },
     {
       "id": "ch-context",
       "version": "0.3.3",
@@ -20,7 +65,7 @@
       "author": "ABC-xiaoxuan",
       "repository": "https://github.com/ABC-xiaoxuan/ch-context",
       "stars": 0,
-      "downloads": 404,
+      "downloads": 88,
       "categories": [
         "analytics",
         "interface"
@@ -62,7 +107,7 @@
       "author": "codexhost",
       "repository": "https://github.com/BytePioneer-AI/codexhost-ext-focus-pomodoro",
       "stars": 1,
-      "downloads": 466,
+      "downloads": 140,
       "categories": [
         "tools"
       ],
@@ -107,7 +152,7 @@
       "author": "codexhost",
       "repository": "https://github.com/BytePioneer-AI/codexhost-ext-prompt-vault",
       "stars": 0,
-      "downloads": 367,
+      "downloads": 123,
       "categories": [
         "tools",
         "workflow"
@@ -151,7 +196,7 @@
       "author": "lpmasser",
       "repository": "https://github.com/lpmasser/codexhost-sidebar-delegation-badges",
       "stars": 0,
-      "downloads": 505,
+      "downloads": 147,
       "categories": [
         "interface",
         "workflow"
@@ -190,7 +235,7 @@
       "author": "sduhantao-maker",
       "repository": "https://github.com/sduhantao-maker/codexhost-sidebar-thread-tree",
       "stars": 3,
-      "downloads": 578,
+      "downloads": 183,
       "categories": [
         "interface",
         "workflow"
@@ -221,7 +266,7 @@
     },
     {
       "id": "the-althing",
-      "version": "1.0.8",
+      "version": "1.1.0",
       "name": {
         "en": "The Althing",
         "zh-CN": "议事厅"
@@ -231,30 +276,30 @@
         "zh-CN": "在 CodexHost 项目中召集专家议会并发布研究结论。"
       },
       "details": {
-        "en": "### Inside the council\n\n- Start with `/althing` in Desktop or Web chat. Ask the moderator to propose an agenda for your topic.\n- Convene a panel from the harnesses and models available on your Host. Pick the Host’s collaboration defaults or assign agents, models, thinking levels and roles in the wizard or expert roster.\n- Follow opening statements, peer critiques and rebuttals in the agenda discussion. Open a delegated thread to inspect its work.\n- Publish agenda conclusions and final reports. Download a standalone publication or transfer the complete council as a portable ZIP.\n- Follow the Host language or choose English, Simplified Chinese, Traditional Chinese, Japanese or Korean in plugin settings.",
-        "zh-CN": "### 在议事厅中\n\n- 在桌面或网页聊天框输入 `/althing` 发起会议，可请主持模型按主题拟订议程。\n- 从本机可用的智能体和模型中选出专家与主持人，可一键加入已就绪的协作专家，也可在向导或专家名册中手动配置 Agent、模型、推理强度和会议角色。\n- 按议程跟进独立分析、交叉质询与反驳，打开子会话查看实时进展。\n- 发布议程结论和总报告，下载独立出版物，或通过 ZIP 在不同主机之间迁移完整议题。\n- 界面可跟随宿主语言，也可在插件设置中选择英语、简体中文、繁体中文、日语或韩语。"
+        "en": "### Inside the council\n\n- Type `/althing <topic>` in Desktop or Web chat (just like `/goal`) to convene a council immediately — no multi-step form required.\n- Automatically assigns optimal expert seats, ready CodexHost agents, defaults, and topic-tailored roles, then plans agendas and launches the opening round automatically.\n- Customize seats, models, thinking levels, roles, or protocols anytime in the 1-screen Quick Convene dialog or **Expert roster → Configure roles & agents**.\n- Follow opening statements, peer critiques, and rebuttals in the agenda discussion, or open a delegated thread to inspect live progress.\n- Publish agenda conclusions and final reports, download standalone HTML/Markdown, or transfer councils as portable ZIP archives.",
+        "zh-CN": "### 在议事厅中\n\n- 在桌面或网页聊天框输入 `/althing <主题>`（与 `/goal` 一样直接发送），无需多步向导即可一键召开议会。\n- 自动结合议题与本机已就绪的多 Agent 协作配置，智能分配专家人数、模型、推理强度与研究角色，并自动规划议程、启动首轮讨论。\n- 随时可通过单页快速配置弹窗或「专家名册 → 配置专家与角色」手动微调席位、模型、推理强度、角色与议事协议。\n- 按议程跟进独立分析、交叉质询与反驳，打开子会话查看实时进展。\n- 发布议程结论和总报告，下载独立 HTML/Markdown，或通过 ZIP 跨主机迁移完整议题。"
       },
       "author": "mythezone",
       "repository": "https://github.com/mythezone/codexhost-ext-the-althing",
       "stars": 3,
-      "downloads": 328,
+      "downloads": 105,
       "categories": [
         "workflow",
         "tools"
       ],
       "trustTier": "community",
-      "icon": "https://github.com/mythezone/codexhost-ext-the-althing/releases/download/v1.0.8/icon.png",
+      "icon": "https://github.com/mythezone/codexhost-ext-the-althing/releases/download/v1.1.0/icon.png",
       "screenshots": [
-        "https://github.com/mythezone/codexhost-ext-the-althing/releases/download/v1.0.8/hub.webp",
-        "https://github.com/mythezone/codexhost-ext-the-althing/releases/download/v1.0.8/overview.webp",
-        "https://github.com/mythezone/codexhost-ext-the-althing/releases/download/v1.0.8/discussion.webp",
-        "https://github.com/mythezone/codexhost-ext-the-althing/releases/download/v1.0.8/report-reader.webp"
+        "https://github.com/mythezone/codexhost-ext-the-althing/releases/download/v1.1.0/hub.webp",
+        "https://github.com/mythezone/codexhost-ext-the-althing/releases/download/v1.1.0/overview.webp",
+        "https://github.com/mythezone/codexhost-ext-the-althing/releases/download/v1.1.0/discussion.webp",
+        "https://github.com/mythezone/codexhost-ext-the-althing/releases/download/v1.1.0/report-reader.webp"
       ],
-      "downloadUrl": "https://github.com/mythezone/codexhost-ext-the-althing/releases/download/v1.0.8/the-althing.zip",
-      "sha256": "a9fc91643b1c0415b869c87fd753f3756e1e65368cfbee90214e4a988c98dc78",
+      "downloadUrl": "https://github.com/mythezone/codexhost-ext-the-althing/releases/download/v1.1.0/the-althing.zip",
+      "sha256": "e607968f9e9983ee3838fbfad79aa753d472cafb609676e739e4015448e5656d",
       "slots": [],
       "publishedAt": "2026-11-23T04:21:59Z",
-      "updatedAt": "2026-11-23T09:40:28Z",
+      "updatedAt": "2026-11-24T07:43:08Z",
       "format": "codexhost",
       "targets": [
         "desktop",
