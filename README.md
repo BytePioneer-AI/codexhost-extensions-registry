@@ -40,6 +40,7 @@ CodexHost Desktop / CH Web 插件中心展示列表与更新提示
    - 运行完整契约校验与静态安全扫描；
    - 自动创建 `sources/<id>.json` 的 PR 并把链接评论回 Issue。
 4. 若校验未通过，Bot 会在 Issue 下直接列出具体错误；修改扩展仓库后**编辑该 Issue** 即可自动重新校验。
+   - 若扩展因需要启动本机命令行（`child_process`）等正当能力而无法通过自动检查，可提交 [**人工审查上架 Issue**](https://github.com/BytePioneer-AI/codexhost-extensions-registry/issues/new?template=manual-review.yml)（说明仓库地址、插件介绍与原因），或扫码联系维护者微信（见 [CodexHost 微信联系方式](https://github.com/BytePioneer-AI/codex-host/blob/main/docs/project/README.zh-CN.md#%E5%BE%AE%E4%BF%A1%E4%BA%A4%E6%B5%81%E7%BE%A4)，备注「CodexHost 插件」），维护者人工审查后可单独放行上架。
 5. 维护者复核 PR 与 `safety-report.md` 并合并后，扩展会自动上架到市场目录。
 
 ### 方式二：直接提交 PR
@@ -212,6 +213,7 @@ npx wrangler deploy
 
 1. Open the [**Submit Extension Issue Form**](https://github.com/BytePioneer-AI/codexhost-extensions-registry/issues/new?template=submit-extension.yml) and enter your public GitHub repository URL (`https://github.com/<owner>/<repo>`).
 2. GitHub Actions automatically reads `manifest.json` from your latest stable Release `.zip` (or default branch if no Release exists), runs schema & static safety checks, and opens a PR adding `sources/<id>.json`.
+   - If your extension cannot pass automatic checks for a legitimate reason (such as a `backend` spawning local CLI tools via `child_process`), open a [**Manual Review Issue**](https://github.com/BytePioneer-AI/codexhost-extensions-registry/issues/new?template=manual-review.yml) with your repository URL and description (or contact the maintainer on WeChat via the [CodexHost README](https://github.com/BytePioneer-AI/codex-host#%E5%BE%AE%E4%BF%A1%E4%BA%A4%E6%B5%81%E7%BE%A4)) for manual review and listing.
 3. Once a maintainer reviews the safety report and merges the PR, your extension is published to the marketplace catalog automatically.
 
 ### Publish an Update

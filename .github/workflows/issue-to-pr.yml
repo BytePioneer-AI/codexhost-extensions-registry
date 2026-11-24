@@ -63,6 +63,14 @@ jobs:
             echo "Please make sure the **GitHub repository URL** field contains a valid public \`https://github.com/<owner>/<repo>\` URL with a valid \`manifest.json\` (in the latest Release \`.zip\` or on the default branch), then edit this issue to re-run automatically."
             echo ""
             echo "请确认 **GitHub repository URL** 为公开的 \`https://github.com/<owner>/<repo>\` 仓库地址且包含合法的 \`manifest.json\`，修改本 Issue 后会自动重新校验。"
+            echo ""
+            echo "---"
+            echo ""
+            echo "💬 **需要人工协助？ / Need manual review?**"
+            echo ""
+            echo "- 可直接在本仓库提交 **[人工审查上架 Issue](https://github.com/BytePioneer-AI/codexhost-extensions-registry/issues/new?template=manual-review.yml)**（说明仓库地址、插件介绍与遇到的问题），维护者人工审查后协助上架。"
+            echo "- 也可以联系维护者微信沟通（二维码见 [CodexHost 微信联系方式](https://github.com/BytePioneer-AI/codex-host/blob/main/docs/project/README.zh-CN.md#%E5%BE%AE%E4%BF%A1%E4%BA%A4%E6%B5%81%E7%BE%A4)，备注「CodexHost 插件」）。"
+            echo "- Or open a [Manual Review Issue](https://github.com/BytePioneer-AI/codexhost-extensions-registry/issues/new?template=manual-review.yml) with your repository URL and extension summary so maintainers can review and list it manually."
           } > error-comment.md
           gh issue comment "$ISSUE_NUMBER" --body-file error-comment.md
           exit 1
@@ -121,6 +129,14 @@ jobs:
               echo ""
               echo "</details>"
             fi
+            echo ""
+            echo "---"
+            echo ""
+            echo "💬 **因特殊能力（如后端调用 \`child_process\`）或自动校验误拦无法通过？ / Blocked by a legitimate capability (e.g. backend \`child_process\`)?**"
+            echo ""
+            echo "- 无需反复重试，可以直接在本仓库提交 **[人工审查上架 Issue](https://github.com/BytePioneer-AI/codexhost-extensions-registry/issues/new?template=manual-review.yml)**（附上仓库地址、插件介绍与原因说明），维护者人工审查通过后会手动放行上架。"
+            echo "- 也可以直接联系维护者微信沟通（二维码见 [CodexHost 微信联系方式](https://github.com/BytePioneer-AI/codex-host/blob/main/docs/project/README.zh-CN.md#%E5%BE%AE%E4%BF%A1%E4%BA%A4%E6%B5%81%E7%BE%A4)，备注「CodexHost 插件」）。"
+            echo "- If your extension requires a restricted capability such as \`child_process\` in its backend, please open a [Manual Review Issue](https://github.com/BytePioneer-AI/codexhost-extensions-registry/issues/new?template=manual-review.yml) with your repository URL, description, and security notes, or reach out via the maintainer's WeChat listed in the CodexHost README."
           } > comment.md
           gh issue comment "$ISSUE_NUMBER" --body-file comment.md
           exit 1
