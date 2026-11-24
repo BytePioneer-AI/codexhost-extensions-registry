@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-24T15:09:51.258Z",
+  "generatedAt": "2026-11-24T15:43:26.052Z",
   "extensions": [
     {
       "id": "auto-archive-guard",
@@ -66,7 +66,7 @@
       "author": "ABC-xiaoxuan",
       "repository": "https://github.com/ABC-xiaoxuan/ch-context",
       "stars": 0,
-      "downloads": 88,
+      "downloads": 89,
       "categories": [
         "analytics",
         "interface"
@@ -153,6 +153,7 @@
       "author": "anlostsheep",
       "repository": "https://github.com/anlostsheep/codexhost-ext-github-primer-themes",
       "stars": 0,
+      "downloads": 1,
       "categories": [
         "appearance",
         "interface"
@@ -290,7 +291,7 @@
       "author": "lpmasser",
       "repository": "https://github.com/lpmasser/codexhost-sidebar-delegation-badges",
       "stars": 0,
-      "downloads": 147,
+      "downloads": 148,
       "categories": [
         "interface",
         "workflow"
@@ -329,7 +330,7 @@
       "author": "sduhantao-maker",
       "repository": "https://github.com/sduhantao-maker/codexhost-sidebar-thread-tree",
       "stars": 3,
-      "downloads": 183,
+      "downloads": 185,
       "categories": [
         "interface",
         "workflow"
@@ -376,7 +377,7 @@
       "author": "mythezone",
       "repository": "https://github.com/mythezone/codexhost-ext-the-althing",
       "stars": 3,
-      "downloads": 106,
+      "downloads": 108,
       "categories": [
         "workflow",
         "tools"
