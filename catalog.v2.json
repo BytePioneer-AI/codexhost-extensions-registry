@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-24T09:59:29.895Z",
+  "generatedAt": "2026-11-24T15:09:51.258Z",
   "extensions": [
     {
       "id": "auto-archive-guard",
@@ -20,6 +20,7 @@
       "author": "biground",
       "repository": "https://github.com/biground/codexhost-plugin-auto-archive",
       "stars": 0,
+      "downloads": 1,
       "categories": [
         "workflow",
         "tools"
@@ -132,6 +133,54 @@
       "apis": {
         "page": 1,
         "widget": 1
+      }
+    },
+    {
+      "id": "github-primer-themes",
+      "version": "1.2.3",
+      "name": {
+        "en": "GitHub Primer Themes",
+        "zh-CN": "GitHub 官方外观主题"
+      },
+      "description": {
+        "en": "Official GitHub Primer appearance themes (3 Light + 4 Dark including Soft Dark, plus High Contrast) across Codex Desktop and CH Web, sourced directly from GitHub's @primer/primitives.",
+        "zh-CN": "完整还原 GitHub 官方外观主题（3 款浅色 + 4 款深色含 Soft dark，并支持高对比度开关），全部 CSS 色板直接提取自 GitHub 官方 @primer/primitives 仓库，支持 Codex Desktop 与 CH Web 跨端同步。"
+      },
+      "details": {
+        "en": "### Highlights\n\n- **100% Official GitHub Primer CSS**: Every color token (`--bgColor-*`, `--fgColor-*`, `--borderColor-*`, `--button-*`, `--diffBlob-*`, `--prettylights-syntax-*`) is synced directly from GitHub's official [`primer/primitives`](https://github.com/primer/primitives) (`@primer/primitives@11.10.0`).\n- **All 7 GitHub Themes + High Contrast (14 Official Stylesheets)**:\n  - **Light (3)**: Light default, Light protanopia & deuteranopia (`Beta`), Light tritanopia (`Beta`).\n  - **Dark (4)**: Dark default, Dark protanopia & deuteranopia (`Beta`), Dark tritanopia (`Beta`), and **Soft dark** (`dark_dimmed`).\n  - **Increase Contrast**: One-click switch to the official `*-high-contrast.css` counterpart for every theme.\n- **Single Theme & Sync with System**: Lock one theme or automatically switch between your preferred Day (Light) and Night (Dark) GitHub themes.\n- **Cross-Platform Settings Page & Quick Switcher Widget**: Manage themes in the GitHub-style **Theme preferences** page or switch instantly from the edge-docking floating capsule widget on both Codex Desktop and CH Web — pure frontend with zero background processes.",
+        "zh-CN": "### 特性亮点\n\n- **100% 源自 GitHub 官方 Primer CSS**：全部颜色与语义变量（`--bgColor-*`、`--fgColor-*`、`--borderColor-*`、`--button-*`、`--diffBlob-*`、`--prettylights-syntax-*`）均直接读取自 GitHub 官方 [`primer/primitives`](https://github.com/primer/primitives)（`@primer/primitives@11.10.0`）主题样式表。\n- **完整收录 7 大主题 × 高对比度（共 14 套官方样式）**：\n  - **浅色模式（3 套）**：Light default、Light protanopia & deuteranopia（红绿色盲友好 `Beta`）、Light tritanopia（蓝黄色盲友好 `Beta`）。\n  - **深色模式（4 套）**：Dark default、Dark protanopia & deuteranopia（红绿色盲友好 `Beta`）、Dark tritanopia（蓝黄色盲友好 `Beta`）、**Soft dark**（`dark_dimmed` 柔和深色）。\n  - **增强对比度开关**：一键切换至每款主题对应的官方 `*-high-contrast.css` 高对比度变体。\n- **单一主题 & 跟随系统自动切换**：支持锁定单一主题，或按日间浅色 / 夜间深色分别指定 GitHub 主题并跟随系统自动切换。\n- **跨端主题偏好页 + 悬浮速切挂件**：完整复刻 GitHub Settings → Appearance 界面体验，同时提供主界面轻量悬浮速切胶囊；纯前端实现，零后台常驻进程，Desktop 与 Web 通过共享 Host 存储实时同步。"
+      },
+      "author": "anlostsheep",
+      "repository": "https://github.com/anlostsheep/codexhost-ext-github-primer-themes",
+      "stars": 0,
+      "categories": [
+        "appearance",
+        "interface"
+      ],
+      "trustTier": "community",
+      "icon": "https://github.com/anlostsheep/codexhost-ext-github-primer-themes/releases/download/v1.2.3/icon.png",
+      "screenshots": [
+        "https://github.com/anlostsheep/codexhost-ext-github-primer-themes/releases/download/v1.2.3/preview-dark.png",
+        "https://github.com/anlostsheep/codexhost-ext-github-primer-themes/releases/download/v1.2.3/preview-light.png",
+        "https://github.com/anlostsheep/codexhost-ext-github-primer-themes/releases/download/v1.2.3/preview-widget.png"
+      ],
+      "downloadUrl": "https://github.com/anlostsheep/codexhost-ext-github-primer-themes/releases/download/v1.2.3/github-primer-themes-1.2.3.zip",
+      "sha256": "1a5d615565b363518249c93d8b19594378fcfb08ad1e401fcb4e54138a007782",
+      "slots": [
+        "appearance.theme"
+      ],
+      "publishedAt": "2026-11-24T10:59:53Z",
+      "updatedAt": "2026-11-24T10:59:53Z",
+      "format": "codexhost",
+      "targets": [
+        "desktop",
+        "web"
+      ],
+      "apis": {
+        "page": 1,
+        "widget": 1,
+        "desktop": 1,
+        "web": 1
       }
     },
     {
