@@ -35,6 +35,7 @@ const sourceSchema = z.strictObject({
   asset: z.string().regex(safeAssetName).optional(),
   trustTier: z.enum(["official", "community"]).default("community"),
   minCodexHostVersion: z.string().min(1).optional(),
+  allowChildProcess: z.boolean().optional(),
 });
 const legacySourcesSchema = z.strictObject({
   schemaVersion: z.literal(1),
@@ -415,17 +416,57 @@ async function validateSource(source, previous, starsByRepository, downloads) {
   const backendScript = manifest.manifestVersion === 2 ? manifest.backend?.entry : manifest.backend?.script;
   if (backendScript)
     utf8.decode(getResource(files, backendScript, DESKTOP_EXTENSION_SCRIPT_MAX_BYTES));
+  if (source.allowChildProcess && !backendScript)
+    throw new Error("allowChildProcess requires the extension manifest to declare a backend entry");
+  const backendDir =
+    backendScript && canonicalPath(backendScript).includes("/")
+      ? canonicalPath(backendScript).slice(0, canonicalPath(backendScript).lastIndexOf("/") + 1)
+      : undefined;
+  const frontendFiles = new Set(
+    [
+      manifest.desktop?.script,
+      ...(manifest.manifestVersion === 2
+        ? [manifest.page?.entry, manifest.widget?.entry, manifest.web?.entry]
+        : []),
+    ]
+      .filter(Boolean)
+      .map(canonicalPath),
+  );
+  const frontendDirs = new Set(
+    [...frontendFiles]
+      .map((entry) => {
+        const slash = entry.lastIndexOf("/");
+        return slash > 0 ? entry.slice(0, slash + 1) : undefined;
+      })
+      .filter((dir) => dir && dir !== backendDir),
+  );
+  const isFrontendFile = (file) => {
+    const normalized = canonicalPath(file);
+    if (frontendFiles.has(normalized)) return true;
+    for (const dir of frontendDirs) {
+      if (normalized.startsWith(dir)) return true;
+    }
+    return false;
+  };
+  const exemptedChildProcessFiles = [];
   for (const [file, bytes] of files) {
     if (
-      file !== manifest.desktop?.script &&
-      file !== (manifest.manifestVersion === 2 ? manifest.web?.entry : undefined) &&
+      !frontendFiles.has(canonicalPath(file)) &&
       file !== backendScript &&
       !/\.[cm]?[jt]sx?$/iu.test(file)
     )
       continue;
     const code = utf8.decode(bytes);
     const hits = checks.filter(([, pattern]) => pattern.test(code)).map(([label]) => label);
-    if (hits.length) throw new Error(`Static scan flagged ${file}: ${hits.join(", ")}`);
+    const blockedHits = [];
+    for (const label of hits) {
+      if (label === "child_process" && source.allowChildProcess && !isFrontendFile(file)) {
+        exemptedChildProcessFiles.push(file);
+        continue;
+      }
+      blockedHits.push(label);
+    }
+    if (blockedHits.length) throw new Error(`Static scan flagged ${file}: ${blockedHits.join(", ")}`);
   }
   async function resolveImage(path, maxBytes, label) {
     const bytes = getResource(files, path, maxBytes);
@@ -487,6 +528,7 @@ async function validateSource(source, previous, starsByRepository, downloads) {
   return {
     v1Entry: manifest.manifestVersion === 1 ? baseEntry : undefined,
     v2Entry,
+    exemptedChildProcessFiles,
   };
 }
 
@@ -538,7 +580,7 @@ export async function buildCatalog({
         const count = counts && Object.hasOwn(counts, source.id) ? counts[source.id] : undefined;
         const { data: downloads } =
           desktopExtensionCatalogEntrySchema.shape.downloads.safeParse(count);
-        const { v1Entry, v2Entry } = await validateSource(
+        const { v1Entry, v2Entry, exemptedChildProcessFiles } = await validateSource(
           source,
           existing.get(source.id),
           starsByRepository,
@@ -546,8 +588,16 @@ export async function buildCatalog({
         );
         if (v1Entry) entries.push(v1Entry);
         entriesV2.push(v2Entry);
+        const notes = [];
+        if (source.allowChildProcess) {
+          notes.push(
+            exemptedChildProcessFiles.length
+              ? `allowChildProcess (${exemptedChildProcessFiles.map(inline).join(", ")})`
+              : "allowChildProcess (unused)",
+          );
+        }
         report.push(
-          `- PASS — ${inline(v2Entry.id)} ${inline(v2Entry.version)} (${v2Entry.trustTier}, ${v2Entry.targets.join("+")}) · ${inline(source.repository)} · ${inline(v2Entry.downloadUrl)} · SHA-256: ${v2Entry.sha256}`,
+          `- PASS — ${inline(v2Entry.id)} ${inline(v2Entry.version)} (${v2Entry.trustTier}, ${v2Entry.targets.join("+")}) · ${inline(source.repository)} · ${inline(v2Entry.downloadUrl)} · SHA-256: ${v2Entry.sha256}${notes.length ? ` · ${notes.join(" · ")}` : ""}`,
         );
       } catch (error) {
         failed = true;

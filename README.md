@@ -63,6 +63,7 @@ CodexHost Desktop / CH Web 插件中心展示列表与更新提示
 | `asset` | 否 | 精确指定 Release 中的 `.zip` 文件名；仅在 Release 包含多个 `.zip` 资产时需要。 |
 | `trustTier` | 否 | 默认 `community`；`official` 仅由维护者授予官方维护来源。 |
 | `minCodexHostVersion` | 否 | 可选最低兼容的 CodexHost 版本号。 |
+| `allowChildProcess` | 否 | 默认 `false`；仅由维护者人工审计后显式设为 `true`，为声明了 `backend` 的扩展放行非前端文件中的 `child_process` 静态检查（并在 `safety-report.md` 中列明豁免文件）。 |
 
 ---
 
@@ -121,7 +122,7 @@ CodexHost Desktop / CH Web 插件中心展示列表与更新提示
 | `icon`（可选） | ≤ `128 KiB`，仅 PNG / JPEG / WebP，扩展名须匹配文件头签名 |
 | `screenshots`（可选） | 最多 **4 张**，每张 ≤ `512 KiB`，仅 PNG / JPEG / WebP，扩展名须匹配文件头签名 |
 | Release 图片资产 | Release 模式下需将 `icon` 与 `screenshots` 对应的原图作为同名独立资产上传（资产名为路径最后一段），校验器会逐字节核对与 ZIP 内一致；源码模式自动使用固定 commit 的 Raw URL |
-| 安全静态检查 | CI 不执行扩展代码；记录并核对 ZIP 的 SHA-256，静态阻拦 `eval(`、`new Function`、`child_process` 等高危模式 |
+| 安全静态检查 | CI 不执行扩展代码；记录并核对 ZIP 的 SHA-256，默认静态阻拦 `eval(`、`new Function`、`child_process` 等高危模式（仅当维护者在 `sources/<id>.json` 中显式配置 `"allowChildProcess": true` 时，才对含 `backend` 扩展的非前端文件放行 `child_process`） |
 
 ---
 
