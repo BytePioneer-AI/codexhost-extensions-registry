@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-24T08:09:05.131Z",
+  "generatedAt": "2026-11-24T09:59:29.895Z",
   "extensions": [
     {
       "id": "auto-archive-guard",
@@ -107,7 +107,7 @@
       "author": "codexhost",
       "repository": "https://github.com/BytePioneer-AI/codexhost-ext-focus-pomodoro",
       "stars": 1,
-      "downloads": 140,
+      "downloads": 141,
       "categories": [
         "tools"
       ],
@@ -132,6 +132,51 @@
       "apis": {
         "page": 1,
         "widget": 1
+      }
+    },
+    {
+      "id": "hdd-fairy",
+      "version": "2.0.1",
+      "name": {
+        "en": "H.D.D + Fairy Theme",
+        "zh-CN": "H.D.D + Fairy 主题与眼徽"
+      },
+      "description": {
+        "en": "Carbon-fiber H.D.D dark theme with Microsoft YaHei UI typography, silent H.D.D boot animation, draggable Fairy eye widget across Desktop & Web, and a unified control page.",
+        "zh-CN": "碳纤维暗色 H.D.D 主题（微软雅黑界面字体）、静音开机动画、Desktop 与 Web 跨端可拖动 Fairy 悬浮眼徽挂件，以及独立控制面板页面。"
+      },
+      "details": {
+        "en": "## Features\n\n- **Cross-Platform Boot Animation & Fairy Eye Widget (`widget`)**: Silent H.D.D boot sequence (`boot.webp`) followed by holographic greeting and a draggable animated Fairy eye floating across both Codex Desktop and CH Web, with blink/glance/glitch animations and click-to-inspect status card (auto-disabled on phones).\n- **Unified Control & Preview Page (`page`)**: Accessible from Desktop **Settings → Extensions** or Web **Extensions** top tab bar to configure eye visibility, drag lock, size, boot animation toggle, position reset, Web theme switches, and replay the boot animation.\n- **CH Web H.D.D Carbon Theme (`web`)**: Static carbon-fiber dark workspace backdrop, blue/white chat bubbles, Fairy agent avatar, yellow selected sidebar highlight, high-contrast black/white question panel, and clean **Microsoft YaHei** UI typography.\n- **Pure Frontend & Zero Audio**: No audio playback, no agent prompt modification, and no Node backend subprocess; disabling cleanly removes all styles, mounts, and DOM markers.",
+        "zh-CN": "## 功能特性\n\n- **跨端开机动画与 Fairy 悬浮眼徽挂件（`widget`）**：在 Codex Desktop 与 CH Web 主窗口自动挂载，支持静音 H.D.D 开机动画（Animated WebP）、全息居中问候、眨眼/瞟视/故障花屏动画、自由拖动停靠与点击查看状态卡片（手机端自动停用）。\n- **跨端独立控制与预览页（`page`）**：可在 Desktop「设置 → 插件页面」或 Web「插件」工作区顶部切页栏打开，集中调整眼徽显示、拖拽开关、尺寸、开机动画开关、位置复位、Web H.D.D 皮肤开关并一键重播开机动画。\n- **CH Web H.D.D 碳纤维皮肤（`web`）**：碳纤维暗色背景、蓝白聊天气泡、Fairy 回复头像、侧栏黄色渐变高亮、黑白高对比问答面板，以及清晰易读的**微软雅黑**界面字体。\n- **纯前端零后端无音频**：无音频播放、不修改模型或提示词、不启动 Node 后台子进程；停用即完整回收样式、挂载节点与 DOM 标记。"
+      },
+      "author": "biground",
+      "repository": "https://github.com/biground/codex-host-theme-hdd-fairy",
+      "stars": 0,
+      "categories": [
+        "appearance",
+        "interface"
+      ],
+      "trustTier": "community",
+      "icon": "https://github.com/biground/codex-host-theme-hdd-fairy/releases/download/v2.0.1/icon-180.png",
+      "screenshots": [
+        "https://github.com/biground/codex-host-theme-hdd-fairy/releases/download/v2.0.1/conversation-current.png",
+        "https://github.com/biground/codex-host-theme-hdd-fairy/releases/download/v2.0.1/question-panel-current.png",
+        "https://github.com/biground/codex-host-theme-hdd-fairy/releases/download/v2.0.1/sidebar-current.png"
+      ],
+      "downloadUrl": "https://github.com/biground/codex-host-theme-hdd-fairy/releases/download/v2.0.1/hdd-fairy-2.0.1.zip",
+      "sha256": "f4184a3aaadf3d45be90d3afb38a7117f2d1b616fb805c92909e0d74b353d598",
+      "slots": [],
+      "publishedAt": "2026-11-24T09:56:17Z",
+      "updatedAt": "2026-11-24T09:56:17Z",
+      "format": "codexhost",
+      "targets": [
+        "desktop",
+        "web"
+      ],
+      "apis": {
+        "page": 1,
+        "widget": 1,
+        "web": 1
       }
     },
     {
@@ -282,7 +327,7 @@
       "author": "mythezone",
       "repository": "https://github.com/mythezone/codexhost-ext-the-althing",
       "stars": 3,
-      "downloads": 105,
+      "downloads": 106,
       "categories": [
         "workflow",
         "tools"
