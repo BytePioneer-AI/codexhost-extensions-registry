@@ -1,0 +1,6 @@
+{
+  "id": "second-brain",
+  "repository": "https://github.com/sduhantao-maker/codexhost-second-brain",
+  "trustTier": "community",
+  "allowChildProcess": true
+}
