@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-25T09:43:56.181Z",
+  "generatedAt": "2026-11-25T19:52:17.713Z",
   "extensions": [
     {
       "id": "auto-archive-guard",
@@ -270,7 +270,7 @@
     },
     {
       "id": "second-brain",
-      "version": "0.10.2",
+      "version": "0.10.3",
       "name": {
         "en": "Second Brain",
         "zh-CN": "第二大脑"
@@ -291,18 +291,18 @@
         "interface"
       ],
       "trustTier": "community",
-      "icon": "https://github.com/sduhantao-maker/codexhost-second-brain/releases/download/v0.10.2/icon.png",
+      "icon": "https://github.com/sduhantao-maker/codexhost-second-brain/releases/download/v0.10.3/icon.png",
       "screenshots": [
-        "https://github.com/sduhantao-maker/codexhost-second-brain/releases/download/v0.10.2/hover-zh.png",
-        "https://github.com/sduhantao-maker/codexhost-second-brain/releases/download/v0.10.2/how-it-works-zh.png",
-        "https://github.com/sduhantao-maker/codexhost-second-brain/releases/download/v0.10.2/overview-zh.png",
-        "https://github.com/sduhantao-maker/codexhost-second-brain/releases/download/v0.10.2/save-zh.png"
+        "https://github.com/sduhantao-maker/codexhost-second-brain/releases/download/v0.10.3/hover-zh.png",
+        "https://github.com/sduhantao-maker/codexhost-second-brain/releases/download/v0.10.3/how-it-works-zh.png",
+        "https://github.com/sduhantao-maker/codexhost-second-brain/releases/download/v0.10.3/overview-zh.png",
+        "https://github.com/sduhantao-maker/codexhost-second-brain/releases/download/v0.10.3/save-zh.png"
       ],
-      "downloadUrl": "https://github.com/sduhantao-maker/codexhost-second-brain/releases/download/v0.10.2/second-brain.zip",
-      "sha256": "57c28bfe2a88aa35253e5a72bb5960939466e26dc2f082a1077a5ba363ea567b",
+      "downloadUrl": "https://github.com/sduhantao-maker/codexhost-second-brain/releases/download/v0.10.3/second-brain.zip",
+      "sha256": "c528942fe5393258edc623148d451838ce1d4447989e90158001986b85f0de93",
       "slots": [],
       "publishedAt": "2026-11-24T12:55:19Z",
-      "updatedAt": "2026-11-25T02:26:25Z",
+      "updatedAt": "2026-11-25T15:16:10Z",
       "format": "codexhost",
       "targets": [
         "desktop",
