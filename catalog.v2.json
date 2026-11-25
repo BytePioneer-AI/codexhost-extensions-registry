@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-24T15:46:04.065Z",
+  "generatedAt": "2026-11-25T00:32:38.182Z",
   "extensions": [
     {
       "id": "auto-archive-guard",
@@ -66,7 +66,7 @@
       "author": "ABC-xiaoxuan",
       "repository": "https://github.com/ABC-xiaoxuan/ch-context",
       "stars": 0,
-      "downloads": 89,
+      "downloads": 91,
       "categories": [
         "analytics",
         "interface"
@@ -291,6 +291,7 @@
       "author": "sduhantao-maker",
       "repository": "https://github.com/sduhantao-maker/codexhost-second-brain",
       "stars": 0,
+      "downloads": 2,
       "categories": [
         "workflow",
         "interface"
@@ -377,7 +378,7 @@
       "author": "sduhantao-maker",
       "repository": "https://github.com/sduhantao-maker/codexhost-sidebar-thread-tree",
       "stars": 3,
-      "downloads": 185,
+      "downloads": 189,
       "categories": [
         "interface",
         "workflow"
@@ -424,7 +425,7 @@
       "author": "mythezone",
       "repository": "https://github.com/mythezone/codexhost-ext-the-althing",
       "stars": 3,
-      "downloads": 108,
+      "downloads": 109,
       "categories": [
         "workflow",
         "tools"
