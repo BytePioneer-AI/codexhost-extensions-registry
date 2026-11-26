@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-26T09:46:40.347Z",
+  "generatedAt": "2026-11-26T12:11:05.826Z",
   "extensions": [
     {
       "id": "auto-archive-guard",
@@ -271,18 +271,18 @@
     },
     {
       "id": "mcp-sync-hub",
-      "version": "2.3.4",
+      "version": "2.4.0",
       "name": {
         "en": "MCP Sync Hub",
         "zh-CN": "MCP 统一中心"
       },
       "description": {
-        "en": "Unified MCP registry and multi-AI config synchronizer for Codex, Pi, Claude Code, Antigravity, Grok, Cursor, Copilot, CodeBuddy, OpenCode, and more.",
-        "zh-CN": "跨 AI 统一 MCP 管理与同步中心：一次配置，一键同步到 Codex、Pi、Claude Code、Antigravity、Grok、Cursor、Copilot、CodeBuddy、OpenCode 等 16 家 AI 原生配置。"
+        "en": "Unified MCP registry and real-time multi-AI config synchronizer for Codex, Pi, Claude Code, Antigravity, Grok, Cursor, Copilot, CodeBuddy, OpenCode, and more.",
+        "zh-CN": "跨 AI 统一 MCP 管理与实时自动同步中心：支持 16 家 AI 原生配置同步、快速配置向导、同名多变体别名与实时监听自动同步。"
       },
       "details": {
-        "en": "## Overview\n\n**MCP Hub** gives CodexHost a unified, persistent Model Context Protocol (MCP) management console across Desktop and Web.\n\n### Key Features\n\n- **Auto-Discovery (16 Built-in AIs)**: Scans existing MCP configurations from Codex (`~/.codex/config.toml`), Pi (`~/.pi/agent/mcp.json`), Claude Code (`~/.claude.json`), Antigravity (`~/.gemini/config/mcp_config.json`), Grok (`~/.grok/config.toml`), Cursor (`~/.cursor/mcp.json`), Copilot CLI (`~/.copilot/mcp-config.json`), CodeBuddy (`~/.codebuddy/mcp.json`), Claude Desktop, OpenCode, Qwen Code, Gemini CLI, Kiro, Kimi, WorkBuddy, and Qoder.\n- **Quick Config & Same-Name Variants**: One-click 2-step Quick Config wizard for bulk distribution, plus multi-variant alias support when different AIs share the same MCP name with distinct configs.\n- **One-Click Import & JSON Paste**: Import all local variants as-is from detected AIs or paste standard `mcpServers` / OpenCode JSON blocks.\n- **Surgical Safe Sync**: Preserves comments, unrelated settings, built-in vendor MCPs, and unmanaged native entries. Automatically backs up every target file before writing with one-click restore.\n- **Persistent Native Configs**: Writes directly to each AI's native configuration file, so your MCP setup remains intact even when CodexHost is closed.",
-        "zh-CN": "## 功能简介\n\n**MCP 统一中心（MCP Hub）** 为 CodexHost 的 Desktop 与 Web 提供跨端统一的 MCP 配置管理与多 AI 同步界面。\n\n### 核心能力\n\n- **自动扫描 16 家本机 AI**：自动识别 Codex（`~/.codex/config.toml`）、Pi（`~/.pi/agent/mcp.json`）、Claude Code（`~/.claude.json`）、Antigravity（`~/.gemini/config/mcp_config.json`）、Grok（`~/.grok/config.toml`）、Cursor（`~/.cursor/mcp.json`）、Copilot CLI（`~/.copilot/mcp-config.json`）、CodeBuddy（`~/.codebuddy/mcp.json`）、Claude Desktop、OpenCode、Qwen Code、Gemini CLI、Kiro、Kimi、WorkBuddy、Qoder 等原生 MCP 配置，并支持自定义路径与自定义目标。\n- **快速配置向导 & 同名多配置别名**：支持右上角两步式「快速配置」批量下发/移除，也支持同一 MCP 名称下导入并管理多套不同配置（自动附带别名标识），互不误覆盖。\n- **一键汇总导入 & JSON 粘贴**：按本机真实配置现状一键导入，或直接粘贴标准 `mcpServers` / OpenCode JSON。\n- **安全增量同步 + 自动备份**：卡片内单条即时应用与撤销，保留原文件注释、模型设置、官方内置 MCP 与非托管条目；每次写入前自动备份并支持一键回滚。\n- **脱离 CodexHost 依然生效**：直接写入各家 AI 原生配置文件，关闭或卸载 CodexHost 后配置依然保留。"
+        "en": "## Overview\n\n**MCP Sync Hub** gives CodexHost a unified, persistent Model Context Protocol (MCP) management console across Desktop and Web.\n\n### Key Features\n\n- **Auto-Discovery (16 Built-in AIs)**: Scans existing MCP configurations from Codex (`~/.codex/config.toml`), Pi (`~/.pi/agent/mcp.json`), Claude Code (`~/.claude.json`), Antigravity (`~/.gemini/config/mcp_config.json`), Grok (`~/.grok/config.toml`), Cursor (`~/.cursor/mcp.json`), Copilot CLI (`~/.copilot/mcp-config.json`), CodeBuddy (`~/.codebuddy/mcp.json`), Claude Desktop, OpenCode, Qwen Code, Gemini CLI, Kiro, Kimi, WorkBuddy, and Qoder.\n- **Real-Time Auto-Sync (Optional)**: Watch local AI config files and automatically sync MCP additions/updates across selected AIs — supporting Bidirectional or Primary-Source modes, existing-only vs broadcast update scope, per-MCP filtering, mass-wipe/syntax circuit breakers, and live activity logs.\n- **Quick Config & Same-Name Variants**: One-click 2-step Quick Config wizard for bulk distribution, plus multi-variant alias support when different AIs share the same MCP name with distinct configs.\n- **One-Click Import & JSON Paste**: Import all local variants as-is from detected AIs or paste standard `mcpServers` / OpenCode JSON blocks.\n- **Surgical Safe Sync**: Preserves comments, unrelated settings, built-in vendor MCPs, and unmanaged native entries. Automatically backs up every target file before writing with one-click restore.\n- **Persistent Native Configs**: Writes directly to each AI's native configuration file, so your MCP setup remains intact even when CodexHost is closed.",
+        "zh-CN": "## 功能简介\n\n**MCP 统一中心（MCP Sync Hub）** 为 CodexHost 的 Desktop 与 Web 提供跨端统一的 MCP 配置管理与多 AI 同步界面。\n\n### 核心能力\n\n- **自动扫描 16 家本机 AI**：自动识别 Codex（`~/.codex/config.toml`）、Pi（`~/.pi/agent/mcp.json`）、Claude Code（`~/.claude.json`）、Antigravity（`~/.gemini/config/mcp_config.json`）、Grok（`~/.grok/config.toml`）、Cursor（`~/.cursor/mcp.json`）、Copilot CLI（`~/.copilot/mcp-config.json`）、CodeBuddy（`~/.codebuddy/mcp.json`）、Claude Desktop、OpenCode、Qwen Code、Gemini CLI、Kiro、Kimi、WorkBuddy、Qoder 等原生 MCP 配置，并支持自定义路径与自定义目标。\n- **实时自动同步（可选开启）**：监听本机 AI 配置文件变化，支持「双向同步 / 主源同步」、修改扩散范围（「仅同步到已有该 MCP 的 AI」或「广播到全部已选 AI」）、按指定 MCP 过滤、整文件清空/语法损坏熔断保护与实时同步日志。\n- **快速配置向导 & 同名多配置别名**：支持右上角两步式「快速配置」批量下发/移除，也支持同一 MCP 名称下导入并管理多套不同配置（自动附带别名标识），互不误覆盖。\n- **一键汇总导入 & JSON 粘贴**：按本机真实配置现状一键导入，或直接粘贴标准 `mcpServers` / OpenCode JSON。\n- **安全增量同步 + 自动备份**：卡片内单条即时应用与撤销，保留原文件注释、模型设置、官方内置 MCP 与非托管条目；每次写入前自动备份并支持一键回滚。\n- **脱离 CodexHost 依然生效**：直接写入各家 AI 原生配置文件，关闭或卸载 CodexHost 后配置依然保留。"
       },
       "author": "ErkundenSie",
       "repository": "https://github.com/ErkundenSie/codexhost-mcp-hub",
@@ -293,15 +293,15 @@
         "workflow"
       ],
       "trustTier": "community",
-      "icon": "https://github.com/ErkundenSie/codexhost-mcp-hub/releases/download/v2.3.4/icon.png",
+      "icon": "https://github.com/ErkundenSie/codexhost-mcp-hub/releases/download/v2.4.0/icon.png",
       "screenshots": [
-        "https://github.com/ErkundenSie/codexhost-mcp-hub/releases/download/v2.3.4/preview.png"
+        "https://github.com/ErkundenSie/codexhost-mcp-hub/releases/download/v2.4.0/preview.png"
       ],
-      "downloadUrl": "https://github.com/ErkundenSie/codexhost-mcp-hub/releases/download/v2.3.4/mcp-sync-hub-2.3.4.zip",
-      "sha256": "338d0569b15cbe0503c2f565ffb01be36257de75b798c42765909205e6aca938",
+      "downloadUrl": "https://github.com/ErkundenSie/codexhost-mcp-hub/releases/download/v2.4.0/mcp-sync-hub-2.4.0.zip",
+      "sha256": "d2b4c413d6e79d96efa93e1e12b17871c6f0d7e76cff3f0ab38a630da5c6cc12",
       "slots": [],
       "publishedAt": "2026-11-26T07:44:25Z",
-      "updatedAt": "2026-11-26T09:30:20Z",
+      "updatedAt": "2026-11-26T09:56:26Z",
       "format": "codexhost",
       "targets": [
         "desktop",
@@ -409,7 +409,7 @@
     },
     {
       "id": "prompt-templates",
-      "version": "1.4.0",
+      "version": "1.6.0",
       "name": {
         "en": "Prompt Templates",
         "zh-CN": "提示词模板"
@@ -419,8 +419,8 @@
         "zh-CN": "在对话输入框左下角搜索常用提示词，一键插入草稿。"
       },
       "details": {
-        "en": "### Reuse prompts in chat\n\n- Click **Prompt templates** in the bottom-left toolbar to search and insert a template. Use **+** beside search to create a template in place. Each result has actions to edit, insert, or send directly when the composer is empty.\n- Click a tag in the management page to filter templates, or drag templates to change their order in the picker. Create, edit, or delete custom templates and toggle built-ins.\n- Desktop and Web share the same library when connected to the same Host.",
-        "zh-CN": "### 在对话中复用提示词\n\n- 点击输入框左下角的 **提示词模板**，搜索并插入模板。也可点搜索框右侧的 **＋** 原地新建模板。列表每条模板可编辑、插入或在输入框为空时直接发送。\n- 在管理页点击标签可筛选模板，拖拽模板可调整弹窗里的顺序。也可新增、编辑、删除自定义模板或隐藏内置模板。\n- 连接同一 Host 的 Desktop 和 Web 共享模板库。"
+        "en": "### Reuse prompts in chat\n\n- Click **Prompt templates** in the bottom-left toolbar to search and insert a template. Use **+** beside search to create a template in place, or tap a tag below search to show only that tag. Each result has actions to edit, insert, or send directly when the composer is empty.\n- Click a tag in the management page to filter templates, or drag templates to change their order in the picker. Create, edit, or delete custom templates and toggle built-ins.\n- Export custom templates to an Excel `.xlsx` file, or import templates from one. Duplicate rows are skipped.\n- Desktop and Web share the same library when connected to the same Host.",
+        "zh-CN": "### 在对话中复用提示词\n\n- 点击输入框左下角的 **提示词模板**，搜索并插入模板。也可点搜索框右侧的 **＋** 原地新建模板，或点搜索框下方的标签只看该标签的模板。列表每条模板可编辑、插入或在输入框为空时直接发送。\n- 在管理页点击标签可筛选模板，拖拽模板可调整弹窗里的顺序。也可新增、编辑、删除自定义模板或隐藏内置模板。\n- 可将自定义模板导出为 Excel（`.xlsx`），也可从 Excel 批量导入，重复的行会自动跳过。\n- 连接同一 Host 的 Desktop 和 Web 共享模板库。"
       },
       "author": "zxd-666",
       "repository": "https://github.com/zxd-666/codexhost-prompt-templates",
@@ -430,16 +430,16 @@
         "tools"
       ],
       "trustTier": "community",
-      "icon": "https://github.com/zxd-666/codexhost-prompt-templates/releases/download/v1.4.0/icon.png",
+      "icon": "https://github.com/zxd-666/codexhost-prompt-templates/releases/download/v1.6.0/icon.png",
       "screenshots": [
-        "https://github.com/zxd-666/codexhost-prompt-templates/releases/download/v1.4.0/composer.png",
-        "https://github.com/zxd-666/codexhost-prompt-templates/releases/download/v1.4.0/library.png"
+        "https://github.com/zxd-666/codexhost-prompt-templates/releases/download/v1.6.0/composer.png",
+        "https://github.com/zxd-666/codexhost-prompt-templates/releases/download/v1.6.0/library.png"
       ],
-      "downloadUrl": "https://github.com/zxd-666/codexhost-prompt-templates/releases/download/v1.4.0/prompt-templates-1.4.0.zip",
-      "sha256": "d99cbe6746dee01e745ac830956a4a821402f5afa3dcf6490293b3c4c7aa3b0c",
+      "downloadUrl": "https://github.com/zxd-666/codexhost-prompt-templates/releases/download/v1.6.0/prompt-templates-1.6.0.zip",
+      "sha256": "adf09f0037c134d5331a6f29eb2f43972cbd74bd3876f434490eb248121f9686",
       "slots": [],
       "publishedAt": "2026-11-26T01:13:19Z",
-      "updatedAt": "2026-11-26T06:50:51Z",
+      "updatedAt": "2026-11-26T11:22:46Z",
       "format": "codexhost",
       "targets": [
         "desktop",
@@ -496,7 +496,7 @@
     },
     {
       "id": "second-brain",
-      "version": "0.10.3",
+      "version": "0.10.5",
       "name": {
         "en": "Second Brain",
         "zh-CN": "第二大脑"
@@ -517,18 +517,18 @@
         "interface"
       ],
       "trustTier": "community",
-      "icon": "https://github.com/sduhantao-maker/codexhost-second-brain/releases/download/v0.10.3/icon.png",
+      "icon": "https://github.com/sduhantao-maker/codexhost-second-brain/releases/download/v0.10.5/icon.png",
       "screenshots": [
-        "https://github.com/sduhantao-maker/codexhost-second-brain/releases/download/v0.10.3/hover-zh.png",
-        "https://github.com/sduhantao-maker/codexhost-second-brain/releases/download/v0.10.3/how-it-works-zh.png",
-        "https://github.com/sduhantao-maker/codexhost-second-brain/releases/download/v0.10.3/overview-zh.png",
-        "https://github.com/sduhantao-maker/codexhost-second-brain/releases/download/v0.10.3/save-zh.png"
+        "https://github.com/sduhantao-maker/codexhost-second-brain/releases/download/v0.10.5/hover-zh.png",
+        "https://github.com/sduhantao-maker/codexhost-second-brain/releases/download/v0.10.5/how-it-works-zh.png",
+        "https://github.com/sduhantao-maker/codexhost-second-brain/releases/download/v0.10.5/overview-zh.png",
+        "https://github.com/sduhantao-maker/codexhost-second-brain/releases/download/v0.10.5/save-zh.png"
       ],
-      "downloadUrl": "https://github.com/sduhantao-maker/codexhost-second-brain/releases/download/v0.10.3/second-brain.zip",
-      "sha256": "c528942fe5393258edc623148d451838ce1d4447989e90158001986b85f0de93",
+      "downloadUrl": "https://github.com/sduhantao-maker/codexhost-second-brain/releases/download/v0.10.5/second-brain.zip",
+      "sha256": "c2ba2d25d4ae7656e5c004feb791db3081fad9e2d73e129ac5f3425cd4575882",
       "slots": [],
       "publishedAt": "2026-11-24T12:55:19Z",
-      "updatedAt": "2026-11-25T15:16:10Z",
+      "updatedAt": "2026-11-26T12:10:21Z",
       "format": "codexhost",
       "targets": [
         "desktop",
