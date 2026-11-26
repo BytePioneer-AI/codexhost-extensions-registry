@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-26T09:20:36.876Z",
+  "generatedAt": "2026-11-26T09:46:40.347Z",
   "extensions": [
     {
       "id": "auto-archive-guard",
@@ -271,7 +271,7 @@
     },
     {
       "id": "mcp-sync-hub",
-      "version": "2.3.3",
+      "version": "2.3.4",
       "name": {
         "en": "MCP Sync Hub",
         "zh-CN": "MCP 统一中心"
@@ -293,15 +293,15 @@
         "workflow"
       ],
       "trustTier": "community",
-      "icon": "https://github.com/ErkundenSie/codexhost-mcp-hub/releases/download/v2.3.3/icon.png",
+      "icon": "https://github.com/ErkundenSie/codexhost-mcp-hub/releases/download/v2.3.4/icon.png",
       "screenshots": [
-        "https://github.com/ErkundenSie/codexhost-mcp-hub/releases/download/v2.3.3/preview.png"
+        "https://github.com/ErkundenSie/codexhost-mcp-hub/releases/download/v2.3.4/preview.png"
       ],
-      "downloadUrl": "https://github.com/ErkundenSie/codexhost-mcp-hub/releases/download/v2.3.3/mcp-sync-hub-2.3.3.zip",
-      "sha256": "b77c61d1acd0d169e2fab9f200ab9e57071c511aa9c1d916965d56ab494e900f",
+      "downloadUrl": "https://github.com/ErkundenSie/codexhost-mcp-hub/releases/download/v2.3.4/mcp-sync-hub-2.3.4.zip",
+      "sha256": "338d0569b15cbe0503c2f565ffb01be36257de75b798c42765909205e6aca938",
       "slots": [],
       "publishedAt": "2026-11-26T07:44:25Z",
-      "updatedAt": "2026-11-26T07:44:25Z",
+      "updatedAt": "2026-11-26T09:30:20Z",
       "format": "codexhost",
       "targets": [
         "desktop",
@@ -360,6 +360,50 @@
         "widget": 1,
         "desktop": 1,
         "web": 1,
+        "backend": 1
+      }
+    },
+    {
+      "id": "prompt-enhancement",
+      "version": "2.0.0",
+      "name": {
+        "en": "Prompt Enhancement",
+        "zh-CN": "提示词增强"
+      },
+      "description": {
+        "en": "Rewrite the current Composer draft into a clearer coding prompt using your own OpenAI-compatible or Anthropic API across Codex Desktop and CH Web, with customizable templates and one-click undo.",
+        "zh-CN": "使用你自己的 OpenAI 兼容或 Anthropic API 按需改写对话输入框草稿为更清晰的编程提示词；完全独立运行于 Codex Desktop 与 CH Web，不调用任何 CodexHost 内置模型或本机 CLI。"
+      },
+      "details": {
+        "en": "### Prompt Enhancement for CodexHost\n\nReplicates [`vastsa/pi-prompt-enhancement`](https://github.com/vastsa/pi-prompt-enhancement) as a cross-platform CodexHost Host Extension (`manifestVersion: 2`) powered exclusively by your own custom API endpoint & model.\n\n#### Key Features\n\n- **Standalone Custom API Only**: Uses only the OpenAI-compatible (`/v1/chat/completions`) or Anthropic (`/v1/messages`) endpoint and model you configure — never reads or invokes CodexHost built-in models or local CLIs (`codex`, `claude`, `pi`).\n- **One-Click Composer Enhancement (`widget`)**: Adds an **Enhance prompt** button directly to the chat composer toolbar (or as a compact floating capsule) in both **Codex Desktop** and **CH Web**, plus the `Alt+Shift+E` / `⌥⇧E` keyboard shortcut.\n- **Chip-Preserving & One-Click Undo**: Preserves inline file-reference chips when rewriting, guards against draft drift while waiting for the model, and provides an inline **Undo** button to restore the previous draft immediately.\n- **Settings & Playground (`page`)**:\n  - **Custom API & Model**: Configure Protocol, Base URL, API Key (`0600` local storage), and Model ID with one-click **Fetch models** (`/models`) and **Test connection**.\n  - **Reasoning Effort**: `off` to `max` (automatically falls back to `off` when unsupported).\n  - **User Template**: Inspect and override the built-in few-shot template with `Insert {{draft}}` at caret, `Restore built-in`, and 8,000-character validation.\n  - **Live Playground**: Test prompts side-by-side without touching active chats.\n\n#### Privacy & Isolation\n\n- Draft text is sent **only when you click Enhance** (never automatically).\n- Never reads conversation history, workspace files, or attachments; spawns zero child CLI processes.\n- API keys are stored locally in `provider-credentials.json` (`0600`) and never exposed to frontend pages or `settings.json`.\n\n#### License\n\nGNU Lesser General Public License v3.0 (LGPL-3.0).",
+        "zh-CN": "### CodexHost 提示词增强插件\n\n完整复刻 [`vastsa/pi-prompt-enhancement`](https://github.com/vastsa/pi-prompt-enhancement) 为跨端 CodexHost Host 扩展（`manifestVersion: 2`），同时支持 **Codex Desktop** 与 **CH Web**。\n\n#### 核心特性\n\n- **纯独立自定义 API**：仅使用你自己配置的 OpenAI 兼容（`/v1/chat/completions`）或 Anthropic（`/v1/messages`）接口与模型，绝不读取或调用任何 CodexHost 内置模型或本机 CLI。\n- **输入框一键增强（`widget`）**：在 Desktop 与 Web 对话输入框工具栏原地挂载 **增强提示词** 按钮（也支持悬浮胶囊模式），并支持 `⌥⇧E` / `Alt+Shift+E` 快捷键。\n- **保留文件引用标签 & 一键撤销**：改写草稿时保留内联文件引用标签，生成期间自动检测草稿变动避免误覆盖（弹出预览供确认或复制），应用后提供 **撤销** 按钮一键还原。\n- **独立管理页与试炼场（`page`）**：\n  - **自定义 API 与模型**：填写协议、Base URL、API Key（本机 `0600` 权限存储）与模型 ID，支持一键 **拉取模型** 与 **测试连通性**。\n  - **推理等级**：支持 `off` ~ `max` 六档（模型不支持时自动回退为 `off`）。\n  - **用户模板**：直接查看与覆写内置模板，支持光标处 **插入 `{{draft}}`**、**恢复内置模板** 与 8,000 字符校验。\n  - **实时试炼场**：在管理页内直接测试提示词改写效果，不干扰正式会话。\n\n#### 隐私与隔离\n\n- 仅在你主动点击「增强提示词」时发送当前草稿文本，绝不自动上传。\n- 不读取会话历史、工作区文件或附件，不派生任何子进程。\n- API 密钥仅保存在本机 `0600` 权限凭据文件中，绝不写入 `settings.json` 或回传给前端。\n\n#### 开源协议\n\nGNU Lesser General Public License v3.0（LGPL-3.0）。"
+      },
+      "author": "vastsa & codexhost community",
+      "repository": "https://github.com/Solren-zhen/codexhost-prompt-enhancement",
+      "stars": 0,
+      "categories": [
+        "workflow",
+        "tools"
+      ],
+      "trustTier": "community",
+      "icon": "https://github.com/Solren-zhen/codexhost-prompt-enhancement/releases/download/v2.0.0/icon.png",
+      "screenshots": [
+        "https://github.com/Solren-zhen/codexhost-prompt-enhancement/releases/download/v2.0.0/preview-page.png",
+        "https://github.com/Solren-zhen/codexhost-prompt-enhancement/releases/download/v2.0.0/preview-widget.png"
+      ],
+      "downloadUrl": "https://github.com/Solren-zhen/codexhost-prompt-enhancement/releases/download/v2.0.0/prompt-enhancement-2.0.0.zip",
+      "sha256": "4fbfb270dcfaba6b5ebd14572fcd2f81b679e77ff867241e1394185f906d7a7a",
+      "slots": [],
+      "publishedAt": "2026-11-26T09:24:10Z",
+      "updatedAt": "2026-11-26T09:24:10Z",
+      "format": "codexhost",
+      "targets": [
+        "desktop",
+        "web"
+      ],
+      "apis": {
+        "page": 1,
+        "widget": 1,
         "backend": 1
       }
     },
