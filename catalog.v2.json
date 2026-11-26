@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-26T02:44:18.962Z",
+  "generatedAt": "2026-11-26T07:33:22.739Z",
   "extensions": [
     {
       "id": "auto-archive-guard",
@@ -20,7 +20,6 @@
       "author": "biground",
       "repository": "https://github.com/biground/codexhost-plugin-auto-archive",
       "stars": 0,
-      "downloads": 24,
       "categories": [
         "workflow",
         "tools"
@@ -50,7 +49,7 @@
     },
     {
       "id": "ch-context",
-      "version": "0.3.3",
+      "version": "0.3.4",
       "name": {
         "en": "Context Insights",
         "zh-CN": "上下文洞察"
@@ -66,22 +65,21 @@
       "author": "ABC-xiaoxuan",
       "repository": "https://github.com/ABC-xiaoxuan/ch-context",
       "stars": 0,
-      "downloads": 135,
       "categories": [
         "analytics",
         "interface"
       ],
       "trustTier": "community",
-      "icon": "https://github.com/ABC-xiaoxuan/ch-context/releases/download/v0.3.3/icon.png",
+      "icon": "https://github.com/ABC-xiaoxuan/ch-context/releases/download/v0.3.4/icon.png",
       "screenshots": [
-        "https://github.com/ABC-xiaoxuan/ch-context/releases/download/v0.3.3/preview.png",
-        "https://github.com/ABC-xiaoxuan/ch-context/releases/download/v0.3.3/preview-dark.png"
+        "https://github.com/ABC-xiaoxuan/ch-context/releases/download/v0.3.4/preview.png",
+        "https://github.com/ABC-xiaoxuan/ch-context/releases/download/v0.3.4/preview-dark.png"
       ],
-      "downloadUrl": "https://github.com/ABC-xiaoxuan/ch-context/releases/download/v0.3.3/ch-context-0.3.3.zip",
-      "sha256": "68ec797ddde38c873486f881610586c9e7e28abb304d25a51945fb56fe8c6387",
+      "downloadUrl": "https://github.com/ABC-xiaoxuan/ch-context/releases/download/v0.3.4/ch-context-0.3.4.zip",
+      "sha256": "7bf78124d0a79dd0c92d380522c6d995551429d941bac30e5a81aff1a4566e6c",
       "slots": [],
       "publishedAt": "2026-11-23T15:06:28Z",
-      "updatedAt": "2026-11-24T02:07:14Z",
+      "updatedAt": "2026-11-26T03:31:12Z",
       "format": "codexhost",
       "targets": [
         "web"
@@ -108,7 +106,6 @@
       "author": "codexhost",
       "repository": "https://github.com/BytePioneer-AI/codexhost-ext-focus-pomodoro",
       "stars": 1,
-      "downloads": 149,
       "categories": [
         "tools"
       ],
@@ -153,7 +150,6 @@
       "author": "anlostsheep",
       "repository": "https://github.com/anlostsheep/codexhost-ext-github-primer-themes",
       "stars": 0,
-      "downloads": 21,
       "categories": [
         "appearance",
         "interface"
@@ -202,7 +198,6 @@
       "author": "biground",
       "repository": "https://github.com/biground/codex-host-theme-hdd-fairy",
       "stars": 0,
-      "downloads": 9,
       "categories": [
         "appearance",
         "interface"
@@ -232,38 +227,37 @@
     },
     {
       "id": "mcp-hub",
-      "version": "1.0.0",
+      "version": "1.2.0",
       "name": {
         "en": "MCP Hub",
         "zh-CN": "MCP 管理中心"
       },
       "description": {
-        "en": "Unified MCP control plane in the sidebar for Claude Code, Antigravity, OpenCode, and Codex — with cross-harness sync, live Streamable HTTP probe, OAuth 2.1 browser auth, and automatic backups.",
-        "zh-CN": "在侧边栏统一管理 Claude Code、Antigravity、OpenCode 与 Codex 的 MCP 服务：支持四端一键同步、实时连通性与工具探测、标准 OAuth 浏览器授权与写前自动备份。"
+        "en": "High-performance unified MCP & native plugin control plane in the sidebar for Claude Code, Antigravity, OpenCode, and Codex — with live fs.watch sync, interactive Tool Playground, redacted export, batch operations, native JSON/TOML preview, and OAuth 2.1 browser auth.",
+        "zh-CN": "在侧边栏高性能统一管理 Claude Code、Antigravity、OpenCode 与 Codex 的 MCP 服务与原生插件：支持 fs.watch 实时监听、MCP 工具在线试运行、脱敏安全导出、多选批量同步、滑出抽屉原生 JSON/TOML 预览与标准 OAuth 浏览器授权。"
       },
       "details": {
-        "en": "## Highlights\n\n- **Direct Sidebar Entry + Cross-Platform Page**: Appears directly in the CH Web left sidebar as **MCP Hub** and is also available as a standalone management page in Codex Desktop (**Settings → Plugin Pages**).\n- **4-Harness Sync Matrix**: Reads and writes native configurations for **Claude Code** (`~/.claude.json`), **Antigravity** (`~/.gemini/config/mcp_config.json`), **OpenCode** (`~/.config/opencode/opencode.json`), and **Codex** (`~/.codex/config.toml`) with comment-preserving TOML patching and automatic schema conversion.\n- **Live Probe & Standard OAuth 2.1**: Tests remote Streamable HTTP MCP endpoints via JSON-RPC `initialize` + `tools/list`, detects `401` OAuth metadata (RFC 9728 / RFC 8414), starts PKCE browser authorization (including manual callback paste for remote Web access), and provides one-click native CLI login commands.\n- **Zero `child_process` & Automatic Backups**: Pure Node.js backend with zero external process spawning; every config change saves a restorable pre-write snapshot inside extension data.",
-        "zh-CN": "## 核心特性\n\n- **左侧边栏直达 + 跨端管理页**：在 CH Web 左侧一级侧边栏直接呈现「MCP 管理」入口，同时兼容 Codex Desktop（设置 → 插件页面）。\n- **四端同步矩阵（Sync Matrix）**：直接安全读写 **Claude Code**（`~/.claude.json`）、**Antigravity**（`~/.gemini/config/mcp_config.json`）、**OpenCode**（`~/.config/opencode/opencode.json`）与 **Codex**（`~/.codex/config.toml`，注释无损补丁），自动完成各家字段格式转换与一键同步。\n- **实时探测与标准 OAuth 2.1 授权**：对远程 Streamable HTTP MCP 发起 `initialize` + `tools/list` 探测；遇 `401` 自动发现 OAuth 端点并发起浏览器 PKCE 授权（支持远程浏览器手动贴回调链接），同时提供各家原生 CLI 登录命令一键复制。\n- **零 `child_process` + 写前自动备份**：纯 Node.js 单实例共享后端，每次写入原生配置前自动生成可一键回滚的快照。"
+        "en": "## Highlights (v1.2.0)\n\n- **Modern Bento App Gallery UI**: 3-column App Store / Raycast-inspired capability cards with deterministic monogram squircles, status capsules, built-in 4-client toggle docks, full-width unfolding Tool/OAuth Inspector, calibrated Light & Dark themes, and 390px mobile responsiveness.\n- **Interactive MCP Tool Playground**: Click any discovered tool on a remote Streamable HTTP MCP to inspect its parameter `inputSchema` and execute live `tools/call` dry-runs directly inside the slide-over drawer.\n- **Live File Watcher & Zero-I/O Incremental Poll**: Lightweight `fs.watch` automatically detects external CLI edits (`claude mcp add`, `codex`, `opencode`, `agy`) and syncs UI state with a ~28-byte revision heartbeat.\n- **Secret Hygiene & Redacted Export**: Detects hardcoded plaintext keys/tokens per server and defaults Export JSON to safe `<REDACTED>` masking so you can share configs without leaking credentials.\n- **Multi-Select Batch Actions & Keyboard Shortcuts**: Batch enable/disable, batch sync across harnesses, or batch remove servers in one click; navigate instantly with `/` (search), `N` (new), `R` (refresh), and `Esc`.\n- **Backup Snapshot Preview**: Inspect exact JSON/TOML snapshot contents before rolling back.\n- **Extreme Performance Engine**: Projected `StatFileCache` (drops multi-MB unrelated history subtrees), overview memoization, slim mutation IPC payloads (~70% smaller), per-harness serialized write queues, bounded-concurrency probing, and `rAF`-batched targeted DOM patching.",
+        "zh-CN": "## 核心特性（v1.2.0）\n\n- **现代应用卡片画廊 UI**：全新 3 列 Bento 应用卡片布局（确定性双色圆角徽标、状态胶囊、底部四端快捷停靠栏、预设市场快速接入卡），点击探测/调试平滑全宽展开工具与 OAuth 面板，亮/暗双主题与 390px 移动端深度适配。\n- **MCP 工具在线调试器（Tool Playground）**：探测远程 Streamable HTTP MCP 后，点击任意工具卡片即可查看完整参数 `inputSchema` 并在滑出抽屉内发起真实 `tools/call` 试运行。\n- **文件实时监听与零 I/O 增量同步**：后端内置轻量 `fs.watch` 与版本号增量心跳（未变更时仅 ~28 字节零磁盘 I/O），你在终端用 CLI 新增/修改 MCP 时界面自动同步刷新。\n- **密钥安全与默认脱敏导出**：自动识别硬编码明文 Token / API Key 并给出锁定提示；导出 JSON 默认开启「脱敏导出」，自动隐藏敏感凭据。\n- **多选批量操作与快捷键**：支持批量启用/停用（随时释放上下文 Token 占用）、批量跨端同步与批量移除；内置 `/` 搜索、`N` 新增、`R` 刷新、`Esc` 关闭快捷键。\n- **备份快照源码预览**：恢复快照前可直接在线查看完整 JSON / TOML 内容。\n- **极致性能工程**：投影式 `StatFileCache` + 概览记忆化、精简变更 RPC 载荷（约减少 70%）、懒加载备份列表、按端串行写队列与前端 `rAF` 合批精准更新。"
       },
       "author": "ABC-xiaoxuan",
       "repository": "https://github.com/ABC-xiaoxuan/ch-mcp-hub",
       "stars": 0,
-      "downloads": 10,
       "categories": [
         "integrations",
         "tools"
       ],
       "trustTier": "community",
-      "icon": "https://github.com/ABC-xiaoxuan/ch-mcp-hub/releases/download/v1.0.0/icon.png",
+      "icon": "https://github.com/ABC-xiaoxuan/ch-mcp-hub/releases/download/v1.2.0/icon.png",
       "screenshots": [
-        "https://github.com/ABC-xiaoxuan/ch-mcp-hub/releases/download/v1.0.0/preview-dark.png",
-        "https://github.com/ABC-xiaoxuan/ch-mcp-hub/releases/download/v1.0.0/preview-light.png"
+        "https://github.com/ABC-xiaoxuan/ch-mcp-hub/releases/download/v1.2.0/preview-dark.png",
+        "https://github.com/ABC-xiaoxuan/ch-mcp-hub/releases/download/v1.2.0/preview-light.png"
       ],
-      "downloadUrl": "https://github.com/ABC-xiaoxuan/ch-mcp-hub/releases/download/v1.0.0/mcp-hub-1.0.0.zip",
-      "sha256": "0fe40d5ae8c7a7c7c8273a9f68c7126630ab5eb68d62935437df8b7615fc23f1",
+      "downloadUrl": "https://github.com/ABC-xiaoxuan/ch-mcp-hub/releases/download/v1.2.0/mcp-hub-1.2.0.zip",
+      "sha256": "cdd55de7401cc44cf0338d02dc62dcffbe8f629294b2359a1f5ad914cbdbb0a2",
       "slots": [],
       "publishedAt": "2026-11-25T14:58:13Z",
-      "updatedAt": "2026-11-25T14:58:13Z",
+      "updatedAt": "2026-11-26T03:56:43Z",
       "format": "codexhost",
       "targets": [
         "desktop",
@@ -276,8 +270,59 @@
       }
     },
     {
+      "id": "prism-facets",
+      "version": "1.2.3",
+      "name": {
+        "en": "Prism Facets",
+        "zh-CN": "棱镜切面 · 光学主题"
+      },
+      "description": {
+        "en": "Unofficial codexhost port of the Obsidian Prism colour system — four optical palettes, accent tones, corners, code fonts and an ambient prism light for Codex Desktop and CH Web — plus a usage dashboard built on codexhost's own usage statistics, also shown on the CH Web new-session screen.",
+        "zh-CN": "Obsidian Prism（黑曜棱镜）配色系统的非官方 codexhost 移植版：四套深浅光学配色、强调色、圆角、代码字体与环境棱光，作用于 Codex Desktop 与 CH Web；并基于 codexhost 自带的用量统计提供使用统计面板，可显示在 CH Web 新会话页。"
+      },
+      "details": {
+        "en": "### Highlights\n\n- **Four optical palettes**: *Obsidian* and *Warm Basalt* (dark), *Daylight Crystal* and *Alabaster* (light). Follow the host's light/dark switch automatically, or lock one appearance.\n- **Accent tones**: keep the palette accent or switch to Cobalt, Iris, Amber or Titanium (mono).\n- **Shape & type**: sharp / host default / soft corners, JetBrains Mono, Cascadia Code or SF Mono for code, optional ligatures.\n- **Ambient prism light**: a 1 px spectrum hairline and a faint aura at the top of the window — static, `0 fps` when idle, never intercepts clicks. Scene presets *Full optics / Focus / Quiet*.\n- **Frosted menus** for menus and popovers.\n- **Usage statistics** from codexhost itself (`codexhost/usage/statistics/get`, the same data as *Settings → Usage*): cost, requests, total tokens (input / output / cache), active days, cache hit rate, top model, a 26-week heatmap, per-model and per-Harness breakdowns, and Codex account quota — filter by Harness, project and today / 7 / 30 / 90 days / all. On CH Web the panel also sits above the greeting of the new-session screen (hide it with × or in settings). Codex Desktop pages cannot reach the Host RPC, so there a small local backend reads Codex session logs read-only as a fallback.\n- **Settings page + quick switcher**: a full settings page with live preview, and a draggable crystal button on the main window. Desktop and Web share the same settings and the same statistics backend.\n\n### Credits & licence\n\nColour values and design are ported from [Obsidian Prism](https://github.com/RMvdesi/obsidian-prism) by **RMvdesi** (GPL-3.0-only). This port is also **GPL-3.0-only**, is not an official release, and is not affiliated with or endorsed by the original author. Antigravity-specific features of the original (context vial, effort slider, mascots, thought translator, etc.) are not included.",
+        "zh-CN": "### 特性\n\n- **四套光学配色**：深色「深空黑曜」「暖炭玄岩」，浅色「白昼冷晶」「暖白画册」。可跟随宿主深浅色自动切换，也可固定一种外观。\n- **强调色**：保留配色自带强调色，或切换为钴蓝、鸢尾紫、琥珀金、纯银钛（单色）。\n- **形状与字体**：锐利 / 宿主默认 / 柔和三档圆角；代码字体可选 JetBrains Mono、Cascadia Code、SF Mono，并可开启连字。\n- **环境棱光**：窗口顶部 1px 光谱细线与淡淡的光晕——纯静态、空闲 `0 fps`、不拦截任何点击；提供「完整光效 / 专注编码 / 静默省电」三档场景预设。\n- **毛玻璃菜单**：为菜单与浮层添加背景模糊。\n- **使用统计**直接读取 codexhost 自带的用量统计（`codexhost/usage/statistics/get`，与「设置 → 用量统计」同一份数据）：费用、请求数、Token 总量（输入 / 输出 / 缓存）、活跃天数、缓存命中率、最常用模型、26 周热力图、按模型与按 Harness 拆分，以及 Codex 账号配额；可按 Harness、项目与「今天 / 7 / 30 / 90 天 / 全部」筛选。在 CH Web 中还会显示在新会话页的问候语上方（可用 × 或在设置中隐藏）。Codex Desktop 的页面无法访问 Host RPC，因此在 Desktop 上由本机小型后台以只读方式读取 Codex 会话日志作为替代。\n- **设置页 + 速切挂件**：带实时预览的独立设置页，以及主窗口上可拖动的水晶按钮。Desktop 与 Web 共享同一份设置与同一个统计后台。\n\n### 致谢与许可\n\n配色数值与设计移植自 **RMvdesi** 的 [Obsidian Prism（黑曜棱镜）](https://github.com/RMvdesi/obsidian-prism)（GPL-3.0-only）。本移植版同样以 **GPL-3.0-only** 授权，并非官方版本，与原作者无隶属或背书关系。原项目中依赖 Antigravity 的功能（上下文试管、推理滑块、像素伙伴、思考转译等）未包含在内。"
+      },
+      "author": "SgAlice",
+      "repository": "https://github.com/SgAlice/codexhost-prism-facets",
+      "stars": 0,
+      "categories": [
+        "appearance",
+        "interface",
+        "analytics"
+      ],
+      "trustTier": "community",
+      "icon": "https://github.com/SgAlice/codexhost-prism-facets/releases/download/v1.2.3/icon.png",
+      "screenshots": [
+        "https://github.com/SgAlice/codexhost-prism-facets/releases/download/v1.2.3/preview-usage.png",
+        "https://github.com/SgAlice/codexhost-prism-facets/releases/download/v1.2.3/preview-page.png",
+        "https://github.com/SgAlice/codexhost-prism-facets/releases/download/v1.2.3/preview-palettes.png",
+        "https://github.com/SgAlice/codexhost-prism-facets/releases/download/v1.2.3/preview-widget.png"
+      ],
+      "downloadUrl": "https://github.com/SgAlice/codexhost-prism-facets/releases/download/v1.2.3/prism-facets-1.2.3.zip",
+      "sha256": "5992aa05bd2fdfcfd968079bc9889b59e132495a23c1be4bcd3750972973e326",
+      "slots": [
+        "appearance.theme"
+      ],
+      "publishedAt": "2026-11-26T07:24:24Z",
+      "updatedAt": "2026-11-26T07:24:24Z",
+      "format": "codexhost",
+      "targets": [
+        "desktop",
+        "web"
+      ],
+      "apis": {
+        "page": 1,
+        "widget": 1,
+        "desktop": 1,
+        "web": 1,
+        "backend": 1
+      }
+    },
+    {
       "id": "prompt-templates",
-      "version": "1.2.0",
+      "version": "1.4.0",
       "name": {
         "en": "Prompt Templates",
         "zh-CN": "提示词模板"
@@ -287,28 +332,27 @@
         "zh-CN": "在对话输入框左下角搜索常用提示词，一键插入草稿。"
       },
       "details": {
-        "en": "### Reuse prompts in chat\n\n- Click **Prompt templates** in the bottom-left toolbar to search and insert a template.\n- Click a tag in the management page to filter templates, or drag templates to change their order in the picker. Create, edit, or delete custom templates and toggle built-ins.\n- Desktop and Web share the same library when connected to the same Host.",
-        "zh-CN": "### 在对话中复用提示词\n\n- 点击输入框左下角的 **提示词模板**，搜索并插入模板。\n- 在管理页点击标签可筛选模板，拖拽模板可调整弹窗里的顺序。也可新增、编辑、删除自定义模板或隐藏内置模板。\n- 连接同一 Host 的 Desktop 和 Web 共享模板库。"
+        "en": "### Reuse prompts in chat\n\n- Click **Prompt templates** in the bottom-left toolbar to search and insert a template. Use **+** beside search to create a template in place. Each result has actions to edit, insert, or send directly when the composer is empty.\n- Click a tag in the management page to filter templates, or drag templates to change their order in the picker. Create, edit, or delete custom templates and toggle built-ins.\n- Desktop and Web share the same library when connected to the same Host.",
+        "zh-CN": "### 在对话中复用提示词\n\n- 点击输入框左下角的 **提示词模板**，搜索并插入模板。也可点搜索框右侧的 **＋** 原地新建模板。列表每条模板可编辑、插入或在输入框为空时直接发送。\n- 在管理页点击标签可筛选模板，拖拽模板可调整弹窗里的顺序。也可新增、编辑、删除自定义模板或隐藏内置模板。\n- 连接同一 Host 的 Desktop 和 Web 共享模板库。"
       },
       "author": "zxd-666",
       "repository": "https://github.com/zxd-666/codexhost-prompt-templates",
       "stars": 0,
-      "downloads": 4,
       "categories": [
         "workflow",
         "tools"
       ],
       "trustTier": "community",
-      "icon": "https://github.com/zxd-666/codexhost-prompt-templates/releases/download/v1.2.0/icon.png",
+      "icon": "https://github.com/zxd-666/codexhost-prompt-templates/releases/download/v1.4.0/icon.png",
       "screenshots": [
-        "https://github.com/zxd-666/codexhost-prompt-templates/releases/download/v1.2.0/composer.png",
-        "https://github.com/zxd-666/codexhost-prompt-templates/releases/download/v1.2.0/library.png"
+        "https://github.com/zxd-666/codexhost-prompt-templates/releases/download/v1.4.0/composer.png",
+        "https://github.com/zxd-666/codexhost-prompt-templates/releases/download/v1.4.0/library.png"
       ],
-      "downloadUrl": "https://github.com/zxd-666/codexhost-prompt-templates/releases/download/v1.2.0/prompt-templates-1.2.0.zip",
-      "sha256": "1b75504f05b3405dc97449944b236e959e392537d5af273466dbe5e0a9656ae4",
+      "downloadUrl": "https://github.com/zxd-666/codexhost-prompt-templates/releases/download/v1.4.0/prompt-templates-1.4.0.zip",
+      "sha256": "d99cbe6746dee01e745ac830956a4a821402f5afa3dcf6490293b3c4c7aa3b0c",
       "slots": [],
       "publishedAt": "2026-11-26T01:13:19Z",
-      "updatedAt": "2026-11-26T01:13:19Z",
+      "updatedAt": "2026-11-26T06:50:51Z",
       "format": "codexhost",
       "targets": [
         "desktop",
@@ -338,7 +382,6 @@
       "author": "codexhost",
       "repository": "https://github.com/BytePioneer-AI/codexhost-ext-prompt-vault",
       "stars": 0,
-      "downloads": 156,
       "categories": [
         "tools",
         "workflow"
@@ -381,8 +424,7 @@
       },
       "author": "sduhantao-maker",
       "repository": "https://github.com/sduhantao-maker/codexhost-second-brain",
-      "stars": 0,
-      "downloads": 65,
+      "stars": 1,
       "categories": [
         "workflow",
         "interface"
@@ -430,7 +472,6 @@
       "author": "lpmasser",
       "repository": "https://github.com/lpmasser/codexhost-sidebar-delegation-badges",
       "stars": 0,
-      "downloads": 180,
       "categories": [
         "interface",
         "workflow"
@@ -468,8 +509,7 @@
       },
       "author": "sduhantao-maker",
       "repository": "https://github.com/sduhantao-maker/codexhost-sidebar-thread-tree",
-      "stars": 3,
-      "downloads": 243,
+      "stars": 4,
       "categories": [
         "interface",
         "workflow"
@@ -516,7 +556,6 @@
       "author": "mythezone",
       "repository": "https://github.com/mythezone/codexhost-ext-the-althing",
       "stars": 3,
-      "downloads": 156,
       "categories": [
         "workflow",
         "tools"
@@ -564,7 +603,6 @@
       "author": "TimYuhong",
       "repository": "https://github.com/TimYuhong/codexhost-theme-background",
       "stars": 0,
-      "downloads": 3,
       "categories": [
         "appearance",
         "interface"
