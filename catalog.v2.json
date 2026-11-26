@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-25T19:52:17.713Z",
+  "generatedAt": "2026-11-26T01:46:53.771Z",
   "extensions": [
     {
       "id": "auto-archive-guard",
@@ -20,6 +20,7 @@
       "author": "biground",
       "repository": "https://github.com/biground/codexhost-plugin-auto-archive",
       "stars": 0,
+      "downloads": 23,
       "categories": [
         "workflow",
         "tools"
@@ -65,6 +66,7 @@
       "author": "ABC-xiaoxuan",
       "repository": "https://github.com/ABC-xiaoxuan/ch-context",
       "stars": 0,
+      "downloads": 134,
       "categories": [
         "analytics",
         "interface"
@@ -106,6 +108,7 @@
       "author": "codexhost",
       "repository": "https://github.com/BytePioneer-AI/codexhost-ext-focus-pomodoro",
       "stars": 1,
+      "downloads": 149,
       "categories": [
         "tools"
       ],
@@ -150,6 +153,7 @@
       "author": "anlostsheep",
       "repository": "https://github.com/anlostsheep/codexhost-ext-github-primer-themes",
       "stars": 0,
+      "downloads": 19,
       "categories": [
         "appearance",
         "interface"
@@ -198,6 +202,7 @@
       "author": "biground",
       "repository": "https://github.com/biground/codex-host-theme-hdd-fairy",
       "stars": 0,
+      "downloads": 7,
       "categories": [
         "appearance",
         "interface"
@@ -226,6 +231,94 @@
       }
     },
     {
+      "id": "mcp-hub",
+      "version": "1.0.0",
+      "name": {
+        "en": "MCP Hub",
+        "zh-CN": "MCP 管理中心"
+      },
+      "description": {
+        "en": "Unified MCP control plane in the sidebar for Claude Code, Antigravity, OpenCode, and Codex — with cross-harness sync, live Streamable HTTP probe, OAuth 2.1 browser auth, and automatic backups.",
+        "zh-CN": "在侧边栏统一管理 Claude Code、Antigravity、OpenCode 与 Codex 的 MCP 服务：支持四端一键同步、实时连通性与工具探测、标准 OAuth 浏览器授权与写前自动备份。"
+      },
+      "details": {
+        "en": "## Highlights\n\n- **Direct Sidebar Entry + Cross-Platform Page**: Appears directly in the CH Web left sidebar as **MCP Hub** and is also available as a standalone management page in Codex Desktop (**Settings → Plugin Pages**).\n- **4-Harness Sync Matrix**: Reads and writes native configurations for **Claude Code** (`~/.claude.json`), **Antigravity** (`~/.gemini/config/mcp_config.json`), **OpenCode** (`~/.config/opencode/opencode.json`), and **Codex** (`~/.codex/config.toml`) with comment-preserving TOML patching and automatic schema conversion.\n- **Live Probe & Standard OAuth 2.1**: Tests remote Streamable HTTP MCP endpoints via JSON-RPC `initialize` + `tools/list`, detects `401` OAuth metadata (RFC 9728 / RFC 8414), starts PKCE browser authorization (including manual callback paste for remote Web access), and provides one-click native CLI login commands.\n- **Zero `child_process` & Automatic Backups**: Pure Node.js backend with zero external process spawning; every config change saves a restorable pre-write snapshot inside extension data.",
+        "zh-CN": "## 核心特性\n\n- **左侧边栏直达 + 跨端管理页**：在 CH Web 左侧一级侧边栏直接呈现「MCP 管理」入口，同时兼容 Codex Desktop（设置 → 插件页面）。\n- **四端同步矩阵（Sync Matrix）**：直接安全读写 **Claude Code**（`~/.claude.json`）、**Antigravity**（`~/.gemini/config/mcp_config.json`）、**OpenCode**（`~/.config/opencode/opencode.json`）与 **Codex**（`~/.codex/config.toml`，注释无损补丁），自动完成各家字段格式转换与一键同步。\n- **实时探测与标准 OAuth 2.1 授权**：对远程 Streamable HTTP MCP 发起 `initialize` + `tools/list` 探测；遇 `401` 自动发现 OAuth 端点并发起浏览器 PKCE 授权（支持远程浏览器手动贴回调链接），同时提供各家原生 CLI 登录命令一键复制。\n- **零 `child_process` + 写前自动备份**：纯 Node.js 单实例共享后端，每次写入原生配置前自动生成可一键回滚的快照。"
+      },
+      "author": "ABC-xiaoxuan",
+      "repository": "https://github.com/ABC-xiaoxuan/ch-mcp-hub",
+      "stars": 0,
+      "categories": [
+        "integrations",
+        "tools"
+      ],
+      "trustTier": "community",
+      "icon": "https://github.com/ABC-xiaoxuan/ch-mcp-hub/releases/download/v1.0.0/icon.png",
+      "screenshots": [
+        "https://github.com/ABC-xiaoxuan/ch-mcp-hub/releases/download/v1.0.0/preview-dark.png",
+        "https://github.com/ABC-xiaoxuan/ch-mcp-hub/releases/download/v1.0.0/preview-light.png"
+      ],
+      "downloadUrl": "https://github.com/ABC-xiaoxuan/ch-mcp-hub/releases/download/v1.0.0/mcp-hub-1.0.0.zip",
+      "sha256": "0fe40d5ae8c7a7c7c8273a9f68c7126630ab5eb68d62935437df8b7615fc23f1",
+      "slots": [],
+      "publishedAt": "2026-11-25T14:58:13Z",
+      "updatedAt": "2026-11-25T14:58:13Z",
+      "format": "codexhost",
+      "targets": [
+        "desktop",
+        "web"
+      ],
+      "apis": {
+        "page": 1,
+        "web": 1,
+        "backend": 1
+      }
+    },
+    {
+      "id": "prompt-templates",
+      "version": "1.2.0",
+      "name": {
+        "en": "Prompt Templates",
+        "zh-CN": "提示词模板"
+      },
+      "description": {
+        "en": "Search and insert reusable prompts from the bottom-left of the chat composer.",
+        "zh-CN": "在对话输入框左下角搜索常用提示词，一键插入草稿。"
+      },
+      "details": {
+        "en": "### Reuse prompts in chat\n\n- Click **Prompt templates** in the bottom-left toolbar to search and insert a template.\n- Click a tag in the management page to filter templates, or drag templates to change their order in the picker. Create, edit, or delete custom templates and toggle built-ins.\n- Desktop and Web share the same library when connected to the same Host.",
+        "zh-CN": "### 在对话中复用提示词\n\n- 点击输入框左下角的 **提示词模板**，搜索并插入模板。\n- 在管理页点击标签可筛选模板，拖拽模板可调整弹窗里的顺序。也可新增、编辑、删除自定义模板或隐藏内置模板。\n- 连接同一 Host 的 Desktop 和 Web 共享模板库。"
+      },
+      "author": "zxd-666",
+      "repository": "https://github.com/zxd-666/codexhost-prompt-templates",
+      "stars": 0,
+      "categories": [
+        "workflow",
+        "tools"
+      ],
+      "trustTier": "community",
+      "icon": "https://github.com/zxd-666/codexhost-prompt-templates/releases/download/v1.2.0/icon.png",
+      "screenshots": [
+        "https://github.com/zxd-666/codexhost-prompt-templates/releases/download/v1.2.0/composer.png",
+        "https://github.com/zxd-666/codexhost-prompt-templates/releases/download/v1.2.0/library.png"
+      ],
+      "downloadUrl": "https://github.com/zxd-666/codexhost-prompt-templates/releases/download/v1.2.0/prompt-templates-1.2.0.zip",
+      "sha256": "1b75504f05b3405dc97449944b236e959e392537d5af273466dbe5e0a9656ae4",
+      "slots": [],
+      "publishedAt": "2026-11-26T01:13:19Z",
+      "updatedAt": "2026-11-26T01:13:19Z",
+      "format": "codexhost",
+      "targets": [
+        "desktop",
+        "web"
+      ],
+      "apis": {
+        "page": 1,
+        "widget": 1,
+        "backend": 1
+      }
+    },
+    {
       "id": "prompt-vault",
       "version": "1.3.2",
       "name": {
@@ -243,6 +336,7 @@
       "author": "codexhost",
       "repository": "https://github.com/BytePioneer-AI/codexhost-ext-prompt-vault",
       "stars": 0,
+      "downloads": 153,
       "categories": [
         "tools",
         "workflow"
@@ -286,6 +380,7 @@
       "author": "sduhantao-maker",
       "repository": "https://github.com/sduhantao-maker/codexhost-second-brain",
       "stars": 0,
+      "downloads": 56,
       "categories": [
         "workflow",
         "interface"
@@ -333,6 +428,7 @@
       "author": "lpmasser",
       "repository": "https://github.com/lpmasser/codexhost-sidebar-delegation-badges",
       "stars": 0,
+      "downloads": 179,
       "categories": [
         "interface",
         "workflow"
@@ -371,6 +467,7 @@
       "author": "sduhantao-maker",
       "repository": "https://github.com/sduhantao-maker/codexhost-sidebar-thread-tree",
       "stars": 3,
+      "downloads": 242,
       "categories": [
         "interface",
         "workflow"
@@ -417,6 +514,7 @@
       "author": "mythezone",
       "repository": "https://github.com/mythezone/codexhost-ext-the-althing",
       "stars": 3,
+      "downloads": 152,
       "categories": [
         "workflow",
         "tools"
@@ -444,6 +542,53 @@
         "desktop": 1,
         "web": 1,
         "backend": 1
+      }
+    },
+    {
+      "id": "theme-background",
+      "version": "1.0.1",
+      "name": {
+        "en": "Theme Background",
+        "zh-CN": "主题背景"
+      },
+      "description": {
+        "en": "Customize accent palettes, five frosted surfaces, local fonts, and image/video/shader wallpapers across Codex Desktop and CH Web.",
+        "zh-CN": "在 Codex Desktop 与 CH Web 中自由定制主题强调色、五大界面磨砂透明度、本地字体与图片/视频/动态壁纸。"
+      },
+      "details": {
+        "en": "### Highlights\n\n- **Unified Accent Palette**: Pick any color via HSV color wheel, HEX/RGB/HSL, wallpaper extraction, or keyboard-accessible eyedropper. Harmonizes buttons, sidebar navigation, tabs, borders, surfaces, selection, and embedded Host settings while keeping WCAG AA contrast and a luminous top-left CodexHost brand mark.\n- **Five Independent Frosted Surfaces**: Fine-tune opacity (0–100%), frost blur (0–40 px), and text outline separately for Main Canvas, Sidebar (with subtle expanded parent-child thread cards), Cards & Menus, Composer, and Settings Panel.\n- **Local UI Fonts**: Load a single WOFF2/WOFF/TTF/OTF font up to 50 MiB for UI text while preserving monospace code blocks, terminals, and icons.\n- **Rich Backdrops**: Public HTTPS images, local JPEG/PNG/WebP/GIF/AVIF (up to 20 MiB), silent looping MP4/WebM videos (up to 200 MiB), 30-image rotation pools, Mesh gradients, 4 WebGL shaders (Aurora, Nebula, Flow, Starfield), and 6 Canvas patterns.\n- **Profiles & Day/Night Schedule**: Six WCAG-calibrated built-in looks, up to 20 full snapshots (colors, surfaces, background, framing, and font), time or OS-scheme schedules, and JSON import/export.\n\n### Cross-Device Sync & Privacy\n\n- Pure frontend Manifest v2 extension with **zero background processes** and no telemetry.\n- Appearance settings, schedules, and media UUID references sync via CodexHost Host storage; local binary files stay in IndexedDB per browser profile/partition and can be relinked cleanly across Desktop, Chrome, and WebView2.",
+        "zh-CN": "### 核心特性\n\n- **全局主题强调色**：支持 HSV 色轮、HEX/RGB/HSL、壁纸一键提色与键盘可用吸管取色。主题色统一谐和按钮、左侧功能栏、标签页、边框、表面底色、文本选区及内嵌设置弹窗深浅配色，同时守住 WCAG AA 对比度并保持左上角 CodexHost 品牌标志清晰醒亮。\n- **五大界面区域独立调节**：分别控制主界面、侧栏（含展开父子对话轻分组卡片）、卡片与菜单、输入区和设置面板的不透明度（0–100%）、磨砂模糊（0–40 px）与文字描边。\n- **本端界面字体**：支持单字体 WOFF2 / WOFF / TTF / OTF（上限 50 MiB）替换界面文字，代码块、终端与图标字体保持原样。\n- **多源静态与动态背景**：支持公开 HTTPS 图片、本地 JPEG/PNG/WebP/GIF/AVIF（上限 20 MiB）、静音循环 MP4/WebM 视频（上限 200 MiB）、30 图轮换池、网格渐变、4 种着色器（极光/星云/流体/星海）与 6 种几何图案。\n- **外观档案与昼夜定时**：内置 6 套对比度校准预设，支持保存最多 20 套完整档案（含背景、构图与字体）、按本地时间或系统明暗自动切换，以及 JSON 文件/文本导入导出。\n\n### 跨端同步与隐私\n\n- 纯前端 Manifest v2 架构，**零后台常驻进程**、零外部遥测。\n- 外观参数、定时计划与媒体 UUID 引用通过 Host 跨端共享；本地图片/视频/字体保存在各端浏览器 IndexedDB 中，可在 Desktop、Chrome 与 WebView2 间复用 UUID 无损重关联。"
+      },
+      "author": "TimYuhong",
+      "repository": "https://github.com/TimYuhong/codexhost-theme-background",
+      "stars": 0,
+      "categories": [
+        "appearance",
+        "interface"
+      ],
+      "trustTier": "community",
+      "icon": "https://github.com/TimYuhong/codexhost-theme-background/releases/download/v1.0.1/icon.png",
+      "screenshots": [
+        "https://github.com/TimYuhong/codexhost-theme-background/releases/download/v1.0.1/preview-dark.webp",
+        "https://github.com/TimYuhong/codexhost-theme-background/releases/download/v1.0.1/preview-settings.webp",
+        "https://github.com/TimYuhong/codexhost-theme-background/releases/download/v1.0.1/preview-light.webp"
+      ],
+      "downloadUrl": "https://github.com/TimYuhong/codexhost-theme-background/releases/download/v1.0.1/theme-background-1.0.1.zip",
+      "sha256": "fcd9d15388f504eadfd05420fc700b35663f65f27fab4062c21371dd01204273",
+      "slots": [
+        "appearance.theme"
+      ],
+      "publishedAt": "2026-11-25T13:42:26Z",
+      "updatedAt": "2026-11-25T13:42:26Z",
+      "format": "codexhost",
+      "targets": [
+        "desktop",
+        "web"
+      ],
+      "apis": {
+        "page": 1,
+        "desktop": 1,
+        "web": 1
       }
     }
   ]
