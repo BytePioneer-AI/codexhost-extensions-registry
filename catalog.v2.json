@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-26T12:11:05.826Z",
+  "generatedAt": "2026-11-26T13:16:08.766Z",
   "extensions": [
     {
       "id": "auto-archive-guard",
@@ -43,6 +43,52 @@
         "page": 1,
         "widget": 1,
         "desktop": 1,
+        "web": 1,
+        "backend": 1
+      }
+    },
+    {
+      "id": "better-sidebar",
+      "version": "1.0.0",
+      "name": {
+        "en": "Better Sidebar",
+        "zh-CN": "增强侧栏"
+      },
+      "description": {
+        "en": "A file, change and conversation-outline workbench in a resizable drawer, plus a full-page workspace.",
+        "zh-CN": "把文件树、Git 变更、逐行 diff 和对话大纲放进可调宽度的右侧抽屉，并提供完整独立工作台。"
+      },
+      "details": {
+        "en": "Better Sidebar brings the useful half of a code workbench into CodexHost Web without taking over the chat.\n\n- **Files**: lazy file tree with search, text editing and save. Opens text, Markdown, code and images.\n- **Changes**: current branch, staged/unstaged/untracked files and a line-by-line diff against HEAD.\n- **Outline**: jump between user turns and headings of the final answer; Markdown files also get a heading outline.\n- **Workspace**: follows the current thread's Codex session (`session_meta.cwd`) automatically, with a manual root override and recent workspace list.\n- **Where it lives**: a right-hand drawer in Web, and a full-page workspace from the plugin workspace tab bar.\n\nThe plugin has a small local backend. It only reads and writes inside the workspace you choose, never sends files over the network, and refuses to touch `.git` and dependency directories. Git history is read with a bundled JavaScript implementation, so no `git` binary or shell is used.\n\nOpen the drawer with the **Workbench** tab on the right edge, or open the standalone page from the plugin workspace. Press `Ctrl/Cmd+S` to save an edited file, `Escape` to close the drawer.",
+        "zh-CN": "增强侧栏把代码工作台里真正有用的那一半放进 CodexHost Web，同时不抢走对话区。\n\n- **文件**：懒加载文件树、文件名搜索、文本编辑与保存，可打开文本、Markdown、代码和图片。\n- **变更**：当前分支、已暂存/未暂存/未跟踪文件，以及相对 HEAD 的逐行 diff。\n- **大纲**：在用户轮次和最终回答的标题之间跳转；Markdown 文件另有标题大纲。\n- **工作区**：自动跟随当前会话的 Codex 会话文件（`session_meta.cwd`），也可手动改根目录并保留最近工作区。\n- **入口**：Web 中是右侧可收起抽屉；插件工作区顶栏还会出现独立工作台页面。\n\n插件带一个很小的本地 backend，只在选定工作区内读写，不把文件发到网络，并拒绝改动 `.git` 和依赖目录。Git 历史由打包进插件的 JavaScript 实现读取，不依赖 `git` 命令或 shell。\n\n点右边缘的 **工作台** 标签打开抽屉，或从插件工作区打开独立页面。编辑文件后按 `Ctrl/Cmd+S` 保存，按 `Escape` 关闭抽屉。"
+      },
+      "author": "BreezeDoo",
+      "repository": "https://github.com/BreezeDoo/codexhost-better-sidebar",
+      "stars": 0,
+      "categories": [
+        "interface",
+        "workflow",
+        "tools"
+      ],
+      "trustTier": "community",
+      "icon": "https://github.com/BreezeDoo/codexhost-better-sidebar/releases/download/v1.0.0/icon.png",
+      "screenshots": [
+        "https://github.com/BreezeDoo/codexhost-better-sidebar/releases/download/v1.0.0/screenshot-files.png",
+        "https://github.com/BreezeDoo/codexhost-better-sidebar/releases/download/v1.0.0/screenshot-changes.png",
+        "https://github.com/BreezeDoo/codexhost-better-sidebar/releases/download/v1.0.0/screenshot-page.png"
+      ],
+      "downloadUrl": "https://github.com/BreezeDoo/codexhost-better-sidebar/releases/download/v1.0.0/better-sidebar-1.0.0.zip",
+      "sha256": "bbdb5e49f9c43c1ecebdfdebfe268f8f976dd4d56ac1ea90237fc9bc19e27835",
+      "slots": [],
+      "publishedAt": "2026-11-26T10:14:31Z",
+      "updatedAt": "2026-11-26T10:14:31Z",
+      "format": "codexhost",
+      "targets": [
+        "desktop",
+        "web"
+      ],
+      "apis": {
+        "page": 1,
         "web": 1,
         "backend": 1
       }
