@@ -575,14 +575,21 @@ export async function buildCatalog({
       (previousV2?.extensions ?? previous?.extensions ?? []).map((entry) => [entry.id, entry]),
     );
     const counts = checkOnly ? undefined : await readDownloadCounts();
+    if (!checkOnly && counts === undefined && (process.env.CODEXHOST_DESKTOP_EXTENSIONS_STATS_URL?.trim() || process.env.STATS_URL)) {
+      console.warn("Download stats unavailable; preserving previous catalog download counts.");
+    }
     for (const source of sources) {
       try {
-        const count = counts && Object.hasOwn(counts, source.id) ? counts[source.id] : undefined;
+        const previousEntry = existing.get(source.id);
+        const count =
+          counts !== undefined && Object.hasOwn(counts, source.id)
+            ? counts[source.id]
+            : previousEntry?.downloads;
         const { data: downloads } =
           desktopExtensionCatalogEntrySchema.shape.downloads.safeParse(count);
         const { v1Entry, v2Entry, exemptedChildProcessFiles } = await validateSource(
           source,
-          existing.get(source.id),
+          previousEntry,
           starsByRepository,
           downloads,
         );

@@ -13,7 +13,7 @@ on:
       - package-lock.json
       - .github/workflows/registry-sync.yml
   schedule:
-    - cron: "*/30 * * * *"
+    - cron: "17,47 * * * *"
   workflow_dispatch:
 
 permissions:
@@ -31,6 +31,7 @@ jobs:
         with:
           node-version: 24
       - run: npm ci --ignore-scripts
+      - run: node --test worker/worker.test.mjs scripts/check-worker-health.test.mjs scripts/issue-to-pr.test.mjs
       - run: node validate-and-build-catalog.mjs --check-only
         env:
           GITHUB_TOKEN: ${{ github.token }}
@@ -75,5 +76,35 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git commit -m 'chore: sync Desktop & Web extensions catalog'
           git push origin HEAD:main
-          curl -fsS "https://purge.jsdelivr.net/gh/${{ github.repository }}@main/catalog.json" || true
-          curl -fsS "https://purge.jsdelivr.net/gh/${{ github.repository }}@main/catalog.v2.json" || true
+          sleep 15
+          for file in catalog.json catalog.v2.json; do
+            url="https://purge.jsdelivr.net/gh/${{ github.repository }}@main/${file}"
+            body=$(curl --max-time 15 -sS -w '\n%{http_code}' "$url" || true)
+            status="${body##*$'\n'}"
+            payload="${body%$'\n'*}"
+            echo "jsDelivr purge ${file} (HTTP ${status:-error}): ${payload}"
+            if [ "$status" != "200" ]; then
+              echo "::warning::jsDelivr purge for ${file} returned HTTP ${status:-error}"
+            fi
+          done
+
+  monitor-worker:
+    if: (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main' && vars.STATS_URL != ''
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Check Worker health and reconcile alert issue
+        run: node scripts/check-worker-health.mjs
+        env:
+          STATS_URL: ${{ vars.STATS_URL }}
+          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}

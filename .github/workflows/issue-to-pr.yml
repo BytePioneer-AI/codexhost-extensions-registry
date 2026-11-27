@@ -14,6 +14,7 @@ permissions:
   contents: write
   issues: write
   pull-requests: write
+  actions: write
 
 concurrency:
   group: submission-issue-${{ github.event.issue.number || inputs.issue_number }}
@@ -81,7 +82,7 @@ jobs:
           EXTENSION_ID: ${{ steps.prepare.outputs.extension_id }}
           REPOSITORY_URL: ${{ steps.prepare.outputs.repository_url }}
         run: |
-          gh issue comment "$ISSUE_NUMBER" --body "ℹ️ \`$EXTENSION_ID\` ($REPOSITORY_URL) is already listed in \`sources/$EXTENSION_ID.json\`. The catalog syncs automatically every 30 minutes."
+          gh issue comment "$ISSUE_NUMBER" --body "ℹ️ \`$EXTENSION_ID\` ($REPOSITORY_URL) is already listed in \`sources/$EXTENSION_ID.json\`. New releases sync automatically within ~5 minutes."
 
       - name: Comment duplicate extension ID on issue
         if: steps.prepare.outputs.status == 'id-conflict'
@@ -193,6 +194,7 @@ jobs:
             gh pr edit "$EXISTING_PR" \
               --title "feat(registry): add $EXTENSION_ID (#$ISSUE_NUMBER)" \
               --body-file pr-body.md
+            PR_NUMBER="$EXISTING_PR"
             PR_URL="$(gh pr view "$EXISTING_PR" --json url --jq '.url')"
             echo "pr_created=false" >> "$GITHUB_OUTPUT"
           else
@@ -201,22 +203,81 @@ jobs:
               --head "$BRANCH" \
               --title "feat(registry): add $EXTENSION_ID (#$ISSUE_NUMBER)" \
               --body-file pr-body.md)"
+            PR_NUMBER="$(gh pr view "$PR_URL" --json number --jq '.number' 2>/dev/null || gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number // empty')"
             echo "pr_created=true" >> "$GITHUB_OUTPUT"
           fi
+          echo "pr_number=$PR_NUMBER" >> "$GITHUB_OUTPUT"
           echo "pr_url=$PR_URL" >> "$GITHUB_OUTPUT"
 
-      - name: Comment PR link on issue
-        if: steps.pr.outcome == 'success' && steps.pr.outputs.pr_created == 'true' && steps.pr.outputs.pr_url != ''
+      - name: Auto-merge eligible frontend submission
+        id: automerge
+        if: steps.pr.outcome == 'success' && steps.prepare.outputs.auto_approve == 'true' && steps.pr.outputs.pr_number != ''
+        env:
+          PR_NUMBER: ${{ steps.pr.outputs.pr_number }}
+        run: |
+          MERGED=false
+          MERGE_OUTPUT=""
+          for attempt in 1 2 3; do
+            if MERGE_OUTPUT="$(gh pr merge "$PR_NUMBER" --squash --delete-branch 2>&1)"; then
+              MERGED=true
+              break
+            fi
+            echo "Auto-merge attempt ${attempt} failed: ${MERGE_OUTPUT}"
+            if [ "$attempt" -lt 3 ]; then
+              sleep 3
+            fi
+          done
+          if [ "$MERGED" = "true" ]; then
+            echo "$MERGE_OUTPUT"
+            echo "merged=true" >> "$GITHUB_OUTPUT"
+            gh workflow run registry-sync.yml --ref main || echo "::warning::Auto-merged PR #$PR_NUMBER, but triggering registry-sync.yml failed; the scheduled sync will publish the catalog."
+          else
+            echo "::warning::Could not auto-merge PR #$PR_NUMBER (e.g. branch protection rules); leaving PR open for manual maintainer merge."
+            echo "merged=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Comment auto-merged status on issue
+        if: steps.pr.outcome == 'success' && steps.automerge.outputs.merged == 'true' && steps.pr.outputs.pr_url != ''
         env:
           EXTENSION_ID: ${{ steps.prepare.outputs.extension_id }}
           PR_URL: ${{ steps.pr.outputs.pr_url }}
+        run: |
+          {
+            echo "✅ **Validation passed & auto-merged / 自动校验通过并已自动上架**"
+            echo ""
+            echo "Automatically merged pull request for \`$EXTENSION_ID\`: $PR_URL"
+            echo ""
+            echo "Catalog sync (\`registry-sync.yml\`) has been triggered immediately — your extension should appear in the marketplace within ~1 minute."
+            echo "已满足纯前端且仓库本人投稿的自动通过条件并完成合并，目录同步已立即触发，插件预计约 1 分钟内即可在扩展市场可见。"
+          } > pr-comment.md
+          gh issue comment "$ISSUE_NUMBER" --body-file pr-comment.md
+
+      - name: Comment PR link on issue
+        if: steps.pr.outcome == 'success' && steps.automerge.outputs.merged != 'true' && steps.pr.outputs.pr_url != '' && (steps.pr.outputs.pr_created == 'true' || steps.automerge.outputs.merged == 'false')
+        env:
+          EXTENSION_ID: ${{ steps.prepare.outputs.extension_id }}
+          PR_URL: ${{ steps.pr.outputs.pr_url }}
+          AUTO_APPROVE: ${{ steps.prepare.outputs.auto_approve }}
+          AUTO_APPROVE_REASON: ${{ steps.prepare.outputs.auto_approve_reason }}
+          AUTO_MERGE_RESULT: ${{ steps.automerge.outputs.merged }}
         run: |
           {
             echo "✅ **Validation passed / 自动校验通过**"
             echo ""
             echo "Opened pull request for \`$EXTENSION_ID\`: $PR_URL"
             echo ""
-            echo "Once a maintainer merges this PR, the extension will be published to \`catalog.json\` automatically."
-            echo "维护者合并该 PR 后，插件会自动同步上架到市场目录。"
+            if [ "$AUTO_APPROVE" = "true" ] && [ "$AUTO_MERGE_RESULT" = "false" ]; then
+              echo "🟡 **Manual merge needed / 需维护者手动合并**"
+              echo ""
+              echo "This submission passed automatic frontend approval checks, but automatic merge could not complete (for example due to repository branch protection rules). A maintainer will merge it shortly."
+              echo "该投稿满足纯前端自动通过条件，但自动合并未能完成（例如受仓库分支保护规则限制），PR 已保持开启状态，等待维护者合并后即会自动同步上架。"
+            else
+              echo "🟡 **Manual maintainer review required / 需维护者人工审核**"
+              echo ""
+              printf '> %s\n' "${AUTO_APPROVE_REASON:-Manual review is required before merging.}"
+              echo ""
+              echo "Once a maintainer reviews and merges this PR, the extension will be published to the marketplace catalog automatically."
+              echo "维护者人工审核并合并该 PR 后，插件会自动同步上架到市场目录。"
+            fi
           } > pr-comment.md
           gh issue comment "$ISSUE_NUMBER" --body-file pr-comment.md
