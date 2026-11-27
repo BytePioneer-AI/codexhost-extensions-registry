@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-27T14:12:51.962Z",
+  "generatedAt": "2026-11-27T14:53:56.795Z",
   "extensions": [
     {
       "id": "auto-archive-guard",
@@ -85,6 +85,52 @@
         "web"
       ],
       "apis": {
+        "web": 1
+      }
+    },
+    {
+      "id": "claude-style",
+      "version": "1.3.0",
+      "name": {
+        "en": "Claude Style",
+        "zh-CN": "Claude 风格主题"
+      },
+      "description": {
+        "en": "Editorial palettes aligned with dsh-claude-style 0.22.1, original pixel-art animated mascots (Clawd, Deepy, Whale Girl), bundled webfonts, turn outline rail & sound chimes for Desktop and Web.",
+        "zh-CN": "对齐 dsh-claude-style 0.22.1 编辑风配色与内置字体，集成原版像素帧动画小宠物（Clawd/Deepy/鲸娘）、对话大纲导览栏、完成提示音与双端阅读调校。"
+      },
+      "details": {
+        "en": "### Claude Style (`v1.3.0`)\n\nA unified `manifestVersion: 2` appearance & companion extension built cleanly for **Codex Desktop** and **CodexHost Web** — zero host patching required.\n\n- **6 Editorial Palettes + Host Native**: Tuned after `dsh-claude-style 0.22.1` (**Claude**, **DeepSeek Cobalt**, **Parchment**, **Forest**, **Dusk**, **Rose**, **Host Native**) with optional custom Accent, Light/Dark Canvas, and Code Tint overrides.\n- **Original Pixel-Art Animated Mascots + Vector Fallback**: Ships the original **Clawd Crab**, **Deepy Whale**, and **Whale Girl** sprite sheets driven by hardware-accelerated WAAPI `steps(1)` playback (with left/right poke, rapid-click tickle, waking, and idle extras), plus **Claude Spark** and lightweight SVG mode.\n- **Bundled Editorial Webfonts**: Includes `InterVariable`, `NotoSerifVariable`, `JetBrainsMonoVariable` (regular & italic), and `ClaudeStylePixel` (OFL).\n- **Floating Turn Navigator Rail (`Alt+↑` / `Alt+↓`)**: Right-edge user-turn ticks with an expandable prompt outline drawer, active turn highlighting, 4-step reading widths (`100% / 85% / 70% / 60%`), and Web Audio chimes.",
+        "zh-CN": "### Claude 风格主题（`v1.3.0` 双端统一版）\n\n专为 **Codex Desktop** 与 **CodexHost Web** 打造的 `manifestVersion: 2` 编辑风主题与伴侣插件，无需给宿主运行时打补丁。\n\n- **七套编辑风预设 + 自定义配色**：对齐 `dsh-claude-style 0.22.1` 官方色阶（**Claude 编辑白/墨黑**、**DeepSeek 钴蓝**、**复古羊皮纸**、**苔原森林**、**暮色星澜**、**玫瑰编辑**、**宿主原生**），支持自定义强调色、浅/深主画布与代码块底色。\n- **原版像素帧动画小宠物 + 矢量回退**：内置原版 **Clawd 像素蟹**、**Deepy 小鲸鱼**、**鲸娘** 精灵图，采用硬件加速 WAAPI `steps(1)` 逐帧播放，支持左右戳一戳、连点 4 次挠痒痒、苏醒与随机待机动作，另保留 **星芒火花** 与轻量矢量 SVG 模式。\n- **内置原版编辑风字体**：随包提供 `Inter`、`Noto Serif`、`JetBrains Mono`（常规/斜体）与 `ClaudeStylePixel` 字体，跨平台一致呈现。\n- **右侧对话大纲导览栏（`Alt+↑` / `Alt+↓`）与四档宽度**：支持 `100% / 85% / 70% / 60%` 阅读宽度、侧栏密度、界面缩放、实时耗时计时与 Web Audio 提示音。"
+      },
+      "author": "Solren-zhen",
+      "repository": "https://github.com/Solren-zhen/codexhost-claude-style",
+      "stars": 0,
+      "categories": [
+        "appearance",
+        "interface"
+      ],
+      "trustTier": "community",
+      "icon": "https://github.com/Solren-zhen/codexhost-claude-style/releases/download/v1.3.0/icon.png",
+      "screenshots": [
+        "https://github.com/Solren-zhen/codexhost-claude-style/releases/download/v1.3.0/preview-light.png",
+        "https://github.com/Solren-zhen/codexhost-claude-style/releases/download/v1.3.0/preview-dark.png"
+      ],
+      "downloadUrl": "https://github.com/Solren-zhen/codexhost-claude-style/releases/download/v1.3.0/claude-style-1.3.0.zip",
+      "sha256": "e14cf3242306c923339fa46228d25c31676d6995d5deb96d38e6ab5a591dff2d",
+      "slots": [
+        "appearance.theme"
+      ],
+      "publishedAt": "2026-11-27T14:52:11Z",
+      "updatedAt": "2026-11-27T14:52:11Z",
+      "format": "codexhost",
+      "targets": [
+        "desktop",
+        "web"
+      ],
+      "apis": {
+        "page": 1,
+        "desktop": 1,
         "web": 1
       }
     },
