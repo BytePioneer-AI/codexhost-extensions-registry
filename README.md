@@ -15,11 +15,11 @@
   │
   ▼  GitHub Actions: Submission issue to PR
 自动读取 manifest.json → 执行格式与静态安全校验 → 生成 sources/<id>.json PR + 安全报告
+  │   ├─ 纯前端/主题且由仓库本人投稿（无高危模式）→ 自动合并并立即触发同步（约 1 分钟上架）
+  │   └─ 含本地 Node 后端 / 非本人投稿 / 命中高危模式 → 维护者人工复核后合并 PR
   │
-  ▼  维护者人工复核后合并 PR
-  │
-  ▼  GitHub Actions: Desktop extension registry（变更即时触发 + 每 30 分钟定时同步）
-校验全部来源 → 生成 catalog.v2.json / catalog.json → 自动刷新 jsDelivr CDN 缓存
+  ▼  GitHub Actions: Desktop extension registry（变更即时触发 + 5 分钟 Worker 检测 + 错峰兜底定时同步）
+校验全部来源 → 生成 catalog.v2.json / catalog.json → 缓冲后刷新 jsDelivr CDN 缓存 + 监控 Worker 健康状态
   │
   ▼
 CodexHost Desktop / CH Web 插件中心展示列表与更新提示
@@ -41,7 +41,9 @@ CodexHost Desktop / CH Web 插件中心展示列表与更新提示
    - 自动创建 `sources/<id>.json` 的 PR 并把链接评论回 Issue。
 4. 若校验未通过，Bot 会在 Issue 下直接列出具体错误；修改扩展仓库后**编辑该 Issue** 即可自动重新校验。
    - 若扩展因需要启动本机命令行（`child_process`）等正当能力而无法通过自动检查，可提交 [**人工审查上架 Issue**](https://github.com/BytePioneer-AI/codexhost-extensions-registry/issues/new?template=manual-review.yml)（说明仓库地址、插件介绍与原因），或扫码联系维护者微信（见 [CodexHost 微信联系方式](https://github.com/BytePioneer-AI/codex-host/blob/main/docs/project/README.zh-CN.md#%E5%BE%AE%E4%BF%A1%E4%BA%A4%E6%B5%81%E7%BE%A4)，备注「CodexHost 插件」），维护者人工审查后可单独放行上架。
-5. 维护者复核 PR 与 `safety-report.md` 并合并后，扩展会自动上架到市场目录。
+5. **自动审核与上架**：
+   - 若为**纯主题 / 纯前端扩展**（不声明 `backend`）、由**仓库本人投稿**（组织仓库须同时为公开成员且为版本发布者）且通过全部校验与前端风险扫描，工作流会自动合并该 PR 并立即触发目录同步，约 **1 分钟**内即可上架。
+   - 若包含**独立 Node 后端（`backend`）**、非仓库本人投稿或命中可疑模式，PR 会保持开启并在评论中标明原因，等待维护者人工复核 `safety-report.md` 后合并。
 
 ### 方式二：直接提交 PR
 
@@ -79,8 +81,12 @@ CodexHost Desktop / CH Web 插件中心展示列表与更新提示
 
 **更新何时对用户可见？**
 
-1. 市场工作流每 **30 分钟**自动同步一次（若部署了可选 Cloudflare Worker 检测，最快 **5 分钟**内自动触发），同步完成后会自动清理 jsDelivr 缓存；
-2. CodexHost 客户端本地缓存市场目录 **5 分钟**，用户点击插件中心右上角「刷新」即可立即看到版本更新提示。
+1. 线上的 Cloudflare Worker 每 **5 分钟**批量检测全部扩展的新版本并自动触发同步（另有错峰 GitHub Actions 定时任务兜底），同步完成后会等待上游生效再清理 jsDelivr 缓存；
+2. 若希望发完 Release 后 **30 秒～1 分钟内**立刻同步，可在发布脚本中顺手调用一次即时触发口（内置 60 秒防刷冷却，只在检测到真实新版本时触发）：
+   ```sh
+   curl -fsS -X POST https://ext-stats.chost.dev/sync
+   ```
+3. CodexHost 客户端本地缓存市场目录 **5 分钟**，用户点击插件中心右上角「刷新」即可立即看到版本更新提示。
 
 > **注意**：只要 ZIP 字节发生变化就**必须递增 `manifest.json` 中的 `version`**（版本号不变但内容变化会被校验器拒绝）；源码模式下即使只修改 README 也会改变 zipball 字节。
 
@@ -136,13 +142,16 @@ CodexHost Desktop / CH Web 插件中心展示列表与更新提示
 ├── catalog.json                     # 自动生成：v1 兼容扩展目录
 ├── validate-and-build-catalog.mjs   # 来源校验、安全扫描与目录生成脚本
 ├── runtime.mjs                      # 由 codexhost 导出的契约校验与 ZIP 解析器
-├── scripts/issue-to-pr.mjs          # Issue 表单自动转 PR 脚本
-├── worker/                          # 可选：Cloudflare Worker（下载量统计 & 5 分钟更新检测）
+├── scripts/
+│   ├── issue-to-pr.mjs              # Issue 表单自动校验、分级判定与转 PR 脚本
+│   └── check-worker-health.mjs      # Worker 健康检查与自动开/关告警 Issue 脚本
+├── worker/                          # Cloudflare Worker（下载量统计、5 分钟批量更新检测与 POST /sync）
 └── .github/
     ├── ISSUE_TEMPLATE/submit-extension.yml
     └── workflows/
-        ├── issue-to-pr.yml          # 投稿 Issue 自动校验并建 PR
-        └── registry-sync.yml        # PR 检查 & 定时/触发同步目录
+        ├── deploy-worker.yml        # Worker 单测与自动部署到 Cloudflare
+        ├── issue-to-pr.yml          # 投稿 Issue 自动校验、分级自动合并或建 PR
+        └── registry-sync.yml        # PR 检查、同步目录、清缓存与 Worker 健康告警
 ```
 
 客户端公开读取地址（支持 GitHub Raw 与 jsDelivr 并发竞速）：
@@ -188,15 +197,25 @@ CodexHost Desktop / CH Web 插件中心展示列表与更新提示
 3. 在本仓库 **Settings → Secrets and variables → Actions → Variables** 新增变量 `STATS_URL`（填 Worker 根地址，不带 `/stats.json`）；在 CodexHost Host/Console 进程配置相同的 `CODEXHOST_DESKTOP_EXTENSIONS_STATS_URL`。
 4. 仅统计从市场成功完成的安装/更新，客户端只上报扩展 ID（不含账号或设备信息），属于参考计数而非精确去重统计。
 
-#### 2. 启用 5 分钟无状态自动同步检测
+#### 2. 启用 5 分钟自动同步检测、自动部署与故障告警
 
-同一 Worker 内置 `crons = ["*/5 * * * *"]`，每 5 分钟比对 `sources/` 中各扩展的最新 Release ZIP（或默认分支 commit）与当前 `catalog.v2.json` 的 `downloadUrl`，一旦发现新版本或来源下架即自动触发 `registry-sync.yml` 并刷新 jsDelivr 缓存。
+同一 Worker 内置 `crons = ["*/5 * * * *"]` 与即时触发口 `POST /sync`（带 60 秒冷却与并发合并），通过 GitHub GraphQL 批量比对 `sources/` 中各扩展的最新 Release ZIP（或默认分支 commit）与当前 `catalog.v2.json` 的 `downloadUrl`，一旦发现新版本或来源下架即自动触发 `registry-sync.yml`；`/stats.json` 内置 5 分钟 Edge Cache 避免触碰 KV 列表日配额；`/health` 返回脱敏后的最近一次巡检摘要。
 
-开启方式：创建一个仅拥有本仓库 **Actions: Read and write** 权限的 Fine-grained PAT，在 `worker/` 目录执行：
+**推荐通过 GitHub Actions 自动部署（`.github/workflows/deploy-worker.yml`）**：
+
+在仓库 **Settings → Secrets and variables → Actions** 配置一次以下密钥/变量后，每次修改 `worker/**` 合并到 `main`（或手动触发 `Deploy stats & sync worker`）都会自动运行单测并部署到 Cloudflare：
+
+- `secrets.CLOUDFLARE_API_TOKEN`：拥有 Workers Scripts Edit 权限的 Cloudflare API Token；
+- `secrets.CLOUDFLARE_ACCOUNT_ID`：Cloudflare Account ID；
+- `secrets.CLOUDFLARE_STATS_KV_ID`（或同名 Variable）：`STATS_KV` 命名空间 ID（用于部署时替换 `worker/wrangler.toml` 中的 `YOUR_KV_NAMESPACE_ID`）；
+- `secrets.WORKER_GITHUB_TOKEN`（可选）：仅拥有本仓库 **Actions: Read and write** 与 **Contents: Read** 的 Fine-grained PAT，配置后会在部署时自动同步为 Worker 的 `GITHUB_TOKEN` Secret；
+- `vars.STATS_URL`：Worker 根地址（如 `https://ext-stats.chost.dev`），配置后自动开启部署后 `/health` 冒烟检查与 `registry-sync.yml` 中的定时健康监控（当 `/health` 异常、巡检超过 45 分钟未刷新或 `/stats.json` 报错时自动创建去重告警 Issue，恢复后自动关闭）。
+
+如需手工本地配置 Secret 与部署，也可在 `worker/` 目录执行：
 
 ```sh
 npx wrangler secret put GITHUB_TOKEN
-npx wrangler deploy
+npx wrangler deploy --keep-vars
 ```
 
 未配置 `GITHUB_TOKEN` 时自动跳过检测，不影响下载统计接口。
@@ -214,11 +233,11 @@ npx wrangler deploy
 1. Open the [**Submit Extension Issue Form**](https://github.com/BytePioneer-AI/codexhost-extensions-registry/issues/new?template=submit-extension.yml) and enter your public GitHub repository URL (`https://github.com/<owner>/<repo>`).
 2. GitHub Actions automatically reads `manifest.json` from your latest stable Release `.zip` (or default branch if no Release exists), runs schema & static safety checks, and opens a PR adding `sources/<id>.json`.
    - If your extension cannot pass automatic checks for a legitimate reason (such as a `backend` spawning local CLI tools via `child_process`), open a [**Manual Review Issue**](https://github.com/BytePioneer-AI/codexhost-extensions-registry/issues/new?template=manual-review.yml) with your repository URL and description (or contact the maintainer on WeChat via the [CodexHost README](https://github.com/BytePioneer-AI/codex-host#%E5%BE%AE%E4%BF%A1%E4%BA%A4%E6%B5%81%E7%BE%A4)) for manual review and listing.
-3. Once a maintainer reviews the safety report and merges the PR, your extension is published to the marketplace catalog automatically.
+3. Frontend-only extensions (no `backend`) submitted by the repository owner that pass all schema, static, and frontend risk checks are auto-merged and synced within ~1 minute. Extensions declaring a local Node `backend`, third-party submissions, or flagged scripts stay open for manual maintainer review.
 
 ### Publish an Update
 
 - **Recommended (Release ZIP)**: Bump `version` in `manifest.json`, publish a public non-prerelease GitHub Release, and attach a single `.zip` archive (plus matching `icon` / `screenshots` image assets if declared).
 - **Fallback (Default Branch)**: If your repo has no Release, bump `version` and push built files to the default branch.
-- The catalog syncs every **30 minutes** (or within **5 minutes** when the optional Cloudflare Worker cron is enabled) and automatically purges jsDelivr cache. Clients refresh on demand or after their 5-minute local cache expires.
+- The Cloudflare Worker checks for updates every **5 minutes** via GraphQL batching (with a staggered GitHub Actions schedule as fallback) and purges jsDelivr after GitHub propagates the commit. Authors who want near-instant sync (~1 min) can optionally call `curl -fsS -X POST https://ext-stats.chost.dev/sync` (60s cooldown). Clients refresh on demand or after their 5-minute local cache expires.
 - **Note**: Registry updates never auto-install or auto-update extensions on user devices.

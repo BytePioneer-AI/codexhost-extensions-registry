@@ -1,4 +1,5 @@
 import { writeFile } from "node:fs/promises";
+import { pathToFileURL } from "node:url";
 import {
   DESKTOP_EXTENSION_MANIFEST_MAX_BYTES,
   DESKTOP_EXTENSION_ZIP_MAX_BYTES,
@@ -10,6 +11,14 @@ import { loadSources, parseManifest } from "../validate-and-build-catalog.mjs";
 
 const githubRepoPattern =
   /https:\/\/github\.com\/([\w-]+)\/([\w-][\w.-]*?)(?:\.git)?(?:[/?#][^\s)\]>]*)?(?=[\s)\]>]|$)/iu;
+const githubLoginPattern = /^[a-z0-9](?:[a-z0-9_-]{0,37}[a-z0-9])?$/iu;
+const frontendScriptFilePattern = /\.[cm]?[jt]sx?$/iu;
+const frontendAutoApproveRiskChecks = [
+  ["document.cookie", /\bdocument\.cookie\b/u],
+  ["sendBeacon", /\bsendBeacon\b/u],
+  ["new WebSocket", /\bnew\s+WebSocket\b/u],
+  ["node:* builtin import", /["']node:[a-z0-9_/-]+["']/iu],
+];
 const githubHeaders = {
   accept: "application/vnd.github+json",
   "user-agent": "codexhost-desktop-extension-registry",
@@ -81,6 +90,192 @@ async function loadGitHubJson(url, headers, missingOk = false) {
   return bytes === undefined ? undefined : JSON.parse(utf8.decode(bytes));
 }
 
+async function loadRepositoryMetadata(owner, repo) {
+  try {
+    return await loadGitHubJson(`https://api.github.com/repos/${owner}/${repo}`, authHeaders());
+  } catch {
+    return undefined;
+  }
+}
+
+async function checkOrgPublicMember(org, username) {
+  if (!org || !username) return false;
+  try {
+    const url = `https://api.github.com/orgs/${encodeURIComponent(org)}/public_members/${encodeURIComponent(username)}`;
+    const response = await fetch(url, {
+      headers: authHeaders(),
+      redirect: "manual",
+      signal: AbortSignal.timeout(15_000),
+    });
+    await response.body?.cancel();
+    return response.status === 204;
+  } catch {
+    return false;
+  }
+}
+
+function isValidGitHubLogin(login) {
+  return typeof login === "string" && githubLoginPattern.test(login);
+}
+
+export function scanFrontendAutoApproveRisks(files, extraScriptFiles = []) {
+  if (!files) return [];
+  const extraSet = new Set(extraScriptFiles.filter((item) => typeof item === "string" && item));
+  const entries = files instanceof Map ? [...files.entries()] : [...files];
+  const hits = [];
+  for (const [file, content] of entries) {
+    if (typeof file !== "string" || (!frontendScriptFilePattern.test(file) && !extraSet.has(file))) {
+      continue;
+    }
+    let code;
+    try {
+      code = typeof content === "string" ? content : utf8.decode(content);
+    } catch {
+      hits.push({ file, rules: ["invalid UTF-8"] });
+      continue;
+    }
+    const rules = frontendAutoApproveRiskChecks
+      .filter(([, pattern]) => pattern.test(code))
+      .map(([rule]) => rule);
+    if (rules.length > 0) {
+      hits.push({ file, rules });
+    }
+  }
+  return hits;
+}
+
+export function evaluateAutoApproval({
+  issueUser,
+  repositoryMeta,
+  isOrgPublicMember,
+  publisherLogin,
+  manifest,
+  source,
+  files,
+} = {}) {
+  const reasonItems = [];
+  const addReason = (zh, en) => {
+    reasonItems.push({ zh, en });
+  };
+
+  const issueLogin = isValidGitHubLogin(issueUser?.login) ? issueUser.login : "";
+  const isHumanUser = issueUser?.type === "User" && Boolean(issueLogin);
+  if (!isHumanUser) {
+    if (issueUser?.type === "Bot") {
+      addReason("Bot 账号投稿需人工审核", "Bot account submissions require manual review");
+    } else {
+      addReason(
+        "投稿人不是已验证的 GitHub 真人用户",
+        "Issue author is not a verified human GitHub user",
+      );
+    }
+  }
+
+  const hasRepoMeta = Boolean(repositoryMeta && typeof repositoryMeta === "object");
+  if (!hasRepoMeta) {
+    addReason("无法获取或校验仓库元数据", "Unable to verify repository metadata");
+  } else {
+    if (repositoryMeta.private !== false) {
+      addReason("仓库非公开或可见性无法确认", "Repository is private or visibility could not be verified");
+    }
+    if (repositoryMeta.archived !== false) {
+      addReason("仓库已归档或归档状态无法确认", "Repository is archived or archive status could not be verified");
+    }
+  }
+
+  if (hasRepoMeta && isHumanUser) {
+    const ownerType = repositoryMeta.owner?.type;
+    const ownerLogin = isValidGitHubLogin(repositoryMeta.owner?.login)
+      ? repositoryMeta.owner.login
+      : "";
+    if (ownerType === "User") {
+      if (!ownerLogin || ownerLogin.toLowerCase() !== issueLogin.toLowerCase()) {
+        addReason(
+          `投稿人 @${issueLogin} 与仓库所有者${ownerLogin ? ` @${ownerLogin}` : ""}不一致`,
+          `Issue author @${issueLogin} does not match repository owner${ownerLogin ? ` @${ownerLogin}` : ""}`,
+        );
+      }
+    } else if (ownerType === "Organization") {
+      if (isOrgPublicMember !== true) {
+        addReason(
+          `投稿人 @${issueLogin} 不是组织${ownerLogin ? ` ${ownerLogin}` : ""}的公开成员`,
+          `Issue author @${issueLogin} is not a public member of organization${ownerLogin ? ` ${ownerLogin}` : ""}`,
+        );
+      }
+      if (!isValidGitHubLogin(publisherLogin) || publisherLogin.toLowerCase() !== issueLogin.toLowerCase()) {
+        addReason(
+          `投稿人 @${issueLogin} 与当前发布者（Release/Commit 作者）不一致`,
+          `Issue author @${issueLogin} does not match release or commit publisher`,
+        );
+      }
+    } else {
+      addReason("无法自动验证仓库归属", "Unable to verify repository ownership automatically");
+    }
+  }
+
+  if (!manifest || typeof manifest !== "object") {
+    addReason("缺少合法的 manifest.json 信息", "Missing valid manifest metadata");
+  } else if (manifest.backend) {
+    addReason(
+      "包含本地 Node 后端（manifest.backend）",
+      "Extension declares a local Node backend (manifest.backend)",
+    );
+  }
+
+  if (source?.trustTier !== "community") {
+    addReason(
+      `非社区信任等级（trustTier=${source?.trustTier ?? "unknown"}）`,
+      `Non-community trustTier (${source?.trustTier ?? "unknown"}) requires manual review`,
+    );
+  }
+  if (source?.allowChildProcess) {
+    addReason(
+      "配置了 allowChildProcess 豁免",
+      "Source enables allowChildProcess exemption",
+    );
+  }
+
+  if (!files) {
+    addReason(
+      "缺少扩展包文件清单，无法执行前端风险扫描",
+      "Missing extension package files for frontend risk scan",
+    );
+  } else {
+    const extraScriptFiles = [
+      manifest?.desktop?.script,
+      manifest?.page?.entry,
+      manifest?.widget?.entry,
+      manifest?.web?.entry,
+    ];
+    const riskHits = scanFrontendAutoApproveRisks(files, extraScriptFiles);
+    if (riskHits.length > 0) {
+      const detail = riskHits
+        .map(({ file, rules }) => `${file} (${rules.join(", ")})`)
+        .join("; ");
+      addReason(
+        `前端脚本命中高危模式：${detail}`,
+        `Frontend scripts matched high-risk patterns: ${detail}`,
+      );
+    }
+  }
+
+  if (reasonItems.length === 0) {
+    return {
+      eligible: true,
+      reasons: [],
+      summaryZh: "纯前端且仓库本人投稿，通过自动校验与安全检查",
+      summaryEn: "Frontend-only extension submitted by the repository owner and passed automatic checks",
+    };
+  }
+
+  return {
+    eligible: false,
+    reasons: reasonItems.map(({ zh, en }) => `${zh} (${en})`),
+    summaryZh: reasonItems.map(({ zh }) => zh).join("；"),
+    summaryEn: reasonItems.map(({ en }) => en).join("; "),
+  };
+}
+
 function extractRepositoryUrl(issueBody) {
   const body = String(issueBody ?? "");
   const sectionMatch = /###\s*GitHub repository URL\s*\r?\n+([\s\S]*?)(?:\r?\n###\s|$)/iu.exec(body);
@@ -132,6 +327,7 @@ async function resolveExtensionManifest(owner, repo) {
   let useApiHeaders = false;
   let usedRelease;
   let commitSha;
+  let publisherLogin;
   if (release && !release.draft && !release.prerelease && Array.isArray(release.assets)) {
     const zipAssets = release.assets.filter(
       ({ name }) => typeof name === "string" && safeAssetName.test(name),
@@ -144,6 +340,7 @@ async function resolveExtensionManifest(owner, repo) {
     if (zipAssets.length === 1) {
       downloadUrl = zipAssets[0].browser_download_url;
       usedRelease = release;
+      publisherLogin = usedRelease?.author?.login;
     }
   }
   if (!downloadUrl) {
@@ -155,6 +352,7 @@ async function resolveExtensionManifest(owner, repo) {
     downloadUrl = `${api}/zipball/${sha}`;
     useApiHeaders = true;
     commitSha = sha;
+    publisherLogin = commits?.[0]?.author?.login;
   }
   const zip = await download(
     downloadUrl,
@@ -181,7 +379,15 @@ async function resolveExtensionManifest(owner, repo) {
     .map((path) => resolveImage(path))
     .filter(Boolean);
 
-  return { id, manifest, iconUrl, screenshotUrls, releaseTag: usedRelease?.tag_name };
+  return {
+    id,
+    manifest,
+    files,
+    iconUrl,
+    screenshotUrls,
+    releaseTag: usedRelease?.tag_name,
+    publisherLogin,
+  };
 }
 
 function escapeHtml(text) {
@@ -190,6 +396,10 @@ function escapeHtml(text) {
     .replace(/</gu, "&lt;")
     .replace(/>/gu, "&gt;")
     .replace(/"/gu, "&quot;");
+}
+
+function escapeTableCell(text) {
+  return escapeHtml(String(text ?? "").replace(/[\r\n]+/gu, " ")).replace(/\|/gu, "\\|");
 }
 
 function pickLocalized(value) {
@@ -219,7 +429,7 @@ function formatCodeList(items, fallback = "无") {
   return items.map((item) => `\`${item}\``).join(" · ");
 }
 
-function buildPrPreview({
+export function buildPrPreview({
   issueNumber,
   issueAuthorLogin,
   repository,
@@ -228,6 +438,7 @@ function buildPrPreview({
   iconUrl,
   screenshotUrls,
   releaseTag,
+  autoApproval,
 }) {
   const name = pickLocalized(manifest.name);
   const primaryName = name.zh || name.en || id;
@@ -271,6 +482,10 @@ function buildPrPreview({
     );
   }
 
+  const reviewMode = autoApproval?.eligible
+    ? "🟢 满足自动通过条件（纯前端且仓库本人投稿）"
+    : `🟡 需维护者人工审核（${escapeTableCell(autoApproval?.summaryZh || "未满足自动通过条件")}）`;
+
   lines.push(
     "| 项目 | 内容 |",
     "| --- | --- |",
@@ -281,6 +496,7 @@ function buildPrPreview({
     `| 占用槽位 | ${formatCodeList(manifest.slots)} |`,
     `| 能力范围 | ${capabilities.length ? capabilities.join(" + ") : "仅声明"} |`,
     "| 自动校验 | `node validate-and-build-catalog.mjs --check-only` 通过 ✅ |",
+    `| 审核方式 | ${reviewMode} |`,
     "",
   );
 
@@ -353,10 +569,8 @@ async function main() {
   }
 
   const { owner, repo, repository } = extractRepositoryUrl(issue.body);
-  const { id, manifest, iconUrl, screenshotUrls, releaseTag } = await resolveExtensionManifest(
-    owner,
-    repo,
-  );
+  const { id, manifest, files, iconUrl, screenshotUrls, releaseTag, publisherLogin } =
+    await resolveExtensionManifest(owner, repo);
 
   const sourcesDirectory = new URL("../sources/", import.meta.url);
   const sources = await loadSources(sourcesDirectory);
@@ -395,6 +609,22 @@ async function main() {
       ? `${issueAuthorId}+${issueAuthorLogin}@users.noreply.github.com`
       : "";
 
+  const repositoryMeta = await loadRepositoryMetadata(owner, repo);
+  const isOrgPublicMember =
+    repositoryMeta?.owner?.type === "Organization" && issueAuthorLogin
+      ? await checkOrgPublicMember(repositoryMeta.owner.login, issueAuthorLogin)
+      : false;
+  const autoApproval = evaluateAutoApproval({
+    issueUser: issue?.user,
+    repositoryMeta,
+    isOrgPublicMember,
+    publisherLogin,
+    manifest,
+    source,
+    files,
+  });
+  const autoApproveReason = `${autoApproval.summaryZh} / ${autoApproval.summaryEn}`;
+
   const previewMarkdown = buildPrPreview({
     issueNumber,
     issueAuthorLogin,
@@ -404,6 +634,7 @@ async function main() {
     iconUrl,
     screenshotUrls,
     releaseTag,
+    autoApproval,
   });
   await writeFile(new URL("../pr-preview.md", import.meta.url), previewMarkdown, "utf8");
 
@@ -412,13 +643,19 @@ async function main() {
   await setOutput("repository_url", repository);
   await setOutput("issue_author_login", issueAuthorLogin);
   await setOutput("issue_author_email", issueAuthorEmail);
-  console.log(`Prepared sources/${filename} and PR preview for ${id} (${repository}).`);
+  await setOutput("auto_approve", autoApproval.eligible ? "true" : "false");
+  await setOutput("auto_approve_reason", autoApproveReason);
+  console.log(
+    `Prepared sources/${filename} and PR preview for ${id} (${repository}); auto_approve=${autoApproval.eligible}.`,
+  );
 }
 
-main().catch(async (error) => {
-  const message = error instanceof Error ? error.message : String(error);
-  await setOutput("status", "error");
-  await setOutput("error_message", message);
-  console.error(message);
-  process.exitCode = 1;
-});
+if (process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url) {
+  main().catch(async (error) => {
+    const message = error instanceof Error ? error.message : String(error);
+    await setOutput("status", "error");
+    await setOutput("error_message", message);
+    console.error(message);
+    process.exitCode = 1;
+  });
+}
