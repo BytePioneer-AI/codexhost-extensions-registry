@@ -1,13 +1,63 @@
 const prefix = "count:";
+const syncMetaKey = "meta:last-sync-check";
+const syncMetaWriteIntervalMs = 15 * 60 * 1000;
+const syncMetaRefreshIntervalMs = 10 * 60 * 1000;
+const syncCooldownMs = 60 * 1000;
+const syncCooldownCachePath = "/__internal/sync-cooldown";
+const syncCooldownCacheControl = "public, max-age=60";
+const graphqlEndpoint = "https://api.github.com/graphql";
+const graphqlRepoBatchSize = 40;
+const statsCacheControl = "public, max-age=300, s-maxage=300";
+
 const idPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/u;
+const repoSlugPattern = /^([A-Za-z0-9_.-]+)\/([A-Za-z0-9_.-]+)$/u;
 const githubRepoPattern =
   /^https:\/\/github\.com\/([A-Za-z0-9_.-]+)\/([A-Za-z0-9_.-]+?)(?:\.git)?\/?$/u;
 const safeAssetName = /^(?!\.\.?$)[^/\\\r\n]+\.zip$/iu;
+const shaPattern = /^[a-f0-9]{40}$/u;
+
 const cors = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type",
 };
+
+const registryStateQuery = `query RegistryState($owner: String!, $name: String!) {
+  repository(owner: $owner, name: $name) {
+    sources: object(expression: "main:sources") {
+      ... on Tree {
+        entries {
+          name
+          type
+          object {
+            ... on Blob {
+              text
+            }
+          }
+        }
+      }
+    }
+    catalog: object(expression: "main:catalog.v2.json") {
+      ... on Blob {
+        text
+      }
+    }
+  }
+}`;
+
+let lastSyncCheck = null;
+let lastPersistedAt = 0;
+let lastPersistedOk;
+let lastSyncTriggeredAtMs = 0;
+let inFlightSyncPromise = null;
+
+class SyncCheckError extends Error {
+  constructor(safeMessage) {
+    super(safeMessage);
+    this.name = "SyncCheckError";
+    this.safeMessage = safeMessage;
+  }
+}
 
 const json = (body, status = 200, headers = {}) =>
   Response.json(body, { status, headers: { ...cors, ...headers } });
@@ -21,99 +71,137 @@ function githubHeaders(token, accept = "application/vnd.github+json") {
   };
 }
 
-async function fetchGitHubJson(url, token, { missingOk = false, accept } = {}) {
-  const response = await fetch(url, { headers: githubHeaders(token, accept) });
-  if (missingOk && response.status === 404) return undefined;
-  if (!response.ok) throw new Error(`GitHub API ${response.status}: ${url}`);
-  return response.json();
+function sanitizeSyncError(error) {
+  if (error instanceof SyncCheckError && typeof error.safeMessage === "string") {
+    return error.safeMessage;
+  }
+  if (error?.name === "SyntaxError") return "Invalid JSON response";
+  if (error?.name === "TypeError") return "Network error";
+  return "Sync check failed";
 }
 
-async function readSources(repo, token) {
-  const api = `https://api.github.com/repos/${repo}`;
-  const files = await fetchGitHubJson(`${api}/contents/sources?ref=main`, token);
-  if (!Array.isArray(files)) throw new Error("Expected a sources directory");
-  return Promise.all(files.filter(({ name }) => name.endsWith(".json")).map(async (file) => {
-    const { name, sha, type } = file;
-    if (type !== "file" || !/^[a-f0-9]{40}$/u.test(sha)) {
-      throw new Error(`Invalid source file: ${name}`);
-    }
-    // Read the listed blob, even if main advances while the files are loading.
-    const source = await fetchGitHubJson(`${api}/git/blobs/${sha}`, token, {
-      accept: "application/vnd.github.raw+json",
-    });
-    if (typeof source?.id !== "string" || name !== `${source.id}.json`) {
-      throw new Error(`Source ID does not match filename: ${name}`);
-    }
-    return source;
-  }));
+function parseRepoSlug(slug) {
+  const match = repoSlugPattern.exec(slug);
+  if (!match) throw new SyncCheckError("Invalid registry repo");
+  return { owner: match[1], name: match[2] };
 }
 
-async function resolveExpectedDownloadUrl(source, token) {
-  const match = githubRepoPattern.exec(source.repository ?? "");
-  if (!match) return undefined;
-  const [, owner, repo] = match;
-  const api = `https://api.github.com/repos/${owner}/${repo}`;
+async function fetchGitHubGraphQL(query, variables, token) {
+  const response = await fetch(graphqlEndpoint, {
+    method: "POST",
+    headers: {
+      ...githubHeaders(token),
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ query, variables }),
+  });
+  if (!response.ok) {
+    throw new SyncCheckError(`GitHub GraphQL HTTP ${response.status}`);
+  }
+  const payload = await response.json();
+  if (!payload || typeof payload !== "object" || !payload.data || typeof payload.data !== "object") {
+    throw new SyncCheckError("GitHub GraphQL empty response");
+  }
+  return payload;
+}
 
-  // Prefer latest public stable Release .zip asset; fall back to default-branch HEAD commit.
-  const release = await fetchGitHubJson(`${api}/releases/latest`, token, { missingOk: true });
+async function readRegistryState(registryRepo, token) {
+  const { owner, name } = parseRepoSlug(registryRepo);
+  const { data } = await fetchGitHubGraphQL(registryStateQuery, { owner, name }, token);
+  const repoData = data.repository;
+  if (!repoData) throw new SyncCheckError("Registry repository unavailable");
+
+  const treeEntries = repoData.sources?.entries;
+  if (!Array.isArray(treeEntries)) {
+    throw new SyncCheckError("Invalid sources directory");
+  }
+
+  const sources = [];
+  for (const entry of treeEntries) {
+    if (typeof entry?.name !== "string" || !entry.name.endsWith(".json")) continue;
+    if ((entry.type && entry.type !== "blob") || typeof entry.object?.text !== "string") {
+      throw new SyncCheckError("Invalid source file");
+    }
+    const source = JSON.parse(entry.object.text);
+    if (typeof source?.id !== "string" || entry.name !== `${source.id}.json`) {
+      throw new SyncCheckError("Source ID mismatch");
+    }
+    sources.push(source);
+  }
+
+  const catalogText = repoData.catalog?.text;
+  if (typeof catalogText !== "string") {
+    throw new SyncCheckError("Missing catalog.v2.json");
+  }
+  const catalogDoc = JSON.parse(catalogText);
+  return { sources, catalogDoc };
+}
+
+function buildSourceReposBatchQuery(repos) {
+  const varDefs = [];
+  const fields = [];
+  const variables = {};
+  for (let i = 0; i < repos.length; i += 1) {
+    const { owner, repo } = repos[i];
+    varDefs.push(`$o${i}: String!`, `$n${i}: String!`);
+    variables[`o${i}`] = owner;
+    variables[`n${i}`] = repo;
+    fields.push(`r${i}: repository(owner: $o${i}, name: $n${i}) {
+    latestRelease {
+      isDraft
+      isPrerelease
+      publishedAt
+      releaseAssets(first: 50) {
+        nodes {
+          name
+          downloadUrl
+        }
+      }
+    }
+    defaultBranchRef {
+      target {
+        oid
+      }
+    }
+  }`);
+  }
+  const query = `query SourceRepos(${varDefs.join(", ")}) {\n  ${fields.join("\n  ")}\n}`;
+  return { query, variables };
+}
+
+function resolveExpectedDownloadUrlFromRepo(source, owner, repo, repoData) {
+  if (!repoData) return undefined;
+
+  const release = repoData.latestRelease;
+  const assetNodes = release?.releaseAssets?.nodes;
   if (
     release &&
-    !release.draft &&
-    !release.prerelease &&
-    release.published_at &&
-    Array.isArray(release.assets)
+    !release.isDraft &&
+    !release.isPrerelease &&
+    release.publishedAt &&
+    Array.isArray(assetNodes)
   ) {
-    const zipAssets = release.assets.filter(
-      ({ name }) =>
-        typeof name === "string" &&
-        safeAssetName.test(name) &&
-        (!source.asset || name === source.asset),
+    const zipAssets = assetNodes.filter(
+      (asset) =>
+        asset &&
+        typeof asset.name === "string" &&
+        safeAssetName.test(asset.name) &&
+        (!source.asset || asset.name === source.asset),
     );
-    if (zipAssets.length === 1 && typeof zipAssets[0].browser_download_url === "string") {
-      return zipAssets[0].browser_download_url;
+    if (zipAssets.length > 1) return undefined;
+    if (zipAssets.length === 1 && typeof zipAssets[0].downloadUrl === "string") {
+      return zipAssets[0].downloadUrl;
     }
   }
   if (source.asset) return undefined;
 
-  const commits = await fetchGitHubJson(`${api}/commits?per_page=1`, token, { missingOk: true });
-  const sha = Array.isArray(commits) ? commits[0]?.sha : undefined;
-  return typeof sha === "string" && /^[a-f0-9]{40}$/u.test(sha) ? `${api}/zipball/${sha}` : undefined;
+  const sha = repoData.defaultBranchRef?.target?.oid;
+  return typeof sha === "string" && shaPattern.test(sha)
+    ? `https://api.github.com/repos/${owner}/${repo}/zipball/${sha}`
+    : undefined;
 }
 
-async function checkAndDispatchSync(env) {
-  const token = env.GITHUB_TOKEN?.trim();
-  if (!token) return;
-
-  const registryRepo = env.REGISTRY_REPO || "BytePioneer-AI/codexhost-extensions-registry";
-  const workflow = env.REGISTRY_WORKFLOW || "registry-sync.yml";
-
-  const [sources, catalogDoc] = await Promise.all([
-    readSources(registryRepo, token),
-    fetchGitHubJson(`https://api.github.com/repos/${registryRepo}/contents/catalog.v2.json?ref=main`, token, {
-      accept: "application/vnd.github.raw+json",
-    }),
-  ]);
-  const entries = Array.isArray(catalogDoc?.extensions) ? catalogDoc.extensions : [];
-  const currentUrls = new Map(entries.map((entry) => [entry.id, entry.downloadUrl]));
-  const sourceIds = new Set(sources.map((source) => source.id));
-
-  let needsSync = entries.some((entry) => !sourceIds.has(entry.id));
-  if (!needsSync) {
-    for (const source of sources) {
-      try {
-        const expectedUrl = await resolveExpectedDownloadUrl(source, token);
-        if (expectedUrl && currentUrls.get(source.id) !== expectedUrl) {
-          needsSync = true;
-          break;
-        }
-      } catch {
-        // Ignore transient per-source API errors so one repo cannot block others.
-      }
-    }
-  }
-
-  if (!needsSync) return;
-
+async function dispatchWorkflow(registryRepo, workflow, token) {
   const response = await fetch(
     `https://api.github.com/repos/${registryRepo}/actions/workflows/${workflow}/dispatches`,
     {
@@ -126,7 +214,191 @@ async function checkAndDispatchSync(env) {
     },
   );
   if (!response.ok) {
-    throw new Error(`Failed to dispatch ${workflow}: ${response.status}`);
+    throw new SyncCheckError(`Dispatch HTTP ${response.status}`);
+  }
+}
+
+async function readStoredSyncCheck(kv) {
+  if (!kv) return null;
+  try {
+    const raw = await kv.get(syncMetaKey);
+    if (typeof raw !== "string") return null;
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
+async function recordSyncCheck(kv, summary, nowMs) {
+  lastSyncCheck = summary;
+  lastSyncTriggeredAtMs = Math.max(lastSyncTriggeredAtMs, nowMs);
+  if (!kv) return;
+
+  if (lastPersistedAt === 0) {
+    const stored = await readStoredSyncCheck(kv);
+    if (stored) {
+      if (typeof stored.ok === "boolean") lastPersistedOk = stored.ok;
+      const storedTime = Date.parse(stored.checkedAt);
+      if (Number.isFinite(storedTime)) lastPersistedAt = storedTime;
+    }
+  }
+
+  const stateChanged = lastPersistedOk !== summary.ok;
+  const stale = !lastPersistedAt || nowMs - lastPersistedAt >= syncMetaWriteIntervalMs;
+  if (!summary.dispatched && !stateChanged && !stale) return;
+
+  try {
+    await kv.put(syncMetaKey, JSON.stringify(summary));
+    lastPersistedAt = nowMs;
+    lastPersistedOk = summary.ok;
+  } catch {
+    // Ignore KV write failures so sync detection is unaffected.
+  }
+}
+
+async function getLastSyncCheck(kv) {
+  const memTime = lastSyncCheck?.checkedAt ? Date.parse(lastSyncCheck.checkedAt) : Number.NaN;
+  const memFresh =
+    lastSyncCheck && Number.isFinite(memTime) && Date.now() - memTime < syncMetaRefreshIntervalMs;
+  if (memFresh) return lastSyncCheck;
+
+  const stored = await readStoredSyncCheck(kv);
+  if (stored) {
+    const storedTime = Date.parse(stored.checkedAt);
+    if (!lastSyncCheck || !Number.isFinite(memTime) || (Number.isFinite(storedTime) && storedTime >= memTime)) {
+      lastSyncCheck = stored;
+      if (typeof stored.ok === "boolean") lastPersistedOk = stored.ok;
+      if (Number.isFinite(storedTime)) lastPersistedAt = storedTime;
+    }
+  }
+  return lastSyncCheck;
+}
+
+export function resetSyncState() {
+  lastSyncCheck = null;
+  lastPersistedAt = 0;
+  lastPersistedOk = undefined;
+  lastSyncTriggeredAtMs = 0;
+  inFlightSyncPromise = null;
+}
+
+export function checkAndDispatchSync(env = {}) {
+  if (inFlightSyncPromise) return inFlightSyncPromise;
+  const run = runSyncCheck(env).finally(() => {
+    if (inFlightSyncPromise === run) inFlightSyncPromise = null;
+  });
+  inFlightSyncPromise = run;
+  return run;
+}
+
+async function runSyncCheck(env = {}) {
+  const nowMs = Date.now();
+  const checkedAt = new Date(nowMs).toISOString();
+  const kv = env.STATS_KV;
+  const token = env.GITHUB_TOKEN?.trim();
+
+  if (!token) {
+    const summary = {
+      checkedAt,
+      ok: false,
+      needsSync: false,
+      dispatched: false,
+      sourceCount: 0,
+      error: "Missing GITHUB_TOKEN",
+    };
+    await recordSyncCheck(kv, summary, nowMs);
+    return summary;
+  }
+
+  const registryRepo = env.REGISTRY_REPO || "BytePioneer-AI/codexhost-extensions-registry";
+  const workflow = env.REGISTRY_WORKFLOW || "registry-sync.yml";
+
+  let sourceCount = 0;
+  let needsSync = false;
+  let dispatched = false;
+
+  try {
+    const { sources, catalogDoc } = await readRegistryState(registryRepo, token);
+    sourceCount = sources.length;
+
+    const entries = Array.isArray(catalogDoc?.extensions) ? catalogDoc.extensions : [];
+    const currentUrls = new Map(entries.map((entry) => [entry.id, entry.downloadUrl]));
+    const sourceIds = new Set(sources.map((source) => source.id));
+
+    needsSync = entries.some((entry) => !sourceIds.has(entry.id));
+
+    if (!needsSync) {
+      const uniqueRepos = [];
+      const repoGroups = new Map();
+
+      for (const source of sources) {
+        const match = githubRepoPattern.exec(source.repository ?? "");
+        if (!match) continue;
+        const [, owner, repo] = match;
+        const key = `${owner.toLowerCase()}/${repo.toLowerCase()}`;
+        let group = repoGroups.get(key);
+        if (!group) {
+          group = { owner, repo, sources: [] };
+          repoGroups.set(key, group);
+          uniqueRepos.push(group);
+        }
+        group.sources.push(source);
+      }
+
+      for (let offset = 0; offset < uniqueRepos.length && !needsSync; offset += graphqlRepoBatchSize) {
+        const batch = uniqueRepos.slice(offset, offset + graphqlRepoBatchSize);
+        const { query, variables } = buildSourceReposBatchQuery(batch);
+        // Partial GraphQL errors leave unavailable aliases as null while returning healthy repos.
+        const { data } = await fetchGitHubGraphQL(query, variables, token);
+
+        for (let i = 0; i < batch.length; i += 1) {
+          const group = batch[i];
+          const repoData = data[`r${i}`];
+          if (!repoData) continue;
+          for (const source of group.sources) {
+            const expectedUrl = resolveExpectedDownloadUrlFromRepo(
+              source,
+              group.owner,
+              group.repo,
+              repoData,
+            );
+            if (expectedUrl && currentUrls.get(source.id) !== expectedUrl) {
+              needsSync = true;
+              break;
+            }
+          }
+          if (needsSync) break;
+        }
+      }
+    }
+
+    if (needsSync) {
+      await dispatchWorkflow(registryRepo, workflow, token);
+      dispatched = true;
+    }
+
+    const summary = {
+      checkedAt,
+      ok: true,
+      needsSync,
+      dispatched,
+      sourceCount,
+      error: null,
+    };
+    await recordSyncCheck(kv, summary, nowMs);
+    return summary;
+  } catch (error) {
+    const summary = {
+      checkedAt,
+      ok: false,
+      needsSync,
+      dispatched,
+      sourceCount,
+      error: sanitizeSyncError(error),
+    };
+    await recordSyncCheck(kv, summary, nowMs);
+    return summary;
   }
 }
 
@@ -157,15 +429,107 @@ async function snapshot(kv) {
   }
 }
 
+function getDefaultCache() {
+  return typeof caches !== "undefined" && caches?.default ? caches.default : undefined;
+}
+
+async function readSyncCooldownAtMs(cache, cooldownKey, nowMs) {
+  let recentAtMs = lastSyncTriggeredAtMs;
+  if (lastSyncCheck?.checkedAt) {
+    const checkedAtMs = Date.parse(lastSyncCheck.checkedAt);
+    if (Number.isFinite(checkedAtMs) && checkedAtMs > recentAtMs) {
+      recentAtMs = checkedAtMs;
+    }
+  }
+  if (recentAtMs > 0 && nowMs - recentAtMs < syncCooldownMs) {
+    return recentAtMs;
+  }
+  if (!cache) return recentAtMs;
+  try {
+    const cached = await cache.match(cooldownKey);
+    if (cached) {
+      const payload = await cached.json().catch(() => null);
+      const cachedAtMs =
+        typeof payload?.checkedAtMs === "number" && Number.isFinite(payload.checkedAtMs)
+          ? payload.checkedAtMs
+          : nowMs;
+      if (cachedAtMs > recentAtMs) recentAtMs = cachedAtMs;
+    }
+  } catch {
+    // Fall back to in-memory cooldown when Edge Cache is unavailable.
+  }
+  return recentAtMs;
+}
+
+async function writeSyncCooldown(cache, cooldownKey, checkedAtMs, ctx) {
+  lastSyncTriggeredAtMs = Math.max(lastSyncTriggeredAtMs, checkedAtMs);
+  if (!cache) return;
+  const marker = Response.json(
+    { checkedAtMs },
+    { status: 200, headers: { "Cache-Control": syncCooldownCacheControl } },
+  );
+  const putPromise = Promise.resolve(cache.put(cooldownKey, marker)).catch(() => {});
+  if (ctx?.waitUntil) {
+    ctx.waitUntil(putPromise);
+  } else {
+    await putPromise;
+  }
+}
+
+function syncResultStatus(summary) {
+  if (!summary.ok) return 503;
+  if (summary.dispatched) return 202;
+  return 200;
+}
+
 export default {
   async scheduled(_event, env, ctx) {
     ctx.waitUntil(checkAndDispatchSync(env));
   },
-  async fetch(request, { STATS_KV: kv }) {
+  async fetch(request, env = {}, ctx) {
+    const kv = env.STATS_KV;
     const { method } = request;
-    const { pathname } = new URL(request.url);
+    const url = new URL(request.url);
+    const { pathname } = url;
     if (method === "OPTIONS") return new Response(null, { status: 204, headers: cors });
-    if (method === "GET" && pathname === "/health") return json({ ok: true });
+    if (method === "GET" && pathname === "/health") {
+      const sync = await getLastSyncCheck(kv);
+      return json({ ok: true, sync: sync ?? null });
+    }
+    if (method === "POST" && pathname === "/sync") {
+      const cache = getDefaultCache();
+      const cooldownKey = new Request(`${url.origin}${syncCooldownCachePath}`, { method: "GET" });
+
+      if (inFlightSyncPromise) {
+        const summary = await inFlightSyncPromise;
+        return json(summary, syncResultStatus(summary));
+      }
+
+      const nowMs = Date.now();
+      const recentAtMs = await readSyncCooldownAtMs(cache, cooldownKey, nowMs);
+      if (!inFlightSyncPromise && recentAtMs > 0 && nowMs - recentAtMs < syncCooldownMs) {
+        const retryAfterSeconds = Math.max(
+          1,
+          Math.ceil((syncCooldownMs - (nowMs - recentAtMs)) / 1000),
+        );
+        const sync = await getLastSyncCheck(kv);
+        return json(
+          { ok: true, throttled: true, retryAfterSeconds, sync: sync ?? null },
+          429,
+          { "Retry-After": String(retryAfterSeconds) },
+        );
+      }
+
+      const summary = await checkAndDispatchSync(env);
+      const checkedAtMs = Date.parse(summary.checkedAt);
+      await writeSyncCooldown(
+        cache,
+        cooldownKey,
+        Number.isFinite(checkedAtMs) ? checkedAtMs : Date.now(),
+        ctx,
+      );
+      return json(summary, syncResultStatus(summary));
+    }
     try {
       if (method === "POST" && pathname.startsWith("/install/")) {
         let id;
@@ -183,10 +547,29 @@ export default {
         return json({ id, downloads });
       }
       if (method === "GET" && pathname === "/stats.json") {
+        const cache = getDefaultCache();
+        const cacheKey = new Request(`${url.origin}/stats.json`, { method: "GET" });
+        if (cache) {
+          try {
+            const cached = await cache.match(cacheKey);
+            if (cached) return cached;
+          } catch {
+            // Fall through to KV if Edge Cache is unavailable.
+          }
+        }
         const downloads = await snapshot(kv);
-        return json({ generatedAt: new Date().toISOString(), downloads }, 200, {
-          "Cache-Control": "public, max-age=300",
+        const response = json({ generatedAt: new Date().toISOString(), downloads }, 200, {
+          "Cache-Control": statsCacheControl,
         });
+        if (cache) {
+          const putPromise = Promise.resolve(cache.put(cacheKey, response.clone())).catch(() => {});
+          if (ctx?.waitUntil) {
+            ctx.waitUntil(putPromise);
+          } else {
+            await putPromise;
+          }
+        }
+        return response;
       }
       return json({ error: "Not found" }, 404);
     } catch {

@@ -1,0 +1,129 @@
+name: Deploy stats & sync worker
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'worker/**'
+      - '.github/workflows/deploy-worker.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'worker/**'
+      - '.github/workflows/deploy-worker.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Syntax check Worker
+        run: node --check worker/worker.js
+      - name: Run Worker unit tests
+        run: node --test worker/worker.test.mjs
+
+  deploy:
+    needs: test
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    concurrency:
+      group: deploy-worker
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Validate deployment config and render Wrangler config
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_STATS_KV_ID: ${{ secrets.CLOUDFLARE_STATS_KV_ID || vars.CLOUDFLARE_STATS_KV_ID }}
+          CLOUDFLARE_WORKER_NAME: ${{ vars.CLOUDFLARE_WORKER_NAME }}
+        run: |
+          node -e '
+            const fs = require("node:fs");
+            const apiToken = (process.env.CLOUDFLARE_API_TOKEN || "").trim();
+            const accountId = (process.env.CLOUDFLARE_ACCOUNT_ID || "").trim();
+            const kvId = (process.env.CLOUDFLARE_STATS_KV_ID || "").trim();
+            const workerName = (process.env.CLOUDFLARE_WORKER_NAME || "").trim();
+            const rawToml = fs.readFileSync("worker/wrangler.toml", "utf8");
+            const needsKvId = rawToml.includes("YOUR_KV_NAMESPACE_ID");
+
+            const missing = [];
+            if (!apiToken) missing.push("`secrets.CLOUDFLARE_API_TOKEN` (Cloudflare API Token with Workers Scripts: Edit)");
+            if (!accountId) missing.push("`secrets.CLOUDFLARE_ACCOUNT_ID` (Cloudflare Account ID)");
+            if (needsKvId && !kvId) {
+              missing.push("`secrets.CLOUDFLARE_STATS_KV_ID` or `vars.CLOUDFLARE_STATS_KV_ID` (STATS_KV Namespace ID to replace `YOUR_KV_NAMESPACE_ID`)");
+            }
+
+            if (missing.length > 0) {
+              const message = [
+                "### Worker deployment blocked: missing required configuration",
+                "",
+                "Configure the following repository secrets/variables before deploying:",
+                ...missing.map((item) => `- ${item}`),
+                "",
+                "Optional:",
+                "- `vars.CLOUDFLARE_WORKER_NAME`: override default worker name from `worker/wrangler.toml`",
+                "- `secrets.WORKER_GITHUB_TOKEN`: sync `GITHUB_TOKEN` secret to the Cloudflare Worker",
+                "- `vars.STATS_URL`: enable post-deploy `/health` smoke check",
+                "",
+              ].join("\n");
+              if (process.env.GITHUB_STEP_SUMMARY) {
+                fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, message);
+              }
+              console.error(message);
+              process.exit(1);
+            }
+
+            let rendered = rawToml;
+            if (needsKvId) {
+              rendered = rendered.replaceAll("\"YOUR_KV_NAMESPACE_ID\"", JSON.stringify(kvId));
+            }
+            if (workerName) {
+              rendered = rendered.replace(/^name\s*=\s*"[^"]*"/m, `name = ${JSON.stringify(workerName)}`);
+            }
+            fs.writeFileSync("worker/wrangler.deploy.toml", rendered, "utf8");
+          '
+      - name: Deploy Cloudflare Worker
+        working-directory: worker
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npx --yes wrangler@4 deploy --config wrangler.deploy.toml --keep-vars
+      - name: Sync Worker GITHUB_TOKEN secret (optional)
+        working-directory: worker
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          WORKER_GITHUB_TOKEN: ${{ secrets.WORKER_GITHUB_TOKEN }}
+        run: |
+          if [ -n "$WORKER_GITHUB_TOKEN" ]; then
+            printf '%s' "$WORKER_GITHUB_TOKEN" | npx --yes wrangler@4 secret put GITHUB_TOKEN --config wrangler.deploy.toml
+          else
+            echo "WORKER_GITHUB_TOKEN secret is not set; preserving existing Cloudflare Worker GITHUB_TOKEN."
+          fi
+      - name: Smoke check deployed Worker
+        if: ${{ vars.STATS_URL != '' }}
+        env:
+          STATS_URL: ${{ vars.STATS_URL }}
+        run: |
+          url="${STATS_URL%/}/health"
+          if body=$(curl --max-time 15 -fsS "$url"); then
+            echo "Worker health smoke check OK: ${body}"
+          else
+            echo "::warning::Worker health smoke check failed for ${url}"
+          fi
