@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import worker, { checkAndDispatchSync, resetSyncState } from "./worker.js";
+import worker, { checkAndDispatchSync, refreshStatsSnapshot, resetSyncState } from "./worker.js";
 
 function createMockKv(initial = {}) {
   const store = new Map(Object.entries(initial));
@@ -858,6 +858,60 @@ test("/stats.json gracefully falls back when caches.default is unavailable", asy
       const body = await res.json();
       assert.deepEqual(body.downloads, { "mcp-hub": 7 });
       assert.equal(kv.stats.listCalls, 1);
+    },
+  );
+});
+
+test("/stats.json reads single-key KV snapshot with zero kv.list() calls and scheduled refresh throttles", async () => {
+  let currentNow = Date.parse("2026-11-27T12:00:00.000Z");
+  const kv = createMockKv({
+    "count:hdd-fairy": "50",
+    "meta:stats-snapshot": JSON.stringify({
+      generatedAt: new Date(currentNow).toISOString(),
+      downloads: { "hdd-fairy": 50 },
+    }),
+  });
+
+  await withMockedGlobals(
+    {
+      cachesValue: undefined,
+      nowMs: () => currentNow,
+    },
+    async () => {
+      // Cold edge POP miss reads only meta:stats-snapshot via kv.get() -> ZERO kv.list() calls!
+      const res1 = await worker.fetch(new Request("https://stats.example.com/stats.json"), {
+        STATS_KV: kv,
+      });
+      assert.equal(res1.status, 200);
+      assert.deepEqual((await res1.json()).downloads, { "hdd-fairy": 50 });
+      assert.equal(kv.stats.listCalls, 0);
+
+      // Refresh within 15 minutes skips kv.list().
+      currentNow += 5 * 60 * 1000;
+      await refreshStatsSnapshot(kv, { nowMs: currentNow });
+      assert.equal(kv.stats.listCalls, 0);
+      assert.equal(kv.stats.putCalls, 0);
+
+      // After 15 minutes with unchanged counts, scans once but skips unnecessary kv.put().
+      currentNow += 15 * 60 * 1000;
+      await refreshStatsSnapshot(kv, { nowMs: currentNow });
+      assert.equal(kv.stats.listCalls, 1);
+      assert.equal(kv.stats.putCalls, 0);
+
+      // After an install increments count + 15 minutes pass, refresh updates meta:stats-snapshot.
+      await kv.put("count:hdd-fairy", "51");
+      const putsBeforeRefresh = kv.stats.putCalls;
+      currentNow += 15 * 60 * 1000;
+      await refreshStatsSnapshot(kv, { nowMs: currentNow });
+      assert.equal(kv.stats.listCalls, 2);
+      assert.equal(kv.stats.putCalls, putsBeforeRefresh + 1);
+
+      const res2 = await worker.fetch(new Request("https://stats.example.com/stats.json"), {
+        STATS_KV: kv,
+      });
+      assert.equal(res2.status, 200);
+      assert.deepEqual((await res2.json()).downloads, { "hdd-fairy": 51 });
+      assert.equal(kv.stats.listCalls, 2);
     },
   );
 });

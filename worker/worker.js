@@ -1,7 +1,10 @@
 const prefix = "count:";
 const syncMetaKey = "meta:last-sync-check";
+const statsSnapshotKey = "meta:stats-snapshot";
 const syncMetaWriteIntervalMs = 15 * 60 * 1000;
 const syncMetaRefreshIntervalMs = 10 * 60 * 1000;
+const statsSnapshotRefreshIntervalMs = 15 * 60 * 1000;
+const statsSnapshotHeartbeatMs = 60 * 60 * 1000;
 const syncCooldownMs = 60 * 1000;
 const syncCooldownCachePath = "/__internal/sync-cooldown";
 const syncCooldownCacheControl = "public, max-age=60";
@@ -49,6 +52,7 @@ let lastSyncCheck = null;
 let lastPersistedAt = 0;
 let lastPersistedOk;
 let lastSyncTriggeredAtMs = 0;
+let lastStatsSnapshotAtMs = 0;
 let inFlightSyncPromise = null;
 
 class SyncCheckError extends Error {
@@ -280,6 +284,7 @@ export function resetSyncState() {
   lastPersistedAt = 0;
   lastPersistedOk = undefined;
   lastSyncTriggeredAtMs = 0;
+  lastStatsSnapshotAtMs = 0;
   inFlightSyncPromise = null;
 }
 
@@ -429,6 +434,80 @@ async function snapshot(kv) {
   }
 }
 
+function normalizeDownloadsMap(raw) {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
+  const downloads = Object.create(null);
+  for (const [id, count] of Object.entries(raw)) {
+    if (idPattern.test(id) && typeof count === "number" && Number.isSafeInteger(count) && count >= 0) {
+      downloads[id] = count;
+    }
+  }
+  return downloads;
+}
+
+function downloadsEqual(a, b) {
+  if (!a || !b) return false;
+  const keysA = Object.keys(a);
+  const keysB = Object.keys(b);
+  if (keysA.length !== keysB.length) return false;
+  for (const key of keysA) {
+    if (a[key] !== b[key]) return false;
+  }
+  return true;
+}
+
+async function readStoredStatsSnapshot(kv) {
+  if (!kv) return null;
+  const raw = await kv.get(statsSnapshotKey);
+  if (typeof raw !== "string") return null;
+  try {
+    const parsed = JSON.parse(raw);
+    const downloads = normalizeDownloadsMap(parsed?.downloads);
+    if (!downloads || typeof parsed?.generatedAt !== "string") return null;
+    return { generatedAt: parsed.generatedAt, downloads };
+  } catch {
+    return null;
+  }
+}
+
+export async function refreshStatsSnapshot(kv, { nowMs = Date.now(), force = false } = {}) {
+  if (!kv) return null;
+  if (!force && lastStatsSnapshotAtMs > 0 && nowMs - lastStatsSnapshotAtMs < statsSnapshotRefreshIntervalMs) {
+    return null;
+  }
+
+  let existing = null;
+  try {
+    existing = await readStoredStatsSnapshot(kv);
+  } catch {
+    existing = null;
+  }
+
+  const existingTime = existing ? Date.parse(existing.generatedAt) : Number.NaN;
+  if (!force && Number.isFinite(existingTime)) {
+    lastStatsSnapshotAtMs = Math.max(lastStatsSnapshotAtMs, existingTime);
+    if (nowMs - existingTime < statsSnapshotRefreshIntervalMs) {
+      return existing;
+    }
+  }
+
+  const downloads = await snapshot(kv);
+  const payload = { generatedAt: new Date(nowMs).toISOString(), downloads };
+  const changed = !existing || !downloadsEqual(existing.downloads, downloads);
+  const heartbeatDue = !Number.isFinite(existingTime) || nowMs - existingTime >= statsSnapshotHeartbeatMs;
+
+  lastStatsSnapshotAtMs = nowMs;
+  if (changed || heartbeatDue) {
+    try {
+      await kv.put(statsSnapshotKey, JSON.stringify(payload));
+    } catch {
+      // Preserve read availability even if KV write quota is temporarily exhausted.
+    }
+    return payload;
+  }
+  return existing;
+}
+
 function getDefaultCache() {
   return typeof caches !== "undefined" && caches?.default ? caches.default : undefined;
 }
@@ -484,7 +563,12 @@ function syncResultStatus(summary) {
 
 export default {
   async scheduled(_event, env, ctx) {
-    ctx.waitUntil(checkAndDispatchSync(env));
+    ctx.waitUntil(
+      Promise.allSettled([
+        checkAndDispatchSync(env),
+        refreshStatsSnapshot(env.STATS_KV),
+      ]),
+    );
   },
   async fetch(request, env = {}, ctx) {
     const kv = env.STATS_KV;
@@ -557,8 +641,12 @@ export default {
             // Fall through to KV if Edge Cache is unavailable.
           }
         }
-        const downloads = await snapshot(kv);
-        const response = json({ generatedAt: new Date().toISOString(), downloads }, 200, {
+        let payload = await readStoredStatsSnapshot(kv);
+        if (!payload) {
+          payload = await refreshStatsSnapshot(kv, { force: true });
+        }
+        if (!payload) throw new Error("Stats unavailable");
+        const response = json(payload, 200, {
           "Cache-Control": statsCacheControl,
         });
         if (cache) {
