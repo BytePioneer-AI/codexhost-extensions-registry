@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-28T06:26:10.384Z",
+  "generatedAt": "2026-11-28T06:39:05.392Z",
   "extensions": [
     {
       "id": "auto-archive-guard",
@@ -449,6 +449,50 @@
       }
     },
     {
+      "id": "model-tier-picker",
+      "version": "0.2.0",
+      "name": {
+        "en": "ThinkShift",
+        "zh-CN": "思考换挡"
+      },
+      "description": {
+        "en": "Shift a model's reasoning effort with a slider. Each tier clicks into place, and signal bars beside the model name show the current tier.",
+        "zh-CN": "用滑杆给模型换挡，调节思考强度。每一档都有轻微吸附，模型名旁的信号格随时显示当前档位。"
+      },
+      "details": {
+        "en": "### Shift gears while you think\n\n- **Stops that follow the model**: The slider shows the tiers the current model actually offers, from three to seven or more. Custom tiers keep their native names.\n- **A tier you can feel**: The thumb catches briefly at each stop. A dotted wave follows your drag, and rainbow dots flow along the track.\n- **Release to apply, keep adjusting**: The badge in the upper right names the tier as you drag. The panel stays open after each selection. Click outside or press Esc to close it. Arrow keys, Home and End also select tiers.\n- **Signal bars in the composer**: Four bars beside the model name and a badge show the confirmed tier. After you open a model's menu once, new conversations and page reloads keep the same tier display.\n\n### Where it works\n\n- CodexHost Web and its desktop window, and external Harness sessions in Codex Desktop, such as Claude Code, DeepSeek and Pi.\n- Native Codex sessions in Codex Desktop keep their native Power picker.\n- Models without reasoning tiers keep the native menu.\n\n### Privacy\n\nFrontend only: no background process, no network requests, and no access to conversation text. Verified tier lists stay in local browser storage without conversation content or IDs. With Reduce Motion enabled, the animations stop.",
+        "zh-CN": "### 一边思考，一边换挡\n\n- **刻度跟着模型走**：滑杆只显示当前模型实际提供的档位，三档到七档都适用；自定义档位保留原名。\n- **每一档都有手感**：滑块经过刻度时会轻轻吸附；点阵波浪随手势推进、折返，彩虹网点沿轨道流动。\n- **松手即生效，可以接着调**：拖动时右上角实时显示档位名；选好后面板保持打开，点击面板外或按 Esc 收起。方向键、Home 和 End 也能选档。\n- **输入框信号格**：模型名旁的四格信号和徽标显示已确认的档位。某个模型展开过一次菜单后，新开对话、刷新页面都保持同样的显示。\n\n### 适用范围\n\n- CodexHost Web 及其桌面窗口，以及 Codex Desktop 中的外部 Harness 会话，例如 Claude Code、DeepSeek 和 Pi。\n- Codex Desktop 原生 Codex 会话保留原生的 Power 选择器。\n- 没有思考档位的模型保留原生菜单。\n\n### 隐私\n\n纯前端扩展：没有后台进程，不联网，不读取对话正文。核实过的档位列表只保存在本机浏览器存储中，不含对话内容或会话 ID。开启「减少动态效果」后动画停止。"
+      },
+      "author": "sduhantao-maker",
+      "repository": "https://github.com/sduhantao-maker/codexhost-thinkshift",
+      "stars": 0,
+      "categories": [
+        "interface"
+      ],
+      "trustTier": "community",
+      "icon": "https://github.com/sduhantao-maker/codexhost-thinkshift/releases/download/v0.2.0/icon.png",
+      "screenshots": [
+        "https://github.com/sduhantao-maker/codexhost-thinkshift/releases/download/v0.2.0/gpt-ultra-zh.png",
+        "https://github.com/sduhantao-maker/codexhost-thinkshift/releases/download/v0.2.0/gpt-ultra-light-en.png",
+        "https://github.com/sduhantao-maker/codexhost-thinkshift/releases/download/v0.2.0/gemini-3-zh.png",
+        "https://github.com/sduhantao-maker/codexhost-thinkshift/releases/download/v0.2.0/haiku-auto-en.png"
+      ],
+      "downloadUrl": "https://github.com/sduhantao-maker/codexhost-thinkshift/releases/download/v0.2.0/model-tier-picker-0.2.0.zip",
+      "sha256": "9bc8abce92ffbba17e8bafd8563068aa39ad76ca483f8b82f04887e6cf0001c9",
+      "slots": [],
+      "publishedAt": "2026-11-28T06:37:19Z",
+      "updatedAt": "2026-11-28T06:37:19Z",
+      "format": "codexhost",
+      "targets": [
+        "desktop",
+        "web"
+      ],
+      "apis": {
+        "desktop": 1,
+        "web": 1
+      }
+    },
+    {
       "id": "prism-facets",
       "version": "1.2.8",
       "name": {
@@ -466,7 +510,7 @@
       "author": "SgAlice",
       "repository": "https://github.com/SgAlice/codexhost-prism-facets",
       "stars": 1,
-      "downloads": 121,
+      "downloads": 122,
       "categories": [
         "appearance",
         "interface",
