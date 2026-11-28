@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-28T13:40:45.858Z",
+  "generatedAt": "2026-11-28T13:42:27.301Z",
   "extensions": [
     {
       "id": "auto-archive-guard",
@@ -373,7 +373,7 @@
     },
     {
       "id": "git-branch-status",
-      "version": "0.3.1",
+      "version": "0.3.2",
       "name": {
         "en": "Git Branch Status",
         "zh-CN": "Git 分支状态"
@@ -395,12 +395,12 @@
         "workflow"
       ],
       "trustTier": "community",
-      "icon": "https://github.com/ABC-xiaoxuan/codexhost-git-branch-status/releases/download/v0.3.1/icon.png",
-      "downloadUrl": "https://github.com/ABC-xiaoxuan/codexhost-git-branch-status/releases/download/v0.3.1/codexhost-git-branch-status-v0.3.1.zip",
-      "sha256": "2bddd16460ec5e6002427137db4d124368ca4d18a776fc50eab09cdc99153978",
+      "icon": "https://github.com/ABC-xiaoxuan/codexhost-git-branch-status/releases/download/v0.3.2/icon.png",
+      "downloadUrl": "https://github.com/ABC-xiaoxuan/codexhost-git-branch-status/releases/download/v0.3.2/codexhost-git-branch-status-v0.3.2.zip",
+      "sha256": "d11672a084e523951d34e88935307514814cdf5f96c21acde4387ce62597d532",
       "slots": [],
       "publishedAt": "2026-11-28T05:57:15Z",
-      "updatedAt": "2026-11-28T05:57:15Z",
+      "updatedAt": "2026-11-28T13:41:41Z",
       "format": "codexhost",
       "targets": [
         "web"
@@ -410,6 +410,12 @@
         "backend": 1
       },
       "changelog": [
+        {
+          "version": "0.3.2",
+          "publishedAt": "2026-11-28T13:41:41Z",
+          "notes": "### Highlights in \u000b0.3.2\n- **Zero-spawn linked worktree discovery & auto-follow**:\n  - Reads <commonDir>/worktrees directly via pure \fs/promises (0 extra git spawns, 0 persistent directory handles).\n  - When a session is in the main repository (e.g. staying on main) and an Agent creates or actively works in a sibling linked feature worktree (git worktree add -b feat/...), the pill **automatically follows** that active worktree branch within <= 2s (highlighted WT badge), and automatically switches back to main once merged.\n  - Configurable via new **Auto-follow active linked worktree** (\followActiveWorktree) toggle in Plugin Details.\n- **Pill +N WT badge & interactive Worktrees switcher in popover**:\n  - When viewing the main repo with existing named-branch worktrees, the pill shows +N WT with branch previews on hover.\n  - Popover lists Main + all existing linked worktrees (sorted by active feature branches first, filtering out deleted/prunable entries) with one-click switching, Auto reset button, and per-worktree path copy.\n- **Compat mode bug fix**:\n  - Clears previous session state immediately when switching conversations in compat mode (\u000b0.27.x/\u000b0.28.2), preventing stale branch pills from lingering if a session lookup is slow or empty.\n\n### Assets\n- codexhost-git-branch-status-v0.3.2.zip — installable CodexHost v2 extension bundle (sha256: d11672a084e523951d34e88935307514814cdf5f96c21acde4387ce62597d532)\n- icon.png — standalone icon asset matching \u0007ssets/icon.png in the ZIP",
+          "url": "https://github.com/ABC-xiaoxuan/codexhost-git-branch-status/releases/tag/v0.3.2"
+        },
         {
           "version": "0.3.1",
           "publishedAt": "2026-11-28T05:57:15Z",
@@ -1188,7 +1194,7 @@
       "author": "sduhantao-maker",
       "repository": "https://github.com/sduhantao-maker/codexhost-sidebar-thread-tree",
       "stars": 5,
-      "downloads": 1654,
+      "downloads": 1649,
       "categories": [
         "interface",
         "workflow"
