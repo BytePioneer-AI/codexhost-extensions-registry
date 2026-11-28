@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-11-26T07:33:22.739Z",
+  "generatedAt": "2026-11-28T04:45:10.589Z",
   "extensions": [
     {
       "id": "sidebar-delegation-badges",
@@ -20,6 +20,7 @@
       "author": "lpmasser",
       "repository": "https://github.com/lpmasser/codexhost-sidebar-delegation-badges",
       "stars": 0,
+      "downloads": 201,
       "categories": [
         "interface",
         "workflow"
@@ -51,6 +52,7 @@
       "author": "sduhantao-maker",
       "repository": "https://github.com/sduhantao-maker/codexhost-sidebar-thread-tree",
       "stars": 4,
+      "downloads": 283,
       "categories": [
         "interface",
         "workflow"
