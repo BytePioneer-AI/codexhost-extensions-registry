@@ -27,9 +27,12 @@ jobs:
         with:
           node-version: 24
       - name: Syntax check Worker
-        run: node --check worker/worker.js
+        run: |
+          node --check worker/worker.js
+          node --check worker/telemetry.js
+          node --check worker/dashboard-html.js
       - name: Run Worker unit tests
-        run: node --test worker/worker.test.mjs
+        run: node --test worker/worker.test.mjs worker/telemetry.test.mjs
 
   deploy:
     needs: test
@@ -50,6 +53,7 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_STATS_DB_ID: ${{ secrets.CLOUDFLARE_STATS_DB_ID || vars.CLOUDFLARE_STATS_DB_ID }}
           CLOUDFLARE_STATS_KV_ID: ${{ secrets.CLOUDFLARE_STATS_KV_ID || vars.CLOUDFLARE_STATS_KV_ID }}
           CLOUDFLARE_WORKER_NAME: ${{ vars.CLOUDFLARE_WORKER_NAME }}
         run: |
@@ -57,14 +61,19 @@ jobs:
             const fs = require("node:fs");
             const apiToken = (process.env.CLOUDFLARE_API_TOKEN || "").trim();
             const accountId = (process.env.CLOUDFLARE_ACCOUNT_ID || "").trim();
+            const dbId = (process.env.CLOUDFLARE_STATS_DB_ID || "").trim();
             const kvId = (process.env.CLOUDFLARE_STATS_KV_ID || "").trim();
             const workerName = (process.env.CLOUDFLARE_WORKER_NAME || "").trim();
             const rawToml = fs.readFileSync("worker/wrangler.toml", "utf8");
+            const needsDbId = rawToml.includes("YOUR_D1_DATABASE_ID");
             const needsKvId = rawToml.includes("YOUR_KV_NAMESPACE_ID");
 
             const missing = [];
             if (!apiToken) missing.push("`secrets.CLOUDFLARE_API_TOKEN` (Cloudflare API Token with Workers Scripts: Edit)");
             if (!accountId) missing.push("`secrets.CLOUDFLARE_ACCOUNT_ID` (Cloudflare Account ID)");
+            if (needsDbId && !dbId) {
+              missing.push("`secrets.CLOUDFLARE_STATS_DB_ID` or `vars.CLOUDFLARE_STATS_DB_ID` (D1 `codexhost-stats` Database ID to replace `YOUR_D1_DATABASE_ID`)");
+            }
             if (needsKvId && !kvId) {
               missing.push("`secrets.CLOUDFLARE_STATS_KV_ID` or `vars.CLOUDFLARE_STATS_KV_ID` (STATS_KV Namespace ID to replace `YOUR_KV_NAMESPACE_ID`)");
             }
@@ -79,6 +88,7 @@ jobs:
                 "Optional:",
                 "- `vars.CLOUDFLARE_WORKER_NAME`: override default worker name from `worker/wrangler.toml`",
                 "- `secrets.WORKER_GITHUB_TOKEN`: sync `GITHUB_TOKEN` secret to the Cloudflare Worker",
+                "- `secrets.DASHBOARD_TOKEN`: sync `DASHBOARD_TOKEN` secret for `/dashboard`",
                 "- `vars.STATS_URL`: enable post-deploy `/health` smoke check",
                 "",
               ].join("\n");
@@ -90,6 +100,9 @@ jobs:
             }
 
             let rendered = rawToml;
+            if (needsDbId) {
+              rendered = rendered.replaceAll("\"YOUR_D1_DATABASE_ID\"", JSON.stringify(dbId));
+            }
             if (needsKvId) {
               rendered = rendered.replaceAll("\"YOUR_KV_NAMESPACE_ID\"", JSON.stringify(kvId));
             }

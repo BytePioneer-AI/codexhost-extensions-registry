@@ -3,7 +3,14 @@ main = "worker.js"
 compatibility_date = "2025-06-01"
 workers_dev = true
 
-# Replace with the ID from `npx wrangler kv namespace create STATS_KV`.
+# Primary analytics & extension stats store (Cloudflare D1 / SQLite).
+# Replace with the ID from `npx wrangler d1 create codexhost-stats`.
+[[d1_databases]]
+binding = "STATS_DB"
+database_name = "codexhost-stats"
+database_id = "YOUR_D1_DATABASE_ID"
+
+# Legacy KV namespace (retained for backward compatibility if STATS_DB is unset).
 [[kv_namespaces]]
 binding = "STATS_KV"
 id = "YOUR_KV_NAMESPACE_ID"
@@ -12,6 +19,7 @@ id = "YOUR_KV_NAMESPACE_ID"
 # and dispatches registry-sync.yml when a package URL changes or a source is removed.
 # Requires `npx wrangler secret put GITHUB_TOKEN` (fine-grained PAT with
 # Actions: Read and write on the registry repository).
+# Dashboard requires `npx wrangler secret put DASHBOARD_TOKEN`.
 [triggers]
 crons = ["*/5 * * * *"]
 

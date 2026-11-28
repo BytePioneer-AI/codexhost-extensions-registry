@@ -1,3 +1,20 @@
+import {
+  clearDashboardSessionCookie,
+  createDashboardSessionCookie,
+  isDashboardAuthenticated,
+  parseHeartbeatPayload,
+  pruneOldDailyDeviceState,
+  queryDashboardOverview,
+  readBoundedJson,
+  readExtensionStatsD1,
+  readWorkerMetaD1,
+  recordExtensionInstallD1,
+  recordHeartbeat,
+  verifyDashboardToken,
+  writeWorkerMetaD1,
+} from "./telemetry.js";
+import { renderDashboardHtml } from "./dashboard-html.js";
+
 const prefix = "count:";
 const syncMetaKey = "meta:last-sync-check";
 const statsSnapshotKey = "meta:stats-snapshot";
@@ -222,7 +239,12 @@ async function dispatchWorkflow(registryRepo, workflow, token) {
   }
 }
 
-async function readStoredSyncCheck(kv) {
+async function readStoredSyncCheck(env) {
+  if (env?.STATS_DB) {
+    const stored = await readWorkerMetaD1(env.STATS_DB, "last-sync-check");
+    if (stored) return stored;
+  }
+  const kv = env?.STATS_KV;
   if (!kv) return null;
   try {
     const raw = await kv.get(syncMetaKey);
@@ -234,13 +256,15 @@ async function readStoredSyncCheck(kv) {
   }
 }
 
-async function recordSyncCheck(kv, summary, nowMs) {
+async function recordSyncCheck(env, summary, nowMs) {
   lastSyncCheck = summary;
   lastSyncTriggeredAtMs = Math.max(lastSyncTriggeredAtMs, nowMs);
-  if (!kv) return;
+  const db = env?.STATS_DB;
+  const kv = env?.STATS_KV;
+  if (!db && !kv) return;
 
   if (lastPersistedAt === 0) {
-    const stored = await readStoredSyncCheck(kv);
+    const stored = await readStoredSyncCheck(env);
     if (stored) {
       if (typeof stored.ok === "boolean") lastPersistedOk = stored.ok;
       const storedTime = Date.parse(stored.checkedAt);
@@ -252,6 +276,13 @@ async function recordSyncCheck(kv, summary, nowMs) {
   const stale = !lastPersistedAt || nowMs - lastPersistedAt >= syncMetaWriteIntervalMs;
   if (!summary.dispatched && !stateChanged && !stale) return;
 
+  if (db) {
+    await writeWorkerMetaD1(db, "last-sync-check", summary, nowMs);
+    lastPersistedAt = nowMs;
+    lastPersistedOk = summary.ok;
+    return;
+  }
+
   try {
     await kv.put(syncMetaKey, JSON.stringify(summary));
     lastPersistedAt = nowMs;
@@ -261,13 +292,13 @@ async function recordSyncCheck(kv, summary, nowMs) {
   }
 }
 
-async function getLastSyncCheck(kv) {
+async function getLastSyncCheck(env) {
   const memTime = lastSyncCheck?.checkedAt ? Date.parse(lastSyncCheck.checkedAt) : Number.NaN;
   const memFresh =
     lastSyncCheck && Number.isFinite(memTime) && Date.now() - memTime < syncMetaRefreshIntervalMs;
   if (memFresh) return lastSyncCheck;
 
-  const stored = await readStoredSyncCheck(kv);
+  const stored = await readStoredSyncCheck(env);
   if (stored) {
     const storedTime = Date.parse(stored.checkedAt);
     if (!lastSyncCheck || !Number.isFinite(memTime) || (Number.isFinite(storedTime) && storedTime >= memTime)) {
@@ -300,7 +331,6 @@ export function checkAndDispatchSync(env = {}) {
 async function runSyncCheck(env = {}) {
   const nowMs = Date.now();
   const checkedAt = new Date(nowMs).toISOString();
-  const kv = env.STATS_KV;
   const token = env.GITHUB_TOKEN?.trim();
 
   if (!token) {
@@ -312,7 +342,7 @@ async function runSyncCheck(env = {}) {
       sourceCount: 0,
       error: "Missing GITHUB_TOKEN",
     };
-    await recordSyncCheck(kv, summary, nowMs);
+    await recordSyncCheck(env, summary, nowMs);
     return summary;
   }
 
@@ -391,7 +421,7 @@ async function runSyncCheck(env = {}) {
       sourceCount,
       error: null,
     };
-    await recordSyncCheck(kv, summary, nowMs);
+    await recordSyncCheck(env, summary, nowMs);
     return summary;
   } catch (error) {
     const summary = {
@@ -402,7 +432,7 @@ async function runSyncCheck(env = {}) {
       sourceCount,
       error: sanitizeSyncError(error),
     };
-    await recordSyncCheck(kv, summary, nowMs);
+    await recordSyncCheck(env, summary, nowMs);
     return summary;
   }
 }
@@ -563,23 +593,101 @@ function syncResultStatus(summary) {
 
 export default {
   async scheduled(_event, env, ctx) {
-    ctx.waitUntil(
-      Promise.allSettled([
-        checkAndDispatchSync(env),
-        refreshStatsSnapshot(env.STATS_KV),
-      ]),
-    );
+    const tasks = [checkAndDispatchSync(env)];
+    if (env.STATS_DB) {
+      tasks.push(pruneOldDailyDeviceState(env.STATS_DB));
+    } else if (env.STATS_KV) {
+      tasks.push(refreshStatsSnapshot(env.STATS_KV));
+    }
+    ctx.waitUntil(Promise.allSettled(tasks));
   },
   async fetch(request, env = {}, ctx) {
+    const db = env.STATS_DB;
     const kv = env.STATS_KV;
     const { method } = request;
     const url = new URL(request.url);
     const { pathname } = url;
     if (method === "OPTIONS") return new Response(null, { status: 204, headers: cors });
+
     if (method === "GET" && pathname === "/health") {
-      const sync = await getLastSyncCheck(kv);
-      return json({ ok: true, sync: sync ?? null });
+      const sync = await getLastSyncCheck(env);
+      return json(db ? { ok: true, storage: "d1", sync: sync ?? null } : { ok: true, sync: sync ?? null });
     }
+
+    if (method === "POST" && pathname === "/v1/telemetry/heartbeat") {
+      if (!db) return json({ error: "Telemetry unavailable" }, 503);
+      const parsedBody = await readBoundedJson(request);
+      if (!parsedBody.ok) return json({ error: parsedBody.error }, parsedBody.status);
+      const validated = parseHeartbeatPayload(parsedBody.body, request.cf?.country);
+      if (!validated.ok) return json({ error: validated.error }, 400);
+      try {
+        const result = await recordHeartbeat(db, validated.data);
+        return json(result, 200, { "Cache-Control": "no-store" });
+      } catch {
+        return json({ error: "Telemetry storage error" }, 503);
+      }
+    }
+
+    if (pathname === "/dashboard" || pathname === "/dashboard/") {
+      if (method !== "GET") return json({ error: "Method not allowed" }, 405);
+      const configured = Boolean(env.DASHBOARD_TOKEN?.trim());
+      const authenticated = configured
+        ? await isDashboardAuthenticated(request, env.DASHBOARD_TOKEN)
+        : false;
+      return new Response(renderDashboardHtml({ authenticated, configured }), {
+        status: 200,
+        headers: {
+          "Content-Type": "text/html; charset=utf-8",
+          "Cache-Control": "no-store",
+          "X-Robots-Tag": "noindex, nofollow",
+          "Content-Security-Policy":
+            "default-src 'self'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data:; frame-ancestors 'none'",
+        },
+      });
+    }
+
+    if (method === "POST" && pathname === "/v1/dashboard/auth") {
+      const secret = env.DASHBOARD_TOKEN?.trim();
+      if (!secret) return json({ error: "Dashboard not configured" }, 503);
+      const parsedBody = await readBoundedJson(request, 2048);
+      if (!parsedBody.ok) return json({ error: parsedBody.error }, parsedBody.status);
+      if (!verifyDashboardToken(parsedBody.body?.token, secret)) {
+        return json({ error: "Unauthorized" }, 401, { "Cache-Control": "no-store" });
+      }
+      const cookie = await createDashboardSessionCookie(secret, url.protocol === "https:");
+      return json({ ok: true }, 200, {
+        "Cache-Control": "no-store",
+        "Set-Cookie": cookie,
+      });
+    }
+
+    if (method === "POST" && pathname === "/v1/dashboard/logout") {
+      const cookie = clearDashboardSessionCookie(url.protocol === "https:");
+      return json({ ok: true }, 200, {
+        "Cache-Control": "no-store",
+        "Set-Cookie": cookie,
+      });
+    }
+
+    if (method === "GET" && pathname === "/v1/dashboard/overview") {
+      const secret = env.DASHBOARD_TOKEN?.trim();
+      if (!secret) return json({ error: "Dashboard not configured" }, 503);
+      if (!db) return json({ error: "D1 database not configured" }, 503);
+      if (!(await isDashboardAuthenticated(request, secret))) {
+        return json({ error: "Unauthorized" }, 401, { "Cache-Control": "no-store" });
+      }
+      const daysParam = Number(url.searchParams.get("days") ?? "30");
+      try {
+        const overview = await queryDashboardOverview(db, daysParam);
+        return json(overview, 200, {
+          "Cache-Control": "no-store",
+          "X-Robots-Tag": "noindex, nofollow",
+        });
+      } catch {
+        return json({ error: "Dashboard query failed" }, 503);
+      }
+    }
+
     if (method === "POST" && pathname === "/sync") {
       const cache = getDefaultCache();
       const cooldownKey = new Request(`${url.origin}${syncCooldownCachePath}`, { method: "GET" });
@@ -596,7 +704,7 @@ export default {
           1,
           Math.ceil((syncCooldownMs - (nowMs - recentAtMs)) / 1000),
         );
-        const sync = await getLastSyncCheck(kv);
+        const sync = await getLastSyncCheck(env);
         return json(
           { ok: true, throttled: true, retryAfterSeconds, sync: sync ?? null },
           429,
@@ -623,6 +731,10 @@ export default {
           return json({ error: "Invalid extension ID" }, 400);
         }
         if (!idPattern.test(id)) return json({ error: "Invalid extension ID" }, 400);
+        if (db) {
+          const result = await recordExtensionInstallD1(db, id);
+          return json(result);
+        }
         const key = `${prefix}${id}`;
         // KV read-modify-write is approximate: concurrent installs can race.
         const downloads = (readCount(await kv.get(key)) ?? 0) + 1;
@@ -638,12 +750,17 @@ export default {
             const cached = await cache.match(cacheKey);
             if (cached) return cached;
           } catch {
-            // Fall through to KV if Edge Cache is unavailable.
+            // Fall through to storage if Edge Cache is unavailable.
           }
         }
-        let payload = await readStoredStatsSnapshot(kv);
-        if (!payload) {
-          payload = await refreshStatsSnapshot(kv, { force: true });
+        let payload;
+        if (db) {
+          payload = await readExtensionStatsD1(db);
+        } else {
+          payload = await readStoredStatsSnapshot(kv);
+          if (!payload) {
+            payload = await refreshStatsSnapshot(kv, { force: true });
+          }
         }
         if (!payload) throw new Error("Stats unavailable");
         const response = json(payload, 200, {
