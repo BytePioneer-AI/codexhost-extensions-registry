@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-28T06:41:47.968Z",
+  "generatedAt": "2026-11-28T07:30:18.936Z",
   "extensions": [
     {
       "id": "auto-archive-guard",
@@ -280,6 +280,7 @@
       "author": "ABC-xiaoxuan",
       "repository": "https://github.com/ABC-xiaoxuan/codexhost-git-branch-status",
       "stars": 0,
+      "downloads": 1,
       "categories": [
         "tools",
         "workflow"
@@ -488,7 +489,7 @@
     },
     {
       "id": "model-tier-picker",
-      "version": "0.2.0",
+      "version": "0.2.1",
       "name": {
         "en": "ThinkShift",
         "zh-CN": "思考换挡"
@@ -498,8 +499,8 @@
         "zh-CN": "用滑杆给模型换挡，调节思考强度。每一档都有轻微吸附，模型名旁的信号格随时显示当前档位。"
       },
       "details": {
-        "en": "### Shift gears while you think\n\n- **Stops that follow the model**: The slider shows the tiers the current model actually offers, from three to seven or more. Custom tiers keep their native names.\n- **A tier you can feel**: The thumb catches briefly at each stop. A dotted wave follows your drag, and rainbow dots flow along the track.\n- **Release to apply, keep adjusting**: The badge in the upper right names the tier as you drag. The panel stays open after each selection. Click outside or press Esc to close it. Arrow keys, Home and End also select tiers.\n- **Signal bars in the composer**: Four bars beside the model name and a badge show the confirmed tier. After you open a model's menu once, new conversations and page reloads keep the same tier display.\n\n### Where it works\n\n- CodexHost Web and its desktop window, and external Harness sessions in Codex Desktop, such as Claude Code, DeepSeek and Pi.\n- Native Codex sessions in Codex Desktop keep their native Power picker.\n- Models without reasoning tiers keep the native menu.\n\n### Privacy\n\nFrontend only: no background process, no network requests, and no access to conversation text. Verified tier lists stay in local browser storage without conversation content or IDs. With Reduce Motion enabled, the animations stop.",
-        "zh-CN": "### 一边思考，一边换挡\n\n- **刻度跟着模型走**：滑杆只显示当前模型实际提供的档位，三档到七档都适用；自定义档位保留原名。\n- **每一档都有手感**：滑块经过刻度时会轻轻吸附；点阵波浪随手势推进、折返，彩虹网点沿轨道流动。\n- **松手即生效，可以接着调**：拖动时右上角实时显示档位名；选好后面板保持打开，点击面板外或按 Esc 收起。方向键、Home 和 End 也能选档。\n- **输入框信号格**：模型名旁的四格信号和徽标显示已确认的档位。某个模型展开过一次菜单后，新开对话、刷新页面都保持同样的显示。\n\n### 适用范围\n\n- CodexHost Web 及其桌面窗口，以及 Codex Desktop 中的外部 Harness 会话，例如 Claude Code、DeepSeek 和 Pi。\n- Codex Desktop 原生 Codex 会话保留原生的 Power 选择器。\n- 没有思考档位的模型保留原生菜单。\n\n### 隐私\n\n纯前端扩展：没有后台进程，不联网，不读取对话正文。核实过的档位列表只保存在本机浏览器存储中，不含对话内容或会话 ID。开启「减少动态效果」后动画停止。"
+        "en": "### Shift gears while you think\n\n- **Stops that follow the model**: The slider shows the tiers the current model actually offers, from three to seven or more. Custom tiers keep their native names.\n- **A tier you can feel**: The thumb catches briefly at each stop. A dotted wave follows your drag, and rainbow dots flow along the track.\n- **Release to apply, keep adjusting**: The badge in the upper right names the tier as you drag. The panel stays open after each selection. Click outside or press Esc to close it. Arrow keys, Home and End also select tiers.\n- **Signal bars in the composer**: Four bars beside the model name and a badge show the confirmed tier, and stay purple in new conversations and after a reload. For a model whose menu you have not opened yet, the bars are estimated from the Harness's other models or the usual strength order; opening the menu once switches to the model's own stops.\n\n### Where it works\n\n- CodexHost Web and its desktop window, and external Harness sessions in Codex Desktop, such as Claude Code, DeepSeek and Pi.\n- Native Codex sessions in Codex Desktop keep their native Power picker.\n- Models without reasoning tiers keep the native menu.\n\n### Privacy\n\nFrontend only: no background process, no network requests, and no access to conversation text. Verified tier lists stay in local browser storage without conversation content or IDs. With Reduce Motion enabled, the animations stop.",
+        "zh-CN": "### 一边思考，一边换挡\n\n- **刻度跟着模型走**：滑杆只显示当前模型实际提供的档位，三档到七档都适用；自定义档位保留原名。\n- **每一档都有手感**：滑块经过刻度时会轻轻吸附；点阵波浪随手势推进、折返，彩虹网点沿轨道流动。\n- **松手即生效，可以接着调**：拖动时右上角实时显示档位名；选好后面板保持打开，点击面板外或按 Esc 收起。方向键、Home 和 End 也能选档。\n- **输入框信号格**：模型名旁的四格信号和徽标显示已确认的档位，新开对话、刷新页面后也保持紫色。还没展开过菜单的模型，按同一 Harness 其他模型的档位或通用强度顺序估计格数；展开一次后改用它的实际刻度。\n\n### 适用范围\n\n- CodexHost Web 及其桌面窗口，以及 Codex Desktop 中的外部 Harness 会话，例如 Claude Code、DeepSeek 和 Pi。\n- Codex Desktop 原生 Codex 会话保留原生的 Power 选择器。\n- 没有思考档位的模型保留原生菜单。\n\n### 隐私\n\n纯前端扩展：没有后台进程，不联网，不读取对话正文。核实过的档位列表只保存在本机浏览器存储中，不含对话内容或会话 ID。开启「减少动态效果」后动画停止。"
       },
       "author": "sduhantao-maker",
       "repository": "https://github.com/sduhantao-maker/codexhost-thinkshift",
@@ -508,18 +509,18 @@
         "interface"
       ],
       "trustTier": "community",
-      "icon": "https://github.com/sduhantao-maker/codexhost-thinkshift/releases/download/v0.2.0/icon.png",
+      "icon": "https://github.com/sduhantao-maker/codexhost-thinkshift/releases/download/v0.2.1/icon.png",
       "screenshots": [
-        "https://github.com/sduhantao-maker/codexhost-thinkshift/releases/download/v0.2.0/gpt-ultra-zh.png",
-        "https://github.com/sduhantao-maker/codexhost-thinkshift/releases/download/v0.2.0/gpt-ultra-light-en.png",
-        "https://github.com/sduhantao-maker/codexhost-thinkshift/releases/download/v0.2.0/gemini-3-zh.png",
-        "https://github.com/sduhantao-maker/codexhost-thinkshift/releases/download/v0.2.0/haiku-auto-en.png"
+        "https://github.com/sduhantao-maker/codexhost-thinkshift/releases/download/v0.2.1/gpt-ultra-zh.png",
+        "https://github.com/sduhantao-maker/codexhost-thinkshift/releases/download/v0.2.1/gpt-ultra-light-en.png",
+        "https://github.com/sduhantao-maker/codexhost-thinkshift/releases/download/v0.2.1/gemini-3-zh.png",
+        "https://github.com/sduhantao-maker/codexhost-thinkshift/releases/download/v0.2.1/haiku-auto-en.png"
       ],
-      "downloadUrl": "https://github.com/sduhantao-maker/codexhost-thinkshift/releases/download/v0.2.0/model-tier-picker-0.2.0.zip",
-      "sha256": "9bc8abce92ffbba17e8bafd8563068aa39ad76ca483f8b82f04887e6cf0001c9",
+      "downloadUrl": "https://github.com/sduhantao-maker/codexhost-thinkshift/releases/download/v0.2.1/model-tier-picker-0.2.1.zip",
+      "sha256": "71aad4f1116f494ee4f839af1fe2122a445b663a204f07658071e79ffa139064",
       "slots": [],
       "publishedAt": "2026-11-28T06:37:19Z",
-      "updatedAt": "2026-11-28T06:37:19Z",
+      "updatedAt": "2026-11-28T07:29:27Z",
       "format": "codexhost",
       "targets": [
         "desktop",
@@ -645,7 +646,7 @@
       "author": "zxd-666",
       "repository": "https://github.com/zxd-666/codexhost-prompt-templates",
       "stars": 0,
-      "downloads": 104,
+      "downloads": 105,
       "categories": [
         "workflow",
         "tools"
@@ -734,7 +735,7 @@
       "author": "sduhantao-maker",
       "repository": "https://github.com/sduhantao-maker/codexhost-second-brain",
       "stars": 2,
-      "downloads": 201,
+      "downloads": 202,
       "categories": [
         "workflow",
         "interface"
@@ -821,7 +822,7 @@
       "author": "sduhantao-maker",
       "repository": "https://github.com/sduhantao-maker/codexhost-sidebar-thread-tree",
       "stars": 4,
-      "downloads": 343,
+      "downloads": 460,
       "categories": [
         "interface",
         "workflow"
