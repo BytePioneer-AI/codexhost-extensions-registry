@@ -86,6 +86,103 @@ export async function loadSources(input = new URL("sources/", import.meta.url)) 
 }
 const digest = (bytes) => createHash("sha256").update(bytes).digest("hex");
 const utf8 = new TextDecoder("utf-8", { fatal: true });
+const MAX_CHANGELOG_ENTRIES = 5;
+const MAX_CHANGELOG_NOTES_CHARS = 4000;
+const MAX_CHANGELOG_FILE_BYTES = 32 * 1024;
+
+export function normalizeChangelogNotes(raw, maxChars = MAX_CHANGELOG_NOTES_CHARS) {
+  if (typeof raw !== "string") return undefined;
+  const cleaned = raw
+    .replace(/\r\n?/gu, "\n")
+    .replace(/\n{3,}/gu, "\n\n")
+    .trim();
+  if (!cleaned) return undefined;
+  if (cleaned.length <= maxChars) return cleaned;
+  const budget = Math.max(1, maxChars - 1);
+  const slice = cleaned.slice(0, budget);
+  const lastBreak = slice.lastIndexOf("\n");
+  const trimmed = (lastBreak > budget - 400 ? slice.slice(0, lastBreak) : slice).trimEnd();
+  return `${trimmed}…`;
+}
+
+export function normalizeReleaseVersion(tagName, fallback) {
+  const raw = typeof tagName === "string" ? tagName.trim() : "";
+  if (raw) {
+    const stripped = raw.replace(/^v(?=\d)/iu, "");
+    if (stripped.length <= 128) return stripped;
+  }
+  const fb = typeof fallback === "string" ? fallback.trim() : "";
+  return fb ? fb.replace(/^v(?=\d)/iu, "").slice(0, 128) : undefined;
+}
+
+export function extractChangelogFromReleases(releases, { selectedReleaseId, manifestVersion } = {}) {
+  if (!Array.isArray(releases)) return [];
+  const entries = [];
+  const seenVersions = new Set();
+  for (const release of releases) {
+    if (!release || typeof release !== "object") continue;
+    if (release.draft || release.prerelease || typeof release.published_at !== "string" || !release.published_at)
+      continue;
+    const notes = normalizeChangelogNotes(release.body);
+    if (!notes) continue;
+    const isSelected = selectedReleaseId !== undefined && release.id === selectedReleaseId;
+    const version = isSelected && manifestVersion
+      ? manifestVersion
+      : normalizeReleaseVersion(release.tag_name, release.name);
+    if (!version || seenVersions.has(version)) continue;
+    seenVersions.add(version);
+    const parsedUrl = desktopExtensionHttpUrlSchema.safeParse(release.html_url);
+    entries.push({
+      version,
+      publishedAt: release.published_at,
+      notes,
+      ...(parsedUrl.success ? { url: parsedUrl.data } : {}),
+    });
+    if (entries.length >= MAX_CHANGELOG_ENTRIES) break;
+  }
+  return entries;
+}
+
+export function extractFallbackChangelogFromFiles(files, { manifestVersion, publishedAt }) {
+  if (!(files instanceof Map)) return [];
+  for (const [filePath, bytes] of files) {
+    if (!/^changelog\.md$/iu.test(filePath)) continue;
+    if (!bytes || bytes.length === 0 || bytes.length > MAX_CHANGELOG_FILE_BYTES) return [];
+    try {
+      const notes = normalizeChangelogNotes(utf8.decode(bytes));
+      if (!notes) return [];
+      return [
+        {
+          version: manifestVersion,
+          ...(publishedAt ? { publishedAt } : {}),
+          notes,
+        },
+      ];
+    } catch {
+      return [];
+    }
+  }
+  return [];
+}
+
+async function readRepositoryChangelog({ api, headers, selectedRelease, manifestVersion, files, date }) {
+  let releases;
+  try {
+    releases = await loadGitHubJson(`${api}/releases?per_page=10`, headers, true);
+  } catch {
+    releases = undefined;
+  }
+  const fromReleases = extractChangelogFromReleases(
+    Array.isArray(releases) ? releases : selectedRelease ? [selectedRelease] : [],
+    { selectedReleaseId: selectedRelease?.id, manifestVersion },
+  );
+  if (fromReleases.length > 0) return fromReleases;
+  const fromFiles = extractFallbackChangelogFromFiles(files, {
+    manifestVersion,
+    publishedAt: date,
+  });
+  return fromFiles.length > 0 ? fromFiles : undefined;
+}
 const assetOrigins = new Set([
   "https://github.com",
   "https://release-assets.githubusercontent.com",
@@ -519,11 +616,20 @@ async function validateSource(source, previous, starsByRepository, downloads) {
     minCodexHostVersion: source.minCodexHostVersion,
   });
   const { targets, apis } = resolveV2TargetsAndApis(manifest);
+  const changelog = await readRepositoryChangelog({
+    api,
+    headers,
+    selectedRelease: release,
+    manifestVersion: manifest.version,
+    files,
+    date,
+  });
   const v2Entry = {
     ...baseEntry,
     format: "codexhost",
     targets,
     apis,
+    ...(changelog ? { changelog } : {}),
   };
   return {
     v1Entry: manifest.manifestVersion === 1 ? baseEntry : undefined,

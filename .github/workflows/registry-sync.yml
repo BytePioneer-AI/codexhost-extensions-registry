@@ -31,7 +31,7 @@ jobs:
         with:
           node-version: 24
       - run: npm ci --ignore-scripts
-      - run: node --test worker/worker.test.mjs scripts/check-worker-health.test.mjs scripts/issue-to-pr.test.mjs
+      - run: node --test validate-and-build-catalog.test.mjs worker/worker.test.mjs scripts/check-worker-health.test.mjs scripts/issue-to-pr.test.mjs
       - run: node validate-and-build-catalog.mjs --check-only
         env:
           GITHUB_TOKEN: ${{ github.token }}
