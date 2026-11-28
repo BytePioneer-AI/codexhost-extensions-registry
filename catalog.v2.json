@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-28T13:43:16.469Z",
+  "generatedAt": "2026-11-28T14:25:48.988Z",
   "extensions": [
     {
       "id": "auto-archive-guard",
@@ -20,7 +20,7 @@
       "author": "biground",
       "repository": "https://github.com/biground/codexhost-plugin-auto-archive",
       "stars": 0,
-      "downloads": 133,
+      "downloads": 134,
       "categories": [
         "workflow",
         "tools"
@@ -98,7 +98,7 @@
       "author": "ABC-xiaoxuan",
       "repository": "https://github.com/ABC-xiaoxuan/ch-context",
       "stars": 0,
-      "downloads": 278,
+      "downloads": 280,
       "categories": [
         "analytics",
         "interface"
@@ -389,7 +389,7 @@
       "author": "ABC-xiaoxuan",
       "repository": "https://github.com/ABC-xiaoxuan/codexhost-git-branch-status",
       "stars": 1,
-      "downloads": 7,
+      "downloads": 8,
       "categories": [
         "tools",
         "workflow"
@@ -569,18 +569,18 @@
     },
     {
       "id": "mcp-hub",
-      "version": "1.2.0",
+      "version": "1.3.0",
       "name": {
         "en": "MCP Hub",
         "zh-CN": "MCP 管理中心"
       },
       "description": {
-        "en": "High-performance unified MCP & native plugin control plane in the sidebar for Claude Code, Antigravity, OpenCode, and Codex — with live fs.watch sync, interactive Tool Playground, redacted export, batch operations, native JSON/TOML preview, and OAuth 2.1 browser auth.",
-        "zh-CN": "在侧边栏高性能统一管理 Claude Code、Antigravity、OpenCode 与 Codex 的 MCP 服务与原生插件：支持 fs.watch 实时监听、MCP 工具在线试运行、脱敏安全导出、多选批量同步、滑出抽屉原生 JSON/TOML 预览与标准 OAuth 浏览器授权。"
+        "en": "High-performance Bento App Gallery MCP & plugin hub for Claude Code, Antigravity, OpenCode, and Codex — with per-tool disable & token savings, live Official MCP Registry search, multi-account switching, global pause/resume, missing env diagnostics, Tool Playground, and OAuth 2.1.",
+        "zh-CN": "在侧边栏高性能统一管理 Claude Code、Antigravity、OpenCode 与 Codex 的 MCP 应用中心：支持单工具粒度禁用与 Token 节省估算、官方 MCP Registry 在线检索、多账号档案一键切换、全局暂停/原样恢复、缺失环境变量诊断、工具在线试运行与标准 OAuth 授权。"
       },
       "details": {
-        "en": "## Highlights (v1.2.0)\n\n- **Modern Bento App Gallery UI**: 3-column App Store / Raycast-inspired capability cards with deterministic monogram squircles, status capsules, built-in 4-client toggle docks, full-width unfolding Tool/OAuth Inspector, calibrated Light & Dark themes, and 390px mobile responsiveness.\n- **Interactive MCP Tool Playground**: Click any discovered tool on a remote Streamable HTTP MCP to inspect its parameter `inputSchema` and execute live `tools/call` dry-runs directly inside the slide-over drawer.\n- **Live File Watcher & Zero-I/O Incremental Poll**: Lightweight `fs.watch` automatically detects external CLI edits (`claude mcp add`, `codex`, `opencode`, `agy`) and syncs UI state with a ~28-byte revision heartbeat.\n- **Secret Hygiene & Redacted Export**: Detects hardcoded plaintext keys/tokens per server and defaults Export JSON to safe `<REDACTED>` masking so you can share configs without leaking credentials.\n- **Multi-Select Batch Actions & Keyboard Shortcuts**: Batch enable/disable, batch sync across harnesses, or batch remove servers in one click; navigate instantly with `/` (search), `N` (new), `R` (refresh), and `Esc`.\n- **Backup Snapshot Preview**: Inspect exact JSON/TOML snapshot contents before rolling back.\n- **Extreme Performance Engine**: Projected `StatFileCache` (drops multi-MB unrelated history subtrees), overview memoization, slim mutation IPC payloads (~70% smaller), per-harness serialized write queues, bounded-concurrency probing, and `rAF`-batched targeted DOM patching.",
-        "zh-CN": "## 核心特性（v1.2.0）\n\n- **现代应用卡片画廊 UI**：全新 3 列 Bento 应用卡片布局（确定性双色圆角徽标、状态胶囊、底部四端快捷停靠栏、预设市场快速接入卡），点击探测/调试平滑全宽展开工具与 OAuth 面板，亮/暗双主题与 390px 移动端深度适配。\n- **MCP 工具在线调试器（Tool Playground）**：探测远程 Streamable HTTP MCP 后，点击任意工具卡片即可查看完整参数 `inputSchema` 并在滑出抽屉内发起真实 `tools/call` 试运行。\n- **文件实时监听与零 I/O 增量同步**：后端内置轻量 `fs.watch` 与版本号增量心跳（未变更时仅 ~28 字节零磁盘 I/O），你在终端用 CLI 新增/修改 MCP 时界面自动同步刷新。\n- **密钥安全与默认脱敏导出**：自动识别硬编码明文 Token / API Key 并给出锁定提示；导出 JSON 默认开启「脱敏导出」，自动隐藏敏感凭据。\n- **多选批量操作与快捷键**：支持批量启用/停用（随时释放上下文 Token 占用）、批量跨端同步与批量移除；内置 `/` 搜索、`N` 新增、`R` 刷新、`Esc` 关闭快捷键。\n- **备份快照源码预览**：恢复快照前可直接在线查看完整 JSON / TOML 内容。\n- **极致性能工程**：投影式 `StatFileCache` + 概览记忆化、精简变更 RPC 载荷（约减少 70%）、懒加载备份列表、按端串行写队列与前端 `rAF` 合批精准更新。"
+        "en": "## Highlights (v1.3.0)\n\n- **Per-Tool Granular Disable & Context Token Savings**: Toggle individual MCP tools on/off inside the expanded Bento Inspector — synced natively to Codex (`disabled_tools`), Claude Code (`permissions.deny`), OpenCode (`tools`), and Antigravity (`excludeTools`), with live context token savings estimates.\n- **Official MCP Registry Live Search & Smart Address Resolver**: Search community MCP servers directly from `registry.modelcontextprotocol.io`, or paste any remote URL, `@scope/pkg`, npm/PyPI link, or GitHub `owner/repo` for 1-click setup.\n- **Multi-Account / Multi-Env Credential Profiles**: Save named credential sets (e.g. Work vs Personal GitHub/Notion) per server and switch across all configured harnesses in one click.\n- **Global Pause / Resume**: Pause any MCP across all clients while remembering which harnesses were active, then restore the exact subset later.\n- **Timeouts & `${ENV_VAR}` Diagnostics**: Configure Codex `startup_timeout_sec` / `tool_timeout_sec` in the drawer and spot undefined `${ENV_VAR}` references immediately on every card.\n- **Modern Bento App Gallery + Extreme Performance**: 3-column App Store / Raycast-style gallery, projected `StatFileCache` (~1.3ms warm reads), 0-I/O `fs.watch` live sync, interactive Tool Playground (`tools/call`), redacted export, and native plugin switches.",
+        "zh-CN": "## 核心特性（v1.3.0）\n\n- **单工具粒度禁用与 Token 节省估算**：在展开的工具面板中逐个开关单个 MCP 工具，自动按各端原生格式同步写入 Codex（`disabled_tools`）、Claude Code（`permissions.deny`）、OpenCode（`tools`）与 Antigravity（`excludeTools`），实时估算每轮节省的上下文 Token。\n- **官方 MCP Registry 在线发现 + 智能粘贴解析**：内置官方 MCP Registry 实时检索；在「发现与预设」直接粘贴远程 MCP URL、`@scope/pkg`、npm/PyPI 链接或 GitHub `owner/repo` 即可一键预填接入。\n- **多账号 / 多环境凭据一键切换**：支持为同一个 MCP 保存多套命名凭据（如「工作号」「个人号」），一键切换同步四端。\n- **全局一键暂停 / 原样恢复**：暂停服务时自动记住原本开启的客户端组合，随时一键按原样恢复，绝不丢失配置。\n- **超时控制与 `${ENV_VAR}` 缺失诊断**：抽屉支持配置 Codex 启动/调用超时秒数，卡片自动识别当前系统未定义的 `${ENV_VAR}` 环境变量并给出告警。\n- **现代应用卡片画廊 + 极致性能**：3 列 Bento 画廊、投影式缓存（热读 ~1.3 ms）、零 I/O `fs.watch` 实时同步、在线工具调试器（`tools/call`）、默认脱敏导出与原生插件开关。"
       },
       "author": "ABC-xiaoxuan",
       "repository": "https://github.com/ABC-xiaoxuan/ch-mcp-hub",
@@ -591,16 +591,16 @@
         "tools"
       ],
       "trustTier": "community",
-      "icon": "https://github.com/ABC-xiaoxuan/ch-mcp-hub/releases/download/v1.2.0/icon.png",
+      "icon": "https://github.com/ABC-xiaoxuan/ch-mcp-hub/releases/download/v1.3.0/icon.png",
       "screenshots": [
-        "https://github.com/ABC-xiaoxuan/ch-mcp-hub/releases/download/v1.2.0/preview-dark.png",
-        "https://github.com/ABC-xiaoxuan/ch-mcp-hub/releases/download/v1.2.0/preview-light.png"
+        "https://github.com/ABC-xiaoxuan/ch-mcp-hub/releases/download/v1.3.0/preview-dark.png",
+        "https://github.com/ABC-xiaoxuan/ch-mcp-hub/releases/download/v1.3.0/preview-light.png"
       ],
-      "downloadUrl": "https://github.com/ABC-xiaoxuan/ch-mcp-hub/releases/download/v1.2.0/mcp-hub-1.2.0.zip",
-      "sha256": "cdd55de7401cc44cf0338d02dc62dcffbe8f629294b2359a1f5ad914cbdbb0a2",
+      "downloadUrl": "https://github.com/ABC-xiaoxuan/ch-mcp-hub/releases/download/v1.3.0/mcp-hub-1.3.0.zip",
+      "sha256": "c04f15ad612b52463c070580be366ec7593144f12ebc7ff45648fca105587a63",
       "slots": [],
       "publishedAt": "2026-11-25T14:58:13Z",
-      "updatedAt": "2026-11-26T03:56:43Z",
+      "updatedAt": "2026-11-28T14:21:04Z",
       "format": "codexhost",
       "targets": [
         "desktop",
@@ -612,6 +612,12 @@
         "backend": 1
       },
       "changelog": [
+        {
+          "version": "1.3.0",
+          "publishedAt": "2026-11-28T14:21:04Z",
+          "notes": "### ✨ 新增功能（Added）\n- **单工具粒度开关 & 上下文 Token 省流估算（Per-Tool Disable & Token Budget）**\n  - 在展开的远程 MCP 工具列表中新增每个工具的独立开关与估算 Token 消耗，支持「一键全部启用」与实时展示每轮节省的上下文 Token 数。\n  - 原生写入四端客户端配置，零子进程、不破坏已有规则：\n    - **Codex**：`~/.codex/config.toml` 中的 `disabled_tools`\n    - **Claude Code**：`~/.claude/settings.json` 中的 `permissions.deny`（`mcp__<server>__<tool>`）\n    - **OpenCode**：`~/.config/opencode/opencode.json` 中的 `tools[\"<server>_<tool>\"] = false`\n    - **Antigravity**：`~/.gemini/config/mcp_config.json` 中的 `excludeTools`\n- **官方 MCP Registry 在线发现 + 智能粘贴解析（Live Registry & Smart Resolver）**\n  - 「发现与预设」页接入官方 `registry.modelcontextprotocol.io/v0/servers` 检索（内置 10 分钟 TTL 缓存与 6.5s 超时离线降级）。\n  - 搜索框直接粘贴远程 MCP URL、`@scope/pkg`、npmjs / PyPI 链接或 GitHub `owner/repo` 即可智能识别并一键预填到配置抽屉（保留 `@scope/mcp` 的包作用域命名与图标字母）。\n- **多账号 / 多环境凭据档案（Multi-Account Profiles）**\n  - 支持为单个 MCP 服务保存多套命名凭据档案（如工作账号 / 个人账号 / 测试环境），一键切换即同步写入全部已启用客户端。\n  - 凭据档案独立持久化于扩展数据目录 `hub-state.json`，概览接口仅返回脱敏元信息，不泄露明文密钥。\n- **全局一键暂停 / 原样恢复（Global Pause & Resume with Memory）**\n  - 暂停服务时自动记住该服务此前启用的客户端子集；再次点击恢复按钮时按原样精准还原，不误启用原本关闭的客户端。\n- **Codex 超时控制 & 缺失 `${ENV_VAR}` 即时诊断**\n  - 编辑抽屉新增「启动超时 (`startup_timeout_sec`)」与「工具调用超时 (`tool_timeout_sec`)」配置，缓解 `npx` / `uvx` 首次冷启动超时问题，并支持清空删除已有超时字段。\n  - 自动检测配置中引用的未定义 `${ENV_VAR}` 环境变量，在卡片右上角显示紧凑告警徽章（悬停查看完整缺失变量列表）。\n\n### 🎨 体验与界面打磨（Improved）\n- Bento 卡片底栏新增暂停/恢复按钮、多账号入口按钮与紧凑状态微标签（`已关 N` / 当前账号芯片），并在 1440px Dark/Light 与 390px 移动端通过 0 Error / 0 Warning 视觉与触控目标审计。\n- 自动化发布流新增 `CHANGELOG.md` 版本校验与 Release Notes 自动提取脚本（`scripts/extract-release-notes.mjs`）。\n\n### ✅ 测试与安全（Testing & Security）\n- 单元测试扩展至 **16 / 16 全部通过**，完整覆盖四端工具禁用、暂停记忆、多账号切换、超时读写、缺失环境变量检测与 Registry 智能解析。\n- 保持纯 Node.js 标准库实现、零 `child_process`、零运行时依赖、静态安全扫描 0 风险。\n\n---",
+          "url": "https://github.com/ABC-xiaoxuan/ch-mcp-hub/releases/tag/v1.3.0"
+        },
         {
           "version": "1.2.0",
           "publishedAt": "2026-11-26T03:56:43Z",
@@ -1075,7 +1081,7 @@
       "author": "sduhantao-maker",
       "repository": "https://github.com/sduhantao-maker/codexhost-second-brain",
       "stars": 2,
-      "downloads": 207,
+      "downloads": 208,
       "categories": [
         "workflow",
         "interface"
@@ -1155,7 +1161,7 @@
       "author": "lpmasser",
       "repository": "https://github.com/lpmasser/codexhost-sidebar-delegation-badges",
       "stars": 0,
-      "downloads": 262,
+      "downloads": 263,
       "categories": [
         "interface",
         "workflow"
@@ -1194,7 +1200,7 @@
       "author": "sduhantao-maker",
       "repository": "https://github.com/sduhantao-maker/codexhost-sidebar-thread-tree",
       "stars": 5,
-      "downloads": 1654,
+      "downloads": 1753,
       "categories": [
         "interface",
         "workflow"
