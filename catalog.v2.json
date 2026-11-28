@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-28T06:25:15.872Z",
+  "generatedAt": "2026-11-28T06:26:10.384Z",
   "extensions": [
     {
       "id": "auto-archive-guard",
@@ -20,7 +20,7 @@
       "author": "biground",
       "repository": "https://github.com/biground/codexhost-plugin-auto-archive",
       "stars": 0,
-      "downloads": 127,
+      "downloads": 128,
       "categories": [
         "workflow",
         "tools"
@@ -66,7 +66,7 @@
       "author": "ABC-xiaoxuan",
       "repository": "https://github.com/ABC-xiaoxuan/ch-context",
       "stars": 0,
-      "downloads": 268,
+      "downloads": 269,
       "categories": [
         "analytics",
         "interface"
@@ -329,7 +329,7 @@
       "author": "biground",
       "repository": "https://github.com/biground/codex-host-theme-hdd-fairy",
       "stars": 0,
-      "downloads": 83,
+      "downloads": 84,
       "categories": [
         "appearance",
         "interface",
@@ -518,7 +518,7 @@
       "author": "vastsa & codexhost community",
       "repository": "https://github.com/Solren-zhen/codexhost-prompt-enhancement",
       "stars": 0,
-      "downloads": 93,
+      "downloads": 94,
       "categories": [
         "workflow",
         "tools"
