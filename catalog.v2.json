@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-28T04:45:10.589Z",
+  "generatedAt": "2026-11-28T06:25:15.872Z",
   "extensions": [
     {
       "id": "auto-archive-guard",
@@ -20,7 +20,7 @@
       "author": "biground",
       "repository": "https://github.com/biground/codexhost-plugin-auto-archive",
       "stars": 0,
-      "downloads": 66,
+      "downloads": 127,
       "categories": [
         "workflow",
         "tools"
@@ -66,7 +66,7 @@
       "author": "ABC-xiaoxuan",
       "repository": "https://github.com/ABC-xiaoxuan/ch-context",
       "stars": 0,
-      "downloads": 208,
+      "downloads": 268,
       "categories": [
         "analytics",
         "interface"
@@ -108,7 +108,7 @@
       "author": "Solren-zhen",
       "repository": "https://github.com/Solren-zhen/codexhost-claude-style",
       "stars": 0,
-      "downloads": 7,
+      "downloads": 68,
       "categories": [
         "appearance",
         "interface"
@@ -155,7 +155,7 @@
       "author": "NIU-001-LIU",
       "repository": "https://github.com/NIU-001-LIU/codexhost-island",
       "stars": 0,
-      "downloads": 10,
+      "downloads": 70,
       "categories": [
         "appearance",
         "interface"
@@ -179,6 +179,45 @@
       }
     },
     {
+      "id": "codexhost-prompt-enhancer",
+      "version": "1.3.1",
+      "name": {
+        "en": "Prompt Enhancer",
+        "zh-CN": "Prompt 增强"
+      },
+      "description": {
+        "en": "Rewrite drafts in place, manage templates, and try individual or batch rewrites with your model.",
+        "zh-CN": "原位增强聊天草稿，管理模板，并使用自己的模型单条或批量试跑。"
+      },
+      "details": {
+        "en": "## Getting started\n\n1. Save a Chat Completions URL and model ID in **Prompt Enhancer**. Test the connection before trying a rewrite.\n2. Edit system instructions and the draft template. Try a saved template or unsaved editor contents with synthetic examples.\n3. In chat, use the left button for optional history, the center button to enhance or cancel, and the right button for a one-run template. Review the result or restore the original draft.\n4. Open **Batch trials** to run selected examples and templates sequentially. Stop to keep completed results.",
+        "zh-CN": "## 使用方式\n\n1. 在 **Prompt 增强** 独立页保存 Chat Completions 地址和模型 ID，点击 **测试模型** 检查连通性。\n2. 编辑系统指令与草稿模板。使用内置合成样例，试跑已保存模板或仍在编辑的内容。\n3. 回到聊天。左键选择是否参考历史，中键增强或取消，右键选择本次模板。写回后可看前后或撤销。\n4. 展开 **批量试跑**，按样例与模板串行生成。停止后可继续查看已完成结果。"
+      },
+      "author": "Danny",
+      "repository": "https://github.com/ai-dachui/codexhost-prompt-enhancer",
+      "stars": 1,
+      "categories": [
+        "tools",
+        "workflow"
+      ],
+      "trustTier": "community",
+      "downloadUrl": "https://github.com/ai-dachui/codexhost-prompt-enhancer/releases/download/v1.3.1/codexhost-prompt-enhancer-1.3.1.zip",
+      "sha256": "ab94bcad0a99784de16e6080350cd21d3a73573db1d8479a1a1c9c8bcdd36e69",
+      "slots": [],
+      "publishedAt": "2026-11-27T19:21:00Z",
+      "updatedAt": "2026-11-27T19:21:00Z",
+      "format": "codexhost",
+      "targets": [
+        "desktop",
+        "web"
+      ],
+      "apis": {
+        "page": 1,
+        "widget": 1,
+        "backend": 1
+      }
+    },
+    {
       "id": "focus-pomodoro",
       "version": "1.3.0",
       "name": {
@@ -196,7 +235,7 @@
       "author": "codexhost",
       "repository": "https://github.com/BytePioneer-AI/codexhost-ext-focus-pomodoro",
       "stars": 1,
-      "downloads": 153,
+      "downloads": 213,
       "categories": [
         "tools"
       ],
@@ -241,7 +280,7 @@
       "author": "anlostsheep",
       "repository": "https://github.com/anlostsheep/codexhost-ext-github-primer-themes",
       "stars": 0,
-      "downloads": 33,
+      "downloads": 93,
       "categories": [
         "appearance",
         "interface"
@@ -290,7 +329,7 @@
       "author": "biground",
       "repository": "https://github.com/biground/codex-host-theme-hdd-fairy",
       "stars": 0,
-      "downloads": 22,
+      "downloads": 83,
       "categories": [
         "appearance",
         "interface",
@@ -338,7 +377,7 @@
       "author": "ABC-xiaoxuan",
       "repository": "https://github.com/ABC-xiaoxuan/ch-mcp-hub",
       "stars": 0,
-      "downloads": 58,
+      "downloads": 118,
       "categories": [
         "integrations",
         "tools"
@@ -383,7 +422,7 @@
       "author": "ErkundenSie",
       "repository": "https://github.com/ErkundenSie/codexhost-mcp-hub",
       "stars": 1,
-      "downloads": 45,
+      "downloads": 105,
       "categories": [
         "integrations",
         "tools",
@@ -427,7 +466,7 @@
       "author": "SgAlice",
       "repository": "https://github.com/SgAlice/codexhost-prism-facets",
       "stars": 1,
-      "downloads": 61,
+      "downloads": 121,
       "categories": [
         "appearance",
         "interface",
@@ -479,7 +518,7 @@
       "author": "vastsa & codexhost community",
       "repository": "https://github.com/Solren-zhen/codexhost-prompt-enhancement",
       "stars": 0,
-      "downloads": 33,
+      "downloads": 93,
       "categories": [
         "workflow",
         "tools"
@@ -524,7 +563,7 @@
       "author": "zxd-666",
       "repository": "https://github.com/zxd-666/codexhost-prompt-templates",
       "stars": 0,
-      "downloads": 43,
+      "downloads": 104,
       "categories": [
         "workflow",
         "tools"
@@ -569,7 +608,7 @@
       "author": "codexhost",
       "repository": "https://github.com/BytePioneer-AI/codexhost-ext-prompt-vault",
       "stars": 0,
-      "downloads": 177,
+      "downloads": 237,
       "categories": [
         "tools",
         "workflow"
@@ -613,7 +652,7 @@
       "author": "sduhantao-maker",
       "repository": "https://github.com/sduhantao-maker/codexhost-second-brain",
       "stars": 2,
-      "downloads": 140,
+      "downloads": 201,
       "categories": [
         "workflow",
         "interface"
@@ -661,7 +700,7 @@
       "author": "lpmasser",
       "repository": "https://github.com/lpmasser/codexhost-sidebar-delegation-badges",
       "stars": 0,
-      "downloads": 201,
+      "downloads": 261,
       "categories": [
         "interface",
         "workflow"
@@ -700,7 +739,7 @@
       "author": "sduhantao-maker",
       "repository": "https://github.com/sduhantao-maker/codexhost-sidebar-thread-tree",
       "stars": 4,
-      "downloads": 283,
+      "downloads": 343,
       "categories": [
         "interface",
         "workflow"
@@ -747,7 +786,7 @@
       "author": "mythezone",
       "repository": "https://github.com/mythezone/codexhost-ext-the-althing",
       "stars": 3,
-      "downloads": 202,
+      "downloads": 263,
       "categories": [
         "workflow",
         "tools"
@@ -795,7 +834,7 @@
       "author": "TimYuhong",
       "repository": "https://github.com/TimYuhong/codexhost-theme-background",
       "stars": 0,
-      "downloads": 42,
+      "downloads": 102,
       "categories": [
         "appearance",
         "interface"
