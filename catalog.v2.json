@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-28T11:29:27.193Z",
+  "generatedAt": "2026-11-28T12:00:53.722Z",
   "extensions": [
     {
       "id": "auto-archive-guard",
@@ -82,7 +82,7 @@
     },
     {
       "id": "ch-context",
-      "version": "0.3.4",
+      "version": "0.4.1",
       "name": {
         "en": "Context Insights",
         "zh-CN": "上下文洞察"
@@ -98,22 +98,22 @@
       "author": "ABC-xiaoxuan",
       "repository": "https://github.com/ABC-xiaoxuan/ch-context",
       "stars": 0,
-      "downloads": 273,
+      "downloads": 274,
       "categories": [
         "analytics",
         "interface"
       ],
       "trustTier": "community",
-      "icon": "https://github.com/ABC-xiaoxuan/ch-context/releases/download/v0.3.4/icon.png",
+      "icon": "https://github.com/ABC-xiaoxuan/ch-context/releases/download/v0.4.1/icon.png",
       "screenshots": [
-        "https://github.com/ABC-xiaoxuan/ch-context/releases/download/v0.3.4/preview.png",
-        "https://github.com/ABC-xiaoxuan/ch-context/releases/download/v0.3.4/preview-dark.png"
+        "https://github.com/ABC-xiaoxuan/ch-context/releases/download/v0.4.1/preview.png",
+        "https://github.com/ABC-xiaoxuan/ch-context/releases/download/v0.4.1/preview-dark.png"
       ],
-      "downloadUrl": "https://github.com/ABC-xiaoxuan/ch-context/releases/download/v0.3.4/ch-context-0.3.4.zip",
-      "sha256": "7bf78124d0a79dd0c92d380522c6d995551429d941bac30e5a81aff1a4566e6c",
+      "downloadUrl": "https://github.com/ABC-xiaoxuan/ch-context/releases/download/v0.4.1/ch-context-0.4.1.zip",
+      "sha256": "7c526de63a314a3f8975148454961ec596e08b8273c7306c3d882255e67bc4cb",
       "slots": [],
       "publishedAt": "2026-11-23T15:06:28Z",
-      "updatedAt": "2026-11-26T03:31:12Z",
+      "updatedAt": "2026-11-28T11:59:21Z",
       "format": "codexhost",
       "targets": [
         "web"
@@ -122,6 +122,12 @@
         "web": 1
       },
       "changelog": [
+        {
+          "version": "0.4.1",
+          "publishedAt": "2026-11-28T11:59:21Z",
+          "notes": "## Highlights in v0.4.1\n\n### Visual Craft, Color System & Typography\n- **Apple Graphite Palette & Dark AA Contrast**: Converged saturated card accents into a calm, desaturated Apple Graphite default palette, unified segmented/chip active states, and lifted dark-mode muted text contrast to pass WCAG AA across all desktop & tablet views.\n- **Offline Bundled Inter Variable Typography**: Embedded the 47 KB OFL-1.1 Inter Variable Latin & tabular-number subset via Shadow-DOM-safe `FontFace` binary loading (zero external network requests), paired with prioritized CJK system fonts (`PingFang SC`, `HarmonyOS Sans SC`, `MiSans`, `Noto Sans SC`, `Source Han Sans SC`, `Microsoft YaHei`) and refined optical sizing/weights.\n- **Extension-Owned Preferences**: Added **Palette** (`Apple Graphite` / `Warm Paper` / `Precision Slate`), **Layout density** (`Standard` / `Compact`), and **Typography** (`Modern Sans (Inter)` / `Mono Metrics` / `System`) settings in the native Settings page, scoped strictly inside the extension's Shadow DOM and persisted via `api.storage`.\n\n### Hero-First Layout & Diagnostic Features\n- **Hero-First Inspector & Floating Occupancy Pill**: Promoted Current Context + Token Stats to Row 1, eliminated duplicated metrics across cards, added a glass sticky header with an out-of-flow floating occupancy pill when scrolled past the hero, hid the stretched single-turn bar for 1-turn windows, and added a bottom Dock bar (`All panels` / `File activity` / `Command executions` / `Session network`).\n- **Window Hotspots & Clues**: Ranked Top 3 largest loaded-window records strictly by text character length (explicitly labeled as characters, never estimated tokens), surfaced repeated file access and failed command alerts, and provided clickable tool/program jump chips.\n- **Lossless Read-Only JSON Tree & Focus Reader Modal**: Added an optional `JSON` tab in record details that preserves exact large integer literals (`9007199254740993`) and duplicate keys verbatim while keeping `Raw text` untouched, plus a full-width Shadow-DOM-safe Focus Reader modal with `Esc` isolation and focus restoration.\n- **Bidirectional Timeline ↔ Browser Filter Sync**: Active filters/searches in Context Browser dim non-matching markers on the Activity Timeline and display a synchronized match count badge.\n- **Overview Upgrades**: Upgraded the activity heatmap to 12 weeks with clean month labels, switched queried-session comparison to horizontal dual-track bars, added honest extremum highlighting (preserving ties and never ranking `≥` lower-bound costs as cheapest) + Markdown copy to the Compare Tray, and added `.csv` (formula-injection safe) and summary Markdown overview exports.\n\n### Verification\n- `npm run check` (`tsc`, 90/90 unit tests, legacy + native builds, package & Shadow CSS checks)\n- `npm run test:market` (14/14 native Web extension lifecycle, Shadow DOM isolation, and preference sync tests)\n- `npm run test:browser` (linked timeline/browser, lossless JSON, Focus Reader modal, dock tabs, hotspots, overview exports, and 16 responsive/theme/locale visual audits with 0 desktop/tablet errors & warnings)\n- Native Web package: `ch-context-0.4.1.zip` (`sha256: 7c526de63a314a3f8975148454961ec596e08b8273c7306c3d882255e67bc4cb`)",
+          "url": "https://github.com/ABC-xiaoxuan/ch-context/releases/tag/v0.4.1"
+        },
         {
           "version": "0.3.4",
           "publishedAt": "2026-11-26T03:31:12Z",
@@ -638,7 +644,7 @@
       "author": "ErkundenSie",
       "repository": "https://github.com/ErkundenSie/codexhost-mcp-hub",
       "stars": 1,
-      "downloads": 108,
+      "downloads": 109,
       "categories": [
         "integrations",
         "tools",
@@ -857,7 +863,7 @@
       "author": "vastsa & codexhost community",
       "repository": "https://github.com/Solren-zhen/codexhost-prompt-enhancement",
       "stars": 0,
-      "downloads": 97,
+      "downloads": 99,
       "categories": [
         "workflow",
         "tools"
@@ -1182,7 +1188,7 @@
       "author": "sduhantao-maker",
       "repository": "https://github.com/sduhantao-maker/codexhost-sidebar-thread-tree",
       "stars": 5,
-      "downloads": 1447,
+      "downloads": 1604,
       "categories": [
         "interface",
         "workflow"
