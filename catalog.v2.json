@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-28T08:13:44.414Z",
+  "generatedAt": "2026-11-28T11:29:27.193Z",
   "extensions": [
     {
       "id": "auto-archive-guard",
@@ -20,7 +20,7 @@
       "author": "biground",
       "repository": "https://github.com/biground/codexhost-plugin-auto-archive",
       "stars": 0,
-      "downloads": 128,
+      "downloads": 132,
       "categories": [
         "workflow",
         "tools"
@@ -46,7 +46,39 @@
         "desktop": 1,
         "web": 1,
         "backend": 1
-      }
+      },
+      "changelog": [
+        {
+          "version": "1.3.1",
+          "publishedAt": "2026-11-26T09:18:25Z",
+          "notes": "## What's Changed / 更新内容\n\n### 1. Optional Bottom-Right Widget (Hidden by Default) / 右下角悬浮挂件默认隐藏\n- Changed `showWidget` default to `false` (configurable in **Plugin Details** or the **Auto Archive** management page).\n- Skips background widget polling while hidden and reacts immediately when toggled.\n\n### 2. Smart Widget Click Navigation / 点击小组件智能跳转\n- When pending-to-archive sessions exist (`expiredCount > 0` or `pendingCount > 0`), clicking the bottom-right widget jumps straight to the **Expired / Ready to Archive** list on the plugin page.\n- When no sessions are due, clicking opens the plugin home page.\n- Works across both **Codex Desktop** and **CodexHost Web**.\n\n### 3. Fix Intermittent Catalog Timeout Error / 修复偶发分页超时报错\n- Fixed `The operation was aborted due to timeout` when deeper native Codex `thread/catalog/read` pages hit slow official `app-server` history scans.\n- Raised Host RPC timeout from 25s to 35s, added single-retry for transient page-0 timeouts, and gracefully converged deeper-page timeouts while keeping all loaded sessions and completing workspace project sync.",
+          "url": "https://github.com/biground/codexhost-plugin-auto-archive/releases/tag/v1.3.1"
+        },
+        {
+          "version": "1.2.0",
+          "publishedAt": "2026-11-24T07:40:53Z",
+          "notes": "## What is New in v1.2.0\n\n- **Archived Sessions Grouped by Project (Collapsible)**: The Archived tab now groups all archived sessions by their CodexHost workspace project with collapsible/expandable project folders, expand-all / collapse-all controls, and auto-expand on search.\n- **Ungrouped Bucket**: Sessions without a project assignment (or explicitly marked projectless) are cleanly grouped together under Ungrouped at the bottom.\n- **Full Catalog Sync Including Unloaded Sessions**: The shared Host backend paginates through the full active and archived catalogs (up to 100 pages) in the background so older sessions not yet expanded in the sidebar are fully visible and manageable without hitting the 10s IPC timeout.",
+          "url": "https://github.com/biground/codexhost-plugin-auto-archive/releases/tag/v1.2.0"
+        },
+        {
+          "version": "1.1.0",
+          "publishedAt": "2026-11-24T06:45:27Z",
+          "notes": "## What is New in v1.1.0\n\n- **Updated Default Rules**: Default retention is **3 days**, scan interval **1440 minutes (24h)**, age reference **last activity**, skip pinned **on**, and floating widget **on**.\n- **Post-Scan Archive Delay (graceMinutes, default 30 min)**: When an automated scan detects expired sessions, they enter a persistent countdown queue (pending-archives.json) and wait **30 minutes** before archiving (set to 0 for immediate archiving).\n- **Cancel Anytime During Grace Window**: Marking a session as Keep from Auto-Archive (from the More menu or management page) or reactivating it automatically removes it from the pending countdown queue.\n- **Live Countdown UI**: Both the management page and floating widget show remaining minutes until auto-archive, plus quick presets (3d retention and 0/15/30/60/120m grace delay).",
+          "url": "https://github.com/biground/codexhost-plugin-auto-archive/releases/tag/v1.1.0"
+        },
+        {
+          "version": "1.0.1",
+          "publishedAt": "2026-11-24T06:32:36Z",
+          "notes": "Fixes Extension backend could not complete the call on workspaces with hundreds of sessions:\n\n- Move full session catalog pagination to an incremental background cache so getState / listThreads return immediately (< 20ms) and never hit CodexHost 10s backend IPC timeout\n- Run bulk \thread/archive sweeps asynchronously with live progress reporting\n- Harden scheduled timer callbacks against unhandled rejections under --unhandled-rejections=strict",
+          "url": "https://github.com/biground/codexhost-plugin-auto-archive/releases/tag/v1.0.1"
+        },
+        {
+          "version": "1.0.0",
+          "publishedAt": "2026-11-24T05:43:32Z",
+          "notes": "Initial release of **Auto Archive & Keep Guard** (\u0007uto-archive-guard, manifestVersion: 2).\n\n- Scheduled auto-archive for inactive sessions older than N days via shared CodexHost backend\n- Persistent **Keep from Auto-Archive** toggle injected into every session More (...) & context menu on both Desktop and Web\n- Cross-platform management page (page) and compact floating status widget (widget)\n\nInstall directly in CodexHost from GitHub: \biground/codexhost-plugin-auto-archive",
+          "url": "https://github.com/biground/codexhost-plugin-auto-archive/releases/tag/v1.0.0"
+        }
+      ]
     },
     {
       "id": "ch-context",
@@ -66,7 +98,7 @@
       "author": "ABC-xiaoxuan",
       "repository": "https://github.com/ABC-xiaoxuan/ch-context",
       "stars": 0,
-      "downloads": 269,
+      "downloads": 273,
       "categories": [
         "analytics",
         "interface"
@@ -88,7 +120,33 @@
       ],
       "apis": {
         "web": 1
-      }
+      },
+      "changelog": [
+        {
+          "version": "0.3.4",
+          "publishedAt": "2026-11-26T03:31:12Z",
+          "notes": "## What's Changed in v0.3.4\n\nFocused runtime performance, caching, rendering, and CSS optimization release with zero UI or data-honesty regressions.\n\n### Networking, Caching & Live Sync\n- **Overview batch coalescing & bounded LRU cache**: Batches overview `inspectUsage` updates (`120ms / 8 items`, concurrency 4) to reduce full-tree re-renders from up to 50 down to 6–7, and caches verified snapshots by `(sessionId, updatedAt, revision)` for 60s (never caching transient RPC failures) for instant 0-RPC Overview ↔ Inspector round trips.\n- **Session page cache & dormant background hooks**: Caches visited session list pages per revision and suspends Inspector `useUsage` / `useHistory` / SSE connections while browsing Overview.\n- **Incremental history short-circuit (`historySince`)**: Skips `session/page` fetches when `session/projections` reports an unchanged `asOfSeq`, separates explicit loads from live background sync, eliminates initial double `inspectUsage` on first SSE connect, switches NDJSON framing to linear O(n) scanning, and defers background refreshes while `document.visibilityState === 'hidden'`.\n\n### Rendering, Indexing & Algorithms\n- **Single-pass record pre-indexing**: Pre-parses `tool/call` JSON arguments, labels, and lowercased search text once per history window; shares deferred filtered results between `Inspector` and `RecordBrowser`.\n- **Fine-grained `React.memo` isolation**: Memoizes all Inspector cards, `RecordRow`, `FileRow`, `CommandRow` (with cached shell token highlighting), and `OverviewSessionCard`, and reuses `summary` across Inspector and diagnostic report export.\n- **Static SVG timeline & accessible SVG activity strip**: Caches the 200-bar static SVG timeline layer while updating only the cursor/highlight overlays, and consolidates the Performance card's up-to-200 `<button>` strip into a single keyboard-accessible SVG slider (`role=\"slider\"`).\n- **Fast paths**: Direct `indexOf` fast path in `findTextMatches` (retaining full Unicode case-expansion fallback), single-sort Treemap `packRects`, and O(1) Map lookup in `relatedSessions`.\n\n### CSS & Assets\n- **Minified CSS output**: Minifies both `web/style.css` (`79.8 KB → 67.2 KB`, `-15.8%`) and embedded CSS in `lib/client.js`.\n- **Rendering containment**: Adds `flex-shrink: 0` + `content-visibility: auto; contain-intrinsic-block-size: auto 31px` on collapsed scrollable list items and `contain: layout style` on Overview cards.\n\n### Package Checksum\n- `ch-context-0.3.4.zip` SHA-256: `7bf78124d0a79dd0c92d380522c6d995551429d941bac30e5a81aff1a4566e6c`",
+          "url": "https://github.com/ABC-xiaoxuan/ch-context/releases/tag/v0.3.4"
+        },
+        {
+          "version": "0.3.3",
+          "publishedAt": "2026-11-24T02:07:14Z",
+          "notes": "## ch-context v0.3.3\n\n### Highlights\n- **`dsh-context`-inspired Apple Neutral UI**:\n  - Dedicated **Context Stats** card (5 summary wells + 2×2 clickable category ledger).\n  - Paired **Token Stats** donut card and **Performance & Cache** card with a loaded-window chronological activity sequence strip.\n  - Refactored **Current Context** card (large occupancy hero, hatched ≥75% caution reference zone, integrated live observation sparkline) and **Activity Timeline** (clickable turn strip + 3-row Step Brief).\n  - **Inline-expandable Context Browser**: category accordions with subtle corner tinting, in-place structured tool-call argument tables (`→ tool`) and nested result cards (`● OK / ● Error`, line counts, `Rendered | Raw text`).\n  - Dedicated full-width **File Activity**, full-width 2-pane **Command Executions** (summary KPIs, attention callouts, searchable program bars, inline output previews), and visual **Session Network** node tree.\n- **New Productivity Features (100% read-only & honest to CodexHost data)**:\n  - **Find-in-Record** match highlighting with Unicode-safe offsets and prev/next navigation.\n  - **Character-Volume Treemap** toggle for the loaded history window (strictly text characters, never estimated tokens).\n  - Scoped keyboard shortcuts (`/` search, `[` / `]` step filtered records, `Esc` clear).\n  - **One-click Diagnostic Report export**: copy Markdown or download `.md` / `.json`.\n  - **Overview Dashboard upgrades**: 2×3 KPIs, queried-session usage comparison chart, aggregate token distribution (honest 4-part / 2-part fallback), 8-week updated-date activity heatmap, workspace/harness breakdowns, high-context & relation quick filters, and up to 3-session side-by-side comparison.\n\n### Verification\n- `npm run check`: strict `tsc`, 75/75 unit tests, legacy + native builds, package & Shadow DOM verification.\n- `npm run test:browser`: full E2E + 16 EN/ZH × Light/Dark × 375–1920px zero-overflow captures.\n- `npm run test:market`: 13/13 native `WebExtensionApi` / Shadow DOM / settings / lifecycle tests.\n\n### Checksum\n`68ec797ddde38c873486f881610586c9e7e28abb304d25a51945fb56fe8c6387  ch-context-0.3.3.zip`",
+          "url": "https://github.com/ABC-xiaoxuan/ch-context/releases/tag/v0.3.3"
+        },
+        {
+          "version": "0.3.2",
+          "publishedAt": "2026-11-23T15:06:28Z",
+          "notes": "## 上下文洞察 / Context Insights 0.3.2\n\n全新 **苹果素灰（Apple Neutral）** 视觉系统与双视图架构升级。原生 CodexHost Host 扩展，使用 manifestVersion: 2 和公开 WebExtensionApi。本版仅支持 **CH Web / PWA**；不声明 Desktop、跨端 page/widget 或 backend，启用后不会启动扩展后台进程。\n\nMajor Apple Neutral UI redesign and dual-view workspace for CodexHost Web (manifestVersion: 2, public WebExtensionApi, owned Shadow DOM, zero backend process).\n\n### 本版更新 / What's New\n\n- **苹果素灰（Apple Neutral）深浅双主题**：纯中性苹果灰层级、macOS 浮起分段控件、克制苹果蓝选中态与 HIG 校准数据色，优先继承宿主 --dsw-alias-* 变量。\n- **双视图导航（总览 / 会话洞察）**：新增「全部会话总览」画廊（工作区筛选、搜索、排序、按需迷你占用环与缺失遥测虚线态），单会话页升级为轻量面包屑浮层切换器。\n- **三联遥测驾驶舱置顶**：① 当前上下文窗口（65%/85% 动态警戒、75%/90% 刻度线、剩余容量胶囊与内嵌实时观测曲线）；② 累计用量环形图（新增 \neasoningOutputTokens 含推理输出与成本来源标识）；③ 性能与缓存（内凹 KPI 槽 + 紧凑可点击活动脉冲条）。\n- **轮次分带事件轨 & 三合一信号卡**：时间线支持 T1/T2 轮次分带、callId 配对连线、错误标记与配对跳转；左侧收纳为文件活动（扩展名徽标、读写搜筛选与逐次展开跳转）、命令记录（程序分布筛选、Shell 语法着色与三态过滤）、会话关系谱系树。\n- **上下文浏览器精修**：支持「仅错误」筛选、配对调用↔输出一键跨筛选跳转，以及原生分段视图切换。\n\n### 安装 / Install\n\n在 CodexHost 0.25.0 或更新版本的「插件 → 插件中心」导入 ch-context-0.3.2.zip，或直接导入仓库 URL https://github.com/ABC-xiaoxuan/ch-context，启用后从侧栏「上下文洞察」进入。\n\n### 验证 / Validation\n\n- Strict TypeScript check, 65 focused Node unit tests, legacy/native builds and static/Shadow-CSS validation passed.\n- Full browser regression (16 locale/theme/viewport audits, zero horizontal overflow) and 13 native WebExtensionApi tests passed.\n- Independent pre-release code review completed with all 11 verified findings resolved.\n- Screenshots use synthetic test data; unknown Harness telemetry remains unavailable (—) without fabricated zeros or inferred prompt breakdown.\n\nApache-2.0; upstream dsh-context and bundled React/Marked notices are included. Marketplace listing remains subject to registry-maintainer review (PR #12).",
+          "url": "https://github.com/ABC-xiaoxuan/ch-context/releases/tag/v0.3.2"
+        },
+        {
+          "version": "0.2.0",
+          "publishedAt": "2026-11-23T07:34:18Z",
+          "notes": "## 上下文洞察 / Context Insights 0.2.0\n\n原生 CodexHost Host 扩展，使用 `manifestVersion: 2` 和公开 `WebExtensionApi`。本版仅支持 **CH Web / PWA**；不声明 Desktop、跨端 page/widget 或 backend，启用后不会启动扩展后台进程。\n\nNative CodexHost Web extension using the public v2 Host extension contract. Web only, with an owned Shadow DOM and self-contained ESM; no private React/Cordis objects, ModuleLoader bootstrap, credential files or backend process.\n\n### 安装 / Install\n\n在 CodexHost 0.25.0 或更新版本的「插件 → 插件中心」导入 `ch-context-0.2.0.zip`，或导入仓库 URL，启用后从侧栏「上下文洞察」进入。面板中选择要查看的会话，语言下拉支持自动 / English / 中文。\n\nImport the ZIP or repository URL in CodexHost Plugin Center, enable it and open Context Insights from the sidebar. The native package is distinct from the optional legacy DSH compatibility entry.\n\n### 功能 / Features\n\n- 紧凑统计、宿主真实用量、缓存、费用、TPS 和首个输出延迟。\n- 联动活动时间线与分类浏览器，支持搜索、键盘、富文本/表格/代码与原文复制。\n- 文件和命令记录跳转、严格调用/结果配对、显式工具错误与内容截断标记。\n- 保留来源的父会话、分叉、会话树和子代理关系。\n- 有界观测与只读数据；不推测缺失的完整 Prompt 组成、逐请求历史 Token 或执行阶段耗时。\n\nCompact native usage/context insights, linked event inspection, safe Markdown and raw-text fidelity, file/command/result navigation, explicit native errors and provenance-aware relationships. Metrics depend on Harness telemetry. Screenshots contain synthetic test data.\n\n### 验证 / Validation\n\n- Strict typecheck, 65 focused Node tests and native/compatibility package validation passed.\n- 12 native-entry browser scenarios passed; 16 locale/theme/viewport audits reported no errors or warnings.\n- Real isolated CodexHost 0.25.0 ZIP import, enable, native sidebar/data UI, zero-backend verification and disable cleanup passed. Test services/data were removed; the live Web PID was unchanged.\n- Official registry manifest parser, ZIP reader and script static rules passed locally.\n\nApache-2.0; upstream dsh-context and bundled React/Marked notices are included. No npm publication is required. Marketplace listing remains subject to registry-maintainer approval.",
+          "url": "https://github.com/ABC-xiaoxuan/ch-context/releases/tag/v0.2.0"
+        }
+      ]
     },
     {
       "id": "claude-style",
@@ -108,7 +166,7 @@
       "author": "Solren-zhen",
       "repository": "https://github.com/Solren-zhen/codexhost-claude-style",
       "stars": 0,
-      "downloads": 68,
+      "downloads": 70,
       "categories": [
         "appearance",
         "interface"
@@ -135,7 +193,15 @@
         "page": 1,
         "desktop": 1,
         "web": 1
-      }
+      },
+      "changelog": [
+        {
+          "version": "1.3.0",
+          "publishedAt": "2026-11-27T14:52:11Z",
+          "notes": "Claude Style v1.3.0 for CodexHost Desktop & Web (manifestVersion 2, pure frontend, zero host patching):\n- 6 editorial palettes aligned with dsh-claude-style 0.22.1 + Host Native & custom color overrides\n- Original pixel-art animated mascots (Clawd Crab, Deepy Whale, Whale Girl) via WAAPI steps(1) with left/right poke, tickle, waking & idle extras, plus Claude Spark & SVG fallback\n- Bundled Inter, Noto Serif, JetBrains Mono & ClaudeStylePixel webfonts (OFL)\n- Floating turn outline rail (Alt+Up/Down), 4-step conversation width (100%/85%/70%/60%), live turn timer & Web Audio chimes",
+          "url": "https://github.com/Solren-zhen/codexhost-claude-style/releases/tag/v1.3.0"
+        }
+      ]
     },
     {
       "id": "codexhost-chat-width",
@@ -155,7 +221,7 @@
       "author": "NIU-001-LIU",
       "repository": "https://github.com/NIU-001-LIU/codexhost-island",
       "stars": 0,
-      "downloads": 70,
+      "downloads": 71,
       "categories": [
         "appearance",
         "interface"
@@ -176,7 +242,15 @@
       ],
       "apis": {
         "desktop": 1
-      }
+      },
+      "changelog": [
+        {
+          "version": "0.1.0",
+          "publishedAt": "2026-11-27T03:28:00Z",
+          "notes": "Island for Codex 0.1.0 is the first public release for CodexHost Desktop.\n\n- A compact floating-panel layout in light and dark mode\n- Separate, resettable colors for the window background, conversation list, chat area, and right panel\n- Drag either edge of the conversation to adjust its width, or double-click to reset\n\nImport the ZIP in CodexHost's extension center. In Codex, choose the Island theme under **Settings → Appearance → Theme → Custom themes**.\n\n---\n\nIsland 的首个公开版本，适用于 CodexHost 桌面端。\n\n- 支持浅色和深色的简洁悬浮岛布局\n- 窗口底色、会话栏、对话区和右侧面板可独立设置颜色，随时恢复默认\n- 拖动聊天内容两侧调整宽度，双击恢复默认\n\n在 CodexHost 插件中心导入 ZIP，再到 Codex 的「设置 → 外观 → 主题 → 自定义主题」选择「island 毛玻璃」。",
+          "url": "https://github.com/NIU-001-LIU/codexhost-island/releases/tag/v0.1.0"
+        }
+      ]
     },
     {
       "id": "codexhost-prompt-enhancer",
@@ -196,6 +270,7 @@
       "author": "Danny",
       "repository": "https://github.com/ai-dachui/codexhost-prompt-enhancer",
       "stars": 1,
+      "downloads": 2,
       "categories": [
         "tools",
         "workflow"
@@ -215,7 +290,15 @@
         "page": 1,
         "widget": 1,
         "backend": 1
-      }
+      },
+      "changelog": [
+        {
+          "version": "1.3.1",
+          "publishedAt": "2026-11-27T19:21:00Z",
+          "notes": "## Prompt 增强 v1.3.1\n\n- 在 CodexHost 聊天框原位改写草稿，支持撤销和查看改写前后。\n- 可选择是否带上当前会话的近期消息，以及本轮使用的模板。\n- 设置页提供模型测试、模板编辑、单条试跑、回答对照和可停止的批量试跑。\n- 这是独立源码仓库的首次发布。保留插件 ID 和同 Host 的配置升级路径。\n\n### 安装\n\n下载附带的 ZIP，在 CodexHost 的「设置 → 插件 → 导入插件」导入并启用。使用 Web 时从左侧「插件」进入插件中心。打开设置页，填写自己的 Chat Completions 兼容地址和模型。\n\nSHA-256: `ab94bcad0a99784de16e6080350cd21d3a73573db1d8479a1a1c9c8bcdd36e69`",
+          "url": "https://github.com/ai-dachui/codexhost-prompt-enhancer/releases/tag/v1.3.1"
+        }
+      ]
     },
     {
       "id": "focus-pomodoro",
@@ -235,7 +318,7 @@
       "author": "codexhost",
       "repository": "https://github.com/BytePioneer-AI/codexhost-ext-focus-pomodoro",
       "stars": 1,
-      "downloads": 213,
+      "downloads": 214,
       "categories": [
         "tools"
       ],
@@ -260,7 +343,27 @@
       "apis": {
         "page": 1,
         "widget": 1
-      }
+      },
+      "changelog": [
+        {
+          "version": "1.3.0",
+          "publishedAt": "2026-11-23T05:57:59Z",
+          "notes": "## What's New in v1.3.0\n\n### 简体中文\n- **倒计时完成庆祝动画与提示音**：每轮专注/休息结束时在屏幕中央展示脉冲光环、微粒绽放与 SVG 描边徽章动画，支持可选 Web Audio 柔和提示音及一键开启建议的短休、长休或下一轮专注。\n- **纯前端零后台 · 跨端与远程同步**：倒计时状态、任务备注与历史记录持久化到共享 Host（`api.storage`），本机 Codex Desktop、本机 Web 与远程 CH Web 实时同步，无需后台进程。\n- **专注记录与近 7 天统计**：独立页新增今日 / 近 7 天 / 连续天数 / 累计统计、近 7 天趋势柱状图、按日分组明细、单条删除与一键导出 CSV。\n- **更小巧的贴边胶囊与行内自定义时长**：未使用贴边时自动收窄为 `36×36px` 迷你番茄小耳朵；待开始或完成后点击 `25:00` 即可直接原位输入任意自定义时长（如 `15` 或 `12:30`）。\n- **细节与文档更新**：修复浮窗状态文案拆行问题，刷新全部 4 张新版预览截图与双语 README。\n\n### English\n- **Centered Completion Celebration & Gentle Chime**: Animated frosted completion card with ripple rings, radial sparkles, SVG emblem draw-in, optional Web Audio chime, and one-click next-round transition.\n- **Zero-Backend Cross-Device & Remote Sync**: Timer state, task note, and completed round history persist to shared Host storage (`api.storage`) across Codex Desktop, local Web, and remote CH Web with zero background processes.\n- **Focus History & 7-Day Insights**: Today / 7-day / streak / all-time stats, 7-day trend bar chart, date-grouped timeline, per-record deletion, and CSV export on the standalone page.\n- **Compact Idle Capsule & Inline Custom Duration**: Tucks down to a `36×36px` tomato icon ear when idle on the edge; click `25:00` while ready/done to type any custom per-round duration (`15`, `12:30`, `0:10`).\n- **Polish & Docs**: Fixed popover status wrapping and refreshed all 4 preview screenshots and bilingual README.",
+          "url": "https://github.com/BytePioneer-AI/codexhost-ext-focus-pomodoro/releases/tag/v1.3.0"
+        },
+        {
+          "version": "1.2.0",
+          "publishedAt": "2026-11-22T04:18:17Z",
+          "notes": "Redesigned minimalist 60-tick focus studio page, added draggable edge-docking Pomodoro capsule + anchored quick popover, and added custom app icon.",
+          "url": "https://github.com/BytePioneer-AI/codexhost-ext-focus-pomodoro/releases/tag/v1.2.0"
+        },
+        {
+          "version": "1.1.0",
+          "publishedAt": "2026-11-22T03:06:34Z",
+          "notes": "A floating timer and workspace page with synchronized countdowns, task notes, and daily completion counts. No backend is required. Download focus-pomodoro.zip to install.",
+          "url": "https://github.com/BytePioneer-AI/codexhost-ext-focus-pomodoro/releases/tag/v1.1.0"
+        }
+      ]
     },
     {
       "id": "git-branch-status",
@@ -279,8 +382,8 @@
       },
       "author": "ABC-xiaoxuan",
       "repository": "https://github.com/ABC-xiaoxuan/codexhost-git-branch-status",
-      "stars": 0,
-      "downloads": 1,
+      "stars": 1,
+      "downloads": 6,
       "categories": [
         "tools",
         "workflow"
@@ -299,7 +402,21 @@
       "apis": {
         "web": 1,
         "backend": 1
-      }
+      },
+      "changelog": [
+        {
+          "version": "0.3.1",
+          "publishedAt": "2026-11-28T05:57:15Z",
+          "notes": "### Fixes & Improvements in \u000b0.3.1\n- **Fast branch switch detection (<= 2s, zero git spawns)**: Added a lightweight gitHead backend RPC that reads .git/HEAD, active operation markers, and ref/index mtime directly via \fs/promises (0 subprocesses, 0 persistent directory handles — safe for git worktree remove on Windows). Even when full git status is backed off on slow Windows repos, switching branches (git checkout / git switch), committing, staging, or entering merge/rebase updates the pill immediately and triggers a full status refresh.\n- **Instant cache invalidation on HEAD changes**: WorkspaceGitStatusReader.read() checks .git/HEAD content/mtime before returning a cached entry, so branch switches immediately bypass the 2-second TTL cache.\n- **Windows-friendly backoff & fresh refocus**: Raised full-status backoff thresholds (1.5s / 3.0s) and forced fresh refresh on tab focus, visibility return, and session change.\n- **Compat mode polish**: Inherit ancestor cwd for subagent sessions and ignore nested embedded [data-conversation-session] elements in DOM fallback mode.\n\n### Assets\n- codexhost-git-branch-status-v0.3.1.zip — installable CodexHost v2 extension bundle (sha256: 2bddd16460ec5e6002427137db4d124368ca4d18a776fc50eab09cdc99153978)\n- icon.png — standalone icon asset matching \u0007ssets/icon.png in the ZIP",
+          "url": "https://github.com/ABC-xiaoxuan/codexhost-git-branch-status/releases/tag/v0.3.1"
+        },
+        {
+          "version": "0.3.0",
+          "publishedAt": "2026-11-28T05:43:46Z",
+          "notes": "Initial public release of **Git Branch Status** (git-branch-status v0.3.0) for CodexHost CH Web (manifestVersion: 2, web + \backend, zero runtime dependencies).\n\n### Highlights\n- Live read-only Git branch pill below the Web composer (\branch / detached HEAD, WT worktree badge, in-progress operation badges, upstream ↑/↓ counts, changed/conflicted file count).\n- Accessible detail popover with 4-way stats, up to 30 changed files with rename display & one-click copy, scan duration, and manual refresh.\n- Performance-hardened steady-state polling (1 git status spawn per poll via pure-file HEAD + mtime-cached layout/config/refs + persistent sandboxed GIT_DIR, adaptive backoff for large repos and idle tabs).\n- Hardened read-only sandboxed GIT_DIR backend that never executes repository \filter.*, include.path/includeIf, .git/info/attributes, core.fsmonitor, hooks, or submodule filters.\n- Automatic compatibility with both upcoming \u0007pi.session + composer-dock region and current CodexHost \u000b0.27.x/\u000b0.28.x Web builds.\n\n### Assets\n- codexhost-git-branch-status-v0.3.0.zip — installable CodexHost v2 extension bundle (sha256: f82fe6a937af0e414d6da109c88e4b8ce8800d4dc7c6fb1b4c00d1ef66f62b95)\n- icon.png — standalone icon asset matching \u0007ssets/icon.png in the ZIP",
+          "url": "https://github.com/ABC-xiaoxuan/codexhost-git-branch-status/releases/tag/v0.3.0"
+        }
+      ]
     },
     {
       "id": "github-primer-themes",
@@ -319,7 +436,7 @@
       "author": "anlostsheep",
       "repository": "https://github.com/anlostsheep/codexhost-ext-github-primer-themes",
       "stars": 0,
-      "downloads": 93,
+      "downloads": 95,
       "categories": [
         "appearance",
         "interface"
@@ -348,7 +465,21 @@
         "widget": 1,
         "desktop": 1,
         "web": 1
-      }
+      },
+      "changelog": [
+        {
+          "version": "1.2.4",
+          "publishedAt": "2026-11-25T02:31:43Z",
+          "notes": "## GitHub Primer Themes v1.2.4\n\n### Fixed\n- **Markdown Table Cell Padding**: Restore GitHub `.markdown-body` standard `padding: 6px 13px` on `table th` and `table td`, overriding CH Web's native borderless `th:first-child / td:first-child { padding-left: 0 }` and `td:last-child { padding-right: 0 }` so leftmost and rightmost column text never touches the table grid borders.",
+          "url": "https://github.com/anlostsheep/codexhost-ext-github-primer-themes/releases/tag/v1.2.4"
+        },
+        {
+          "version": "1.2.3",
+          "publishedAt": "2026-11-24T10:59:53Z",
+          "notes": "## GitHub Primer Themes v1.2.3\n\nOfficial GitHub appearance themes for **codexhost** (Codex Desktop & CH Web), sourced 100% verbatim from GitHub's official [`@primer/primitives@11.10.0`](https://github.com/primer/primitives).\n\n### Highlights\n- **14 Official GitHub Primer Themes**:\n  - **Light (3 + 3 High Contrast)**: Light default, Light protanopia & deuteranopia (`Beta`), Light tritanopia (`Beta`)\n  - **Dark (4 + 4 High Contrast)**: Dark default, Dark protanopia & deuteranopia (`Beta`), Dark tritanopia (`Beta`), **Soft dark** (`dark_dimmed`)\n- **Authentic GitHub Dashboard Hierarchy**: Matches GitHub's inset main canvas + elevated sidebar/composer/cards, `6px` Primer radius, PrettyLights code syntax highlighting, GitHub diff colors, Markdown tables, and styled annotation comment popovers.\n- **Cross-Platform Page & Edge-Docking Widget**: GitHub-style **Theme preferences** page (`Single theme` / `Sync with system` + `Increase contrast` + Primer CSS Token Inspector) and a draggable edge-docking floating switcher tab kept safely away from the bottom send button.\n- **Zero Backend**: Pure frontend `manifestVersion: 2` extension with cross-device Host storage sync.",
+          "url": "https://github.com/anlostsheep/codexhost-ext-github-primer-themes/releases/tag/v1.2.3"
+        }
+      ]
     },
     {
       "id": "hdd-fairy",
@@ -368,7 +499,7 @@
       "author": "biground",
       "repository": "https://github.com/biground/codex-host-theme-hdd-fairy",
       "stars": 0,
-      "downloads": 84,
+      "downloads": 85,
       "categories": [
         "appearance",
         "interface",
@@ -396,7 +527,33 @@
         "page": 1,
         "widget": 1,
         "web": 1
-      }
+      },
+      "changelog": [
+        {
+          "version": "2.2.0",
+          "publishedAt": "2026-11-27T08:33:05Z",
+          "notes": "## H.D.D + Fairy · v2.2.0（CodexHost `manifestVersion: 2` · 适配 v0.28.1）\n\n### 核心更新亮点\n\n- **三套绝区零风格预设 · 自动明暗联动**\n  - **方案 A · H.D.D 黑金重工（`amber`）**：默认碳纤维深黑底座 + 琥珀金高亮 + 斜切工业边框（自动深色模式）；\n  - **方案 B · 新艾利都街头 HUD（`street`）**：赛博酸橙绿高对比街头 HUD + 警戒线纹理（自动深色模式）；\n  - **方案 C · 绳网高反差白卡（`archive`）**：高反差洁净白卡（自动整页浅色模式），同时保留护眼黑曜石代码块与暗色终端；\n  - 支持 **6 大面板区域**（左侧栏与顶栏、对话流与工具卡、输入舱与审批问答、右侧工作台、设置与插件中心、新会话算力用量面板）独立开关与跨预设混搭。\n- **Antigravity 元素周期表模型选择器 & 超频胶囊滑轨**\n  - 独创 2×2 元素核心矩阵（`01 H` / `06 C` / `10 Ne` / `18 Ar`）+ 扩展模型目录；\n  - Codex 风格饱满胶囊思考档位滑轨：纯白圆形滑块、超频档（Overdrive）胶囊内单向流光微粒，切换档位面板原地保持不闪闭。\n- **12 项绝区零交互动效（Juice）与视口按需动态 Fairy 眼徽**\n  - 机械键帽按压、45° 金属扫光、输入舱聚焦警戒条推进、战术点击瞬闪等 12 项微交互（自动遵循 `prefers-reduced-motion`，可一键开关）；\n  - 连续助手回复采用 Telegram 风格头像归组，仅在当前视口内组尾气泡按需挂载轻量动态 Fairy 眼徽（滚出视口即卸载、窗口隐藏自动暂停眨眼，可独立关闭）。\n- **新会话算力用量终端（`web`）**\n  - 欢迎页顶部集成可折叠算力胶囊条与展开态统计看板（KPI、26 周热力图、模型/Harness 拆解与模型配额），直接读取 CodexHost 原生统计，主题预设统一交由插件控制页管理。\n- **全仓零 Emoji & 完整适配 CodexHost v0.28.1 与 390px 移动端**\n  - 36 枚统一工业几何单线 SVG 图标零 Emoji 覆盖（`shared/hdd-icons.mjs`）；\n  - 完整适配 CodexHost `v0.28.1` 原生虚拟滚动、长代码块黑曜石折叠条、统一 Harness 选择器、监听中徽章、远程主机拓扑与配对面板，并修复提问框横向滚动条闪烁；\n  - 390px 手机端自动停用悬浮眼徽，提供抽屉侧栏、弹性底栏与单栏元素周期表。\n\n---\n\n### 三套主题与主要部件实机截图\n\n#### 方案 A · H.D.D 黑金重工（`amber` · 默认深色）\n\n| 活跃对话流 · 元素周期表 & 超频胶囊滑轨 | 欢迎页 · 算力用量终端 & 26 周热力图 |\n| :---: | :---: |\n| ![amber-chat](https://raw.githubusercontent.com/biground/codex-host-theme-hdd-fairy/v2.2.0/docs/screenshots/v2.2.0/01-amber-chat-periodic-slider.png) | ![amber-usage](https://raw.githubusercontent.com/biground/codex-host-theme-hdd-fairy/v2.2.0/docs/screenshots/v2.2.0/02-amber-welcome-usage.png) |\n\n| 右侧文件工作台 · 黑曜石代码块 & 统一 Harness 菜单 | H.D.D + Fairy 独立控制页（三预设 & 6 面板矩阵） |\n| :---: | :---: |\n| ![amber-rightbar](https://raw.githubusercontent.com/biground/codex-host-theme-hdd-fairy/v2.2.0/docs/screenshots/v2.2.0/03-amber-rightbar-and-harness.png) | ![amber-control](https://raw.githubusercontent.com/biground/codex-host-theme-hdd-fairy/v2.2.0/docs/screenshots/v2.2.0/04-amber-fairy-control.png) |\n\n| 设置中心 · 远程主机与网络拓扑（v0.28.1） | 移动端 390px 全响应式（抽屉 / 弹性底栏 / 单栏元素周期表） |\n| :---: | :---: |\n| ![amber-settings](https://raw.githubusercontent.com/biground/codex-host-theme-hdd-fairy/v2.2.0/docs/screenshots/v2.2.0/05-amber-settings-remote.png) | ![mobile-390](https://raw.githubusercontent.com/biground/codex-host-theme-hdd-fairy/v2.2.0/docs/screenshots/v2.2.0/12-mobile-390-showcase.png) |\n\n#### 方案 B · 新艾利都街头 HUD（`street` · 酸橙暗色）\n\n| 对话流 · 元素周期表 & 超频滑轨 | 欢迎页 · 算力用量终端 | Fairy 独立控制页 |\n| :---: | :---: | :---: |\n| ![street-chat](https://raw.githubusercontent.com/biground/codex-host-theme-hdd-fairy/v2.2.0/docs/screenshots/v2.2.0/06-street-chat-periodic-slider.png) | ![street-usage](https://raw.githubusercontent.com/biground/codex-host-theme-hdd-fairy/v2.2.0/docs/screenshots/v2.2.0/07-street-welcome-usage.png) | ![street-control](https://raw.githubusercontent.com/biground/codex-host-theme-hdd-fairy/v2.2.0/docs/screenshots/v2.2.0/08-street-fairy-control.png) |\n\n#### 方案 C · 绳网高反差白卡（`archive` · 自动浅色）\n\n| 对话流 · 自动浅色 & 护眼黑曜石代码块 | 欢迎页 · 算力用量终端 | Fairy 独立控制页 |\n| :---: | :---: | :---: |\n| ![archive-chat](https://raw.githubusercontent.com/biground/codex-host-theme-hdd-fairy/v2.2.0/docs/screenshots/v2.2.0/09-archive-chat-periodic-slider.png) | ![archive-usage](https://raw.githubusercontent.com/biground/codex-host-theme-hdd-fairy/v2.2.0/docs/screenshots/v2.2.0/10-archive-welcome-usage.png) | ![archive-control](https://raw.githubusercontent.com/biground/codex-host-theme-hdd-fairy/v2.2.0/docs/screenshots/v2.2.0/11-archive-fairy-control.png) |\n\n---\n\n### 安装与更新\n\n- **插件市场**：发布后约 30 分钟内自动同步至 CodexHost 插件市场，搜索 **H.D.D + Fairy** 即可一键更新；\n- **手动导入**：下载下方附件 `hdd-fairy-2.2.0.zip`，在 Desktop「设置 → 插件 → 导入插件」或 Web「插件 → 导入插件」直接导入。",
+          "url": "https://github.com/biground/codex-host-theme-hdd-fairy/releases/tag/v2.2.0"
+        },
+        {
+          "version": "2.0.1",
+          "publishedAt": "2026-11-24T09:56:17Z",
+          "notes": "CodexHost 统一扩展（`manifestVersion: 2`），同时适配 Codex Desktop 与 CH Web：\n\n- **跨端开机动画与 Fairy 悬浮眼徽挂件（`widget`）**：静音 Animated WebP 开机动画（`assets/boot.webp`）、全息问候、可拖动停靠眼徽与状态气泡（手机端自动停用）。\n- **跨端独立控制页（`page`）**：支持 Desktop「设置 → 插件页面」与 Web「插件」顶栏切换，集中配置开关、眼徽尺寸、位置复位与开机重播。\n- **CH Web H.D.D 碳纤维暗色皮肤（`web`）**：碳纤维暗色背景、蓝白气泡、暖琥珀金侧栏高亮、矢量居中双波纹进行中状态标、黑白高对比问答面板与微软雅黑界面字体；已修复新会话 Hero 视图 MutationObserver 死循环及侧栏状态槽位对齐问题。\n- **纯前端 · 零后端 · 无音频**：停用即干净回收全部样式、节点与 DOM 标记。",
+          "url": "https://github.com/biground/codex-host-theme-hdd-fairy/releases/tag/v2.0.1"
+        },
+        {
+          "version": "1.0.3-codexhost.12",
+          "publishedAt": "2026-11-13T10:19:35Z",
+          "notes": "新增 Telegram 风格的问答引用显示：\n- 原生异步问题的回答显示为「原问题引用 + 回答正文」。\n- 长问题可展开，多条问答分别排列。\n- 复制得到可读的问答文本；普通消息和无法解析的内容保留原生显示。\n- 保留原始历史与模型输入，只调整主题显示。\n\n安装：设置 → 界面扩展 → 添加扩展，输入 https://github.com/biground/codex-host-theme-hdd-fairy ，安装后启用。\n\n基于 AssassinVIX/fairy-zzz-plugin，Fairy 动画来源 Chengzhibense/Fairy-DSH；完整致谢与 MIT / Apache-2.0 许可见 README、CREDITS.md 和 NOTICE。\n\n已通过 Windows Chromium / CodexHost Web 0.18.0-beta.5 隔离回归及公开仓库地址安装，保持无音频。",
+          "url": "https://github.com/biground/codex-host-theme-hdd-fairy/releases/tag/v1.0.3-codexhost.12"
+        },
+        {
+          "version": "1.0.3-codexhost.11",
+          "publishedAt": "2026-11-13T09:22:02Z",
+          "notes": "CodexHost Web 的 H.D.D + Fairy 无音频界面扩展。\n\n安装：在「设置 → 界面扩展 → 添加扩展」输入：\nhttps://github.com/biground/codex-host-theme-hdd-fairy\n\n安装后启用 H.D.D + Fairy。无需克隆或构建，也可下载下方 .tgz 并通过本地绝对路径安装。\n\n包含碳纤维暗色面板、H.D.D 欢迎背景、蓝白聊天气泡、侧栏高亮、输入控件与静音 Fairy 状态动画。\n\n已在 CodexHost Web 0.18.0-beta.5 / Windows / Chromium 中，通过公开仓库地址完成安装及界面回归；0 音频请求、0 页面异常。\n\n致谢：\n- https://github.com/AssassinVIX/fairy-zzz-plugin\n- https://github.com/Chengzhibense/Fairy-DSH\n- https://github.com/BytePioneer-AI/codex-host\n\n原版权、MIT / Apache-2.0 许可与素材归属见仓库 README、CREDITS.md 和 NOTICE。",
+          "url": "https://github.com/biground/codex-host-theme-hdd-fairy/releases/tag/v1.0.3-codexhost.11"
+        }
+      ]
     },
     {
       "id": "mcp-hub",
@@ -416,7 +573,7 @@
       "author": "ABC-xiaoxuan",
       "repository": "https://github.com/ABC-xiaoxuan/ch-mcp-hub",
       "stars": 0,
-      "downloads": 118,
+      "downloads": 123,
       "categories": [
         "integrations",
         "tools"
@@ -441,7 +598,27 @@
         "page": 1,
         "web": 1,
         "backend": 1
-      }
+      },
+      "changelog": [
+        {
+          "version": "1.2.0",
+          "publishedAt": "2026-11-26T03:56:43Z",
+          "notes": "**Full Changelog**: https://github.com/ABC-xiaoxuan/ch-mcp-hub/compare/v1.1.0...v1.2.0",
+          "url": "https://github.com/ABC-xiaoxuan/ch-mcp-hub/releases/tag/v1.2.0"
+        },
+        {
+          "version": "1.1.0",
+          "publishedAt": "2026-11-26T02:58:23Z",
+          "notes": "**Full Changelog**: https://github.com/ABC-xiaoxuan/ch-mcp-hub/compare/v1.0.0...v1.1.0",
+          "url": "https://github.com/ABC-xiaoxuan/ch-mcp-hub/releases/tag/v1.1.0"
+        },
+        {
+          "version": "1.0.0",
+          "publishedAt": "2026-11-25T14:58:13Z",
+          "notes": "## MCP Hub v1.0.0 (MCP 管理中心)\n\nUnified MCP control plane extension for **CodexHost Web** (direct left sidebar entry) and **Codex Desktop** (Settings → Plugin Pages).\n\n### Highlights\n- **Direct Web Sidebar Entry + Cross-Platform Page**: Mounted via `api.panels.register({ placement: \"main\" })` in CH Web and `page` entry in Codex Desktop.\n- **4-Harness Sync Matrix**: Lossless native config management & cross-harness schema conversion for **Claude Code** (`~/.claude.json`), **Antigravity** (`~/.gemini/config/mcp_config.json`), **OpenCode** (`~/.config/opencode/opencode.json`), and **Codex** (`~/.codex/config.toml`, comment-preserving surgical TOML patcher).\n- **Live Probe & Standard OAuth 2.1**: Streamable HTTP `initialize` + `tools/list` probe, RFC 9728 / RFC 8414 OAuth discovery + PKCE browser auth (with manual callback paste for remote Web access), plus one-click native CLI login commands.\n- **Automatic Backups & Marketplace-Safe**: Pure Node.js shared backend with automatic pre-write snapshots and one-click restore.",
+          "url": "https://github.com/ABC-xiaoxuan/ch-mcp-hub/releases/tag/v1.0.0"
+        }
+      ]
     },
     {
       "id": "mcp-sync-hub",
@@ -461,7 +638,7 @@
       "author": "ErkundenSie",
       "repository": "https://github.com/ErkundenSie/codexhost-mcp-hub",
       "stars": 1,
-      "downloads": 105,
+      "downloads": 108,
       "categories": [
         "integrations",
         "tools",
@@ -485,7 +662,39 @@
       "apis": {
         "page": 1,
         "backend": 1
-      }
+      },
+      "changelog": [
+        {
+          "version": "2.5.7",
+          "publishedAt": "2026-11-27T08:09:08Z",
+          "notes": "### 🛠️ 稳定性与代码质量全面优化\n- **实时自动同步按目标合并写盘**：单次保存多条 MCP 变更时，按目标 AI 合并为**最多 1 次备份 + 1 次原子写盘**，大幅降低磁盘 IO 与重复备份数量。\n- **修复自动同步漏传禁用状态**：切换 DeepSeek / Hermes / Codex / OpenCode 中 MCP 的 `enabled: false` 状态时，现可正确同步至其他已选 AI。\n- **精确备份恢复回环抑制**：`HubStore` 新增备份元信息读取校验，恢复备份前按精确 `targetId` 抑制监听，彻底消除名称后缀误匹配（如 `my_pi` 与 `pi`）。\n- **JSON / JSONC UTF-8 BOM 兼容**：统一剥离 Windows 编辑器常见的 UTF-8 BOM（`\\uFEFF`），避免带 BOM 的 JSON / VS Code JSONC 解析报错。\n- **Codex / Grok TOML 语法错误熔断**：`parseCodexMcpServers` 新增未闭合节头、引号、多行数组与内联表校验，畸形 TOML 触发自动同步熔断保护。\n- **OAuth 并发写锁与防复活保护**：`OAuthManager` 对 `oauth-tokens.json` 全部变更串行加锁，防止多账户并发登录/续期互相覆盖，并防止登出后在途续期写回已注销令牌；同时消除 `buildOverview` 重复查询 OAuth 状态。\n- **多账户禁用卡片重启用修复**：在同名多账户中对已禁用卡片点击 AI 格子时，仅保留该卡片自身目标并追加所选 AI，不再误抢同胞账户正在使用的 AI。\n- **其他细节加固**：`probe.mjs` 改为从 `manifest.json` 动态读取版本号；前端焦点恢复兼容特殊字符 key 并在 `abort` 时清理全部 OAuth 轮询定时器；新增多项回归测试（共 **36 项测试**全部通过）。\n\n---\n**Full Changelog**: https://github.com/ErkundenSie/codexhost-mcp-hub/compare/v2.5.6...v2.5.7",
+          "url": "https://github.com/ErkundenSie/codexhost-mcp-hub/releases/tag/v2.5.7"
+        },
+        {
+          "version": "2.5.6",
+          "publishedAt": "2026-11-27T07:44:50Z",
+          "notes": "### ✨ 新增功能\n- **100% 覆盖 CodexHost 全部 20 个 Harness + VS Code（内置 AI 目标增至 24 个）**：\n  - **VS Code (`vscode`)**：新增 `vscode-json` 格式（完整支持 JSONC `//`、`/* */` 注释与尾逗号），自动扫描全局 `User/mcp.json`（Windows `%APPDATA%\\Code\\User\\mcp.json` / macOS `~/Library/Application Support/Code/User/mcp.json` / Linux `~/.config/Code/User/mcp.json`）与项目级 `.vscode/mcp.json`；使用官方顶层 `servers` 结构，写入时完整保留 `inputs`、`sandbox` 与单服务的 `gallery`、`version`、`envFile`、`oauth`、`dev` 元数据，并兼容商店含 `/` 名称（如 `io.github.upstash/context7`）。\n  - **Oh My Pi (`omp`)**：支持 `~/.omp/agent/mcp.json`（标准 `mcpServers` JSON）。\n  - **ZCode (`zcode`)**：新增 `zcode-json` 格式，支持 `~/.zcode/cli/config.json` 嵌套结构 `mcp.servers`（兼容读取回退 `mcpServers`，写入时保留同级 `mcp` 与全局配置）。\n  - **Hermes (`hermes`)**：新增零依赖局部更新器 `backend/hermes-yaml.mjs`，支持 `~/.hermes/config.yaml` 的 `mcp_servers` 区块，逐字节保留其他顶层设置、注释以及单服务的 `timeout` / `tools` / `auth` 等扩展字段。\n  - **Devin CLI (`devin`)**：支持 Windows `%APPDATA%\\devin\\mcp_config.json` 与 macOS / Linux `~/.config/devin/mcp_config.json`。\n  - **Qoder / Qoder CN 独立拆分**：按 Qoder CLI 官方规范拆分为国际版 **Qoder**（`~/.qoder/settings.json`）与国内版 **Qoder CN**（`~/.qoder-cn/settings.json`），互不串写。\n\n### 🛠️ 优化与修复\n- `shared/models.mjs` 的 `normalizeTransport` 新增对 `transport` 字段（如 Devin 的 `\"transport\": \"sse\"`）的兼容识别；`normalizeServerName` 放行 `/` 以兼容 VS Code Gallery 命名空间 ID。\n- 前端 AI 配置页与原文查看弹窗自动为所有 `*-yaml` 目标（DeepSeek、Hermes）展示 `YAML` 格式标签；项目级同步新增 `.vscode/mcp.json` 选项。\n- 新增 VS Code JSONC、Hermes YAML 及 ZCode / OMP / Devin / Qoder / Qoder CN 单元测试与端到端回归测试（共 28 项测试全部通过）。\n\n---\n**Full Changelog**: https://github.com/ErkundenSie/codexhost-mcp-hub/compare/v2.5.5...v2.5.6",
+          "url": "https://github.com/ErkundenSie/codexhost-mcp-hub/releases/tag/v2.5.6"
+        },
+        {
+          "version": "2.5.5",
+          "publishedAt": "2026-11-27T05:56:47Z",
+          "notes": "### ✨ 新增功能\n- **支持 DeepSeek Desktop 与 DeepSeek Web（`@deepseek-ai/dsh`）**：自动扫描并同步 `~/.dsh/profiles/desktop/cordis.patch.yml` 与 `~/.dsh/profiles/web/cordis.patch.yml`，内置 AI 配置目标增至 **18 个**。\n- **零依赖 Cordis YAML 局部更新器（`backend/dsh-yaml.mjs`）**：\n  - 按 DeepSeek 官方 `ConfigEditor` / `@deepseek-ai/dsh-mcp-manager` 规范写入 `- id: mcp-manager` (`config.servers.<name>`)，自动完成 `http`/`sse` ↔ `streamable-http` 与 `stdio` 跨格式互转；\n  - 兼容读取并就地更新已有的独立 `- insert:` `@deepseek-ai/dsh-mcp-client` 条目（保留 `id` 及 `toolCallTimeoutMs` 等扩展字段），杜绝 `serverName` 重名冲突；\n  - 逐字节保留无关 Cordis 插件块（`ui-chat`、`llm-pi-ai`、`!!js` 表达式、注释及其他插件配置）。\n- **YAML 生态集成**：支持自动生成/一键恢复 `.yml` 备份文件、AI 配置页与原文查看器展示 `YAML` 格式标签，并接入实时自动同步与 YAML 语法损坏熔断保护。\n\n### 🛠️ 优化与修复\n- **OAuth 本地回调端口安全防护**：回环监听自动规避浏览器/Fetch 禁用端口（如 `6000`、`6665–6669`、`10080`），防止浏览器偶发 `ERR_UNSAFE_PORT`。\n- **YAML 解析与序列化健壮性加固**：收紧纯标量安全正则（避免 `.inf`/`.nan`/`+`/`-`/`@` 误作无引号标量），并在检测 MCP 块前剥离行内注释。\n- **发布流程自动化升级**：新增 `CHANGELOG.md`，GitHub Actions 发布 Release 时自动提取对应版本更新日志写入 Release 正文。\n- **文案与测试完善**：修正多 Profile/多客户端目标的表述为「18 个内置 AI 目标」；新增 DeepSeek YAML 单元与跨 AI 端到端回归测试（共 25 项测试全部通过）。\n\n---\n**Full Changelog**: https://github.com/ErkundenSie/codexhost-mcp-hub/compare/v2.5.4...v2.5.5",
+          "url": "https://github.com/ErkundenSie/codexhost-mcp-hub/releases/tag/v2.5.5"
+        },
+        {
+          "version": "2.5.4",
+          "publishedAt": "2026-11-27T03:53:36Z",
+          "notes": "**Full Changelog**: https://github.com/ErkundenSie/codexhost-mcp-hub/compare/v2.5.3...v2.5.4",
+          "url": "https://github.com/ErkundenSie/codexhost-mcp-hub/releases/tag/v2.5.4"
+        },
+        {
+          "version": "2.5.3",
+          "publishedAt": "2026-11-27T01:39:49Z",
+          "notes": "**Full Changelog**: https://github.com/ErkundenSie/codexhost-mcp-hub/compare/v2.5.2...v2.5.3",
+          "url": "https://github.com/ErkundenSie/codexhost-mcp-hub/releases/tag/v2.5.3"
+        }
+      ]
     },
     {
       "id": "model-tier-picker",
@@ -505,7 +714,7 @@
       "author": "sduhantao-maker",
       "repository": "https://github.com/sduhantao-maker/codexhost-thinkshift",
       "stars": 0,
-      "downloads": 2,
+      "downloads": 4,
       "categories": [
         "interface"
       ],
@@ -530,7 +739,21 @@
       "apis": {
         "desktop": 1,
         "web": 1
-      }
+      },
+      "changelog": [
+        {
+          "version": "0.2.1",
+          "publishedAt": "2026-11-28T07:29:27Z",
+          "notes": "## 思考换挡 0.2.1\n\n- 修复新对话中切换档位时面板闪动。宿主在选档期间会把 Harness 图标换成加载圈，插件不再因此重建滑杆，滑块不会跳回旧档位，说明文字和面板高度保持不变。\n- 输入框信号格不再显示灰色。还没展开过菜单的模型（例如 Antigravity 的 Gemini 4 Carbon）按同一 Harness 其他模型的档位或通用强度顺序估计格数；展开一次后改用实际刻度。\n- 已记住的档位只增不清。刷新模型目录、查看其他模型都不再清空记录。使用常见档位名称的提供方（如 DeepSeek）也会显示档位说明。\n\n## ThinkShift 0.2.1\n\n- Fixed the panel flickering when changing tiers in a new conversation. The host shows a spinner instead of the Harness icon while a selection is pending; the picker no longer rebuilds its slider, snaps the thumb back or drops the description.\n- The composer signal is no longer gray. Models whose menu has not been opened yet, such as Gemini 4 Carbon in Antigravity, are ranked from the same Harness's other models or the usual strength order until their own stops are read.\n- Remembered tiers only grow or get corrected. A model directory reload or reading another model no longer clears them. Providers that use the usual tier names, such as DeepSeek, also show tier descriptions.",
+          "url": "https://github.com/sduhantao-maker/codexhost-thinkshift/releases/tag/v0.2.1"
+        },
+        {
+          "version": "0.2.0",
+          "publishedAt": "2026-11-28T06:37:19Z",
+          "notes": "## 思考换挡 0.2.0\n\n提交到 CodexHost 插件市场的第一个版本。\n\n- 更名为「思考换挡」（ThinkShift），换用新图标，补充市场详情介绍。\n- 修复新开对话、发送首条消息后或刷新页面后，输入框信号格变灰、需要重新展开模型菜单才恢复的问题。核实过的档位按主机共享，并保存在本机浏览器存储中。\n- 扩展 ID 仍为 `model-tier-picker`，旧版「模型档位选择」可以直接升级。\n\n安装：在 CodexHost 插件中心搜索「思考换挡」；或下载下方的 `model-tier-picker-0.2.0.zip`，在插件中心导入本地 .zip。\n\n## ThinkShift 0.2.0\n\nThe first version submitted to the CodexHost extension market.\n\n- Renamed to ThinkShift with a new icon and store details.\n- Fixed the composer signal turning gray in new conversations, after the first message or after a page reload until the model menu was opened again. Verified tiers are now shared per Host and kept in local browser storage.\n- The extension ID stays `model-tier-picker`, so Model Tier Picker installs upgrade in place.\n\nInstall: search for ThinkShift in the CodexHost extension center, or download `model-tier-picker-0.2.0.zip` below and import it as a local .zip.",
+          "url": "https://github.com/sduhantao-maker/codexhost-thinkshift/releases/tag/v0.2.0"
+        }
+      ]
     },
     {
       "id": "prism-facets",
@@ -550,7 +773,7 @@
       "author": "SgAlice",
       "repository": "https://github.com/SgAlice/codexhost-prism-facets",
       "stars": 1,
-      "downloads": 122,
+      "downloads": 125,
       "categories": [
         "appearance",
         "interface",
@@ -582,7 +805,39 @@
         "desktop": 1,
         "web": 1,
         "backend": 1
-      }
+      },
+      "changelog": [
+        {
+          "version": "1.2.8",
+          "publishedAt": "2026-11-27T07:23:43Z",
+          "notes": "## What's Changed\n* fix: align UI typography with host system font by @hhucz in https://github.com/SgAlice/codexhost-prism-facets/pull/1\n\n## New Contributors\n* @hhucz made their first contribution in https://github.com/SgAlice/codexhost-prism-facets/pull/1\n\n**Full Changelog**: https://github.com/SgAlice/codexhost-prism-facets/compare/v1.2.7...v1.2.8",
+          "url": "https://github.com/SgAlice/codexhost-prism-facets/releases/tag/v1.2.8"
+        },
+        {
+          "version": "1.2.7",
+          "publishedAt": "2026-11-26T07:55:05Z",
+          "notes": "**Full Changelog**: https://github.com/SgAlice/codexhost-prism-facets/compare/v1.2.6...v1.2.7",
+          "url": "https://github.com/SgAlice/codexhost-prism-facets/releases/tag/v1.2.7"
+        },
+        {
+          "version": "1.2.6",
+          "publishedAt": "2026-11-26T07:51:01Z",
+          "notes": "**Full Changelog**: https://github.com/SgAlice/codexhost-prism-facets/compare/v1.2.5...v1.2.6",
+          "url": "https://github.com/SgAlice/codexhost-prism-facets/releases/tag/v1.2.6"
+        },
+        {
+          "version": "1.2.5",
+          "publishedAt": "2026-11-26T07:46:25Z",
+          "notes": "**Full Changelog**: https://github.com/SgAlice/codexhost-prism-facets/compare/v1.2.4...v1.2.5",
+          "url": "https://github.com/SgAlice/codexhost-prism-facets/releases/tag/v1.2.5"
+        },
+        {
+          "version": "1.2.4",
+          "publishedAt": "2026-11-26T07:43:39Z",
+          "notes": "**Full Changelog**: https://github.com/SgAlice/codexhost-prism-facets/compare/v1.2.3...v1.2.4",
+          "url": "https://github.com/SgAlice/codexhost-prism-facets/releases/tag/v1.2.4"
+        }
+      ]
     },
     {
       "id": "prompt-enhancement",
@@ -602,7 +857,7 @@
       "author": "vastsa & codexhost community",
       "repository": "https://github.com/Solren-zhen/codexhost-prompt-enhancement",
       "stars": 0,
-      "downloads": 94,
+      "downloads": 97,
       "categories": [
         "workflow",
         "tools"
@@ -627,7 +882,15 @@
         "page": 1,
         "widget": 1,
         "backend": 1
-      }
+      },
+      "changelog": [
+        {
+          "version": "2.0.0",
+          "publishedAt": "2026-11-26T09:24:10Z",
+          "notes": "Cross-platform Prompt Enhancement extension (Manifest v2) for Codex Desktop and CH Web, powered by your own OpenAI-compatible or Anthropic API.",
+          "url": "https://github.com/Solren-zhen/codexhost-prompt-enhancement/releases/tag/v2.0.0"
+        }
+      ]
     },
     {
       "id": "prompt-templates",
@@ -647,7 +910,7 @@
       "author": "zxd-666",
       "repository": "https://github.com/zxd-666/codexhost-prompt-templates",
       "stars": 0,
-      "downloads": 105,
+      "downloads": 109,
       "categories": [
         "workflow",
         "tools"
@@ -672,7 +935,39 @@
         "page": 1,
         "widget": 1,
         "backend": 1
-      }
+      },
+      "changelog": [
+        {
+          "version": "1.8.0",
+          "publishedAt": "2026-11-27T10:40:40Z",
+          "notes": "本版本包含 v1.6.1 至 v1.8.0 的更新。\n\n## 内置提示词模板\n\n- 新增 8 条思维方法模板：大图小字讲解、专家会诊、事实核查、第一性原理、横纵分析、逆向法、点子王、天赋挖掘。在输入框左下角的模板弹窗里可直接搜索插入，标签统一为「思维方法」，点标签即可只看这一组。\n- 原有的「审查改动」「梳理需求」「整理交接」三条保持不变。\n\n## 模板管理页\n\n- 管理页按《张张设计规范》重做，改为独立的浅色工具页，排版、间距与张张的其他产品保持一致。宿主切到深色时管理页仍保持浅色。\n- 弹窗与管理页的图标改为随插件打包的 Lucide 线性图标，不再从外网加载，离线也能正常显示。\n\n## 正文编辑\n\n- 在一端编辑模板时，如果另一端已经改了同一条，保存会被拒绝并说明情况，可以点「载入最新内容」核对后再保存。",
+          "url": "https://github.com/zxd-666/codexhost-prompt-templates/releases/tag/v1.8.0"
+        },
+        {
+          "version": "1.6.0",
+          "publishedAt": "2026-11-26T11:22:46Z",
+          "notes": "本版本包含 v1.4.1 至 v1.6.0 的更新。\n\n## 弹窗\n\n- 搜索框下方新增一排标签。点击某个标签只显示该标签下的模板，点「全部」恢复。搜索会在当前标签内进一步筛选。\n- 鼠标悬停或键盘选中的模板行会整行高亮。\n\n## 模板管理页\n\n- 支持导出和导入 Excel（`.xlsx`）。表格含「名称」「标签」「提示词正文」三列，正文保留换行。导入时会跳过重复和无效的行，并显示导入和跳过的条数。\n\n## 正文编辑\n\n- 从文档或网页复制的内容粘贴进正文框时，会保留原有的分段和换行。",
+          "url": "https://github.com/zxd-666/codexhost-prompt-templates/releases/tag/v1.6.0"
+        },
+        {
+          "version": "1.4.0",
+          "publishedAt": "2026-11-26T06:50:51Z",
+          "notes": "## 提示词弹窗操作\n\n- 搜索框右侧的「＋」可在当前对话中直接新建模板。\n- 每条模板右侧可编辑、插入输入框或直接发送。点击标题也会插入模板并保留已有草稿。\n- 编辑内置模板可另存为自定义模板。输入框为空且没有附件时可直接发送当前模板。\n\n已在 CodexHost 0.27.0 的 Desktop 和 CH Web 验证弹窗操作。",
+          "url": "https://github.com/zxd-666/codexhost-prompt-templates/releases/tag/v1.4.0"
+        },
+        {
+          "version": "1.2.0",
+          "publishedAt": "2026-11-26T01:13:19Z",
+          "notes": "## 标签筛选\n\n- 在模板管理页点击顶部或模板卡片上的标签，只显示该标签下的模板。\n- 标签筛选可与关键词搜索叠加。点击「全部模板」恢复完整列表。\n- 在筛选结果里拖拽排序时，其他模板留在原位。\n\n已在 CodexHost 0.27.0 的 Desktop 和 CH Web 验证。",
+          "url": "https://github.com/zxd-666/codexhost-prompt-templates/releases/tag/v1.2.0"
+        },
+        {
+          "version": "1.1.1",
+          "publishedAt": "2026-11-25T16:17:44Z",
+          "notes": "首个公开版本，适用于 CodexHost 的 Codex Desktop 和 CH Web。\n\n- 在聊天输入框左下角搜索并插入模板。搜索匹配名称、标签和正文。\n- 在管理页拖拽排序，管理页与输入框弹窗共享顺序。\n- 连接同一个 Host 的 Desktop 和 Web 共享模板数据。\n\n在 CodexHost 的「插件」中心导入 `prompt-templates-1.1.1.zip` 并启用。模板会插入当前草稿，可编辑后再发送。",
+          "url": "https://github.com/zxd-666/codexhost-prompt-templates/releases/tag/v1.1.1"
+        }
+      ]
     },
     {
       "id": "prompt-vault",
@@ -692,7 +987,7 @@
       "author": "codexhost",
       "repository": "https://github.com/BytePioneer-AI/codexhost-ext-prompt-vault",
       "stars": 0,
-      "downloads": 238,
+      "downloads": 241,
       "categories": [
         "tools",
         "workflow"
@@ -716,7 +1011,39 @@
         "page": 1,
         "widget": 1,
         "backend": 1
-      }
+      },
+      "changelog": [
+        {
+          "version": "1.3.2",
+          "publishedAt": "2026-11-23T06:32:36Z",
+          "notes": "## v1.3.2\n\n- **Compact docked edge tab**: When docked to the left or right edge, the floating trigger now tucks neatly down to a `36×36px` icon-only tab (aligned with Focus Pomodoro), removing the extra blank tail while still expanding smoothly on hover.\n- **更小巧的贴边收起态**：左右贴边收起时自动收缩为与专注番茄钟一致的 `36×36px` 迷你书签图标，去掉多余留白，悬停仍丝滑展开完整按钮。",
+          "url": "https://github.com/BytePioneer-AI/codexhost-ext-prompt-vault/releases/tag/v1.3.2"
+        },
+        {
+          "version": "1.3.1",
+          "publishedAt": "2026-11-22T04:11:03Z",
+          "notes": "Added custom Prompt Vault app icon.",
+          "url": "https://github.com/BytePioneer-AI/codexhost-ext-prompt-vault/releases/tag/v1.3.1"
+        },
+        {
+          "version": "1.3.0",
+          "publishedAt": "2026-11-22T04:07:34Z",
+          "notes": "### Prompt Vault 1.3.0\n\n- Drag the floating button with a mouse or touch. It remembers its position and tucks halfway away when docked at either screen edge.\n- Open the compact, backdrop-free picker beside the button with a click or `⌥P` / `Alt+P`. Search, fill `{{variable}}` placeholders, then insert or copy without leaving the page.\n- **+ Save** starts from your chat draft or selected text. Prompts are ordered by pin, recent use, then last updated.\n- The library keeps pin, copy, and delete actions; preferences are managed from the host’s plugin settings.\n\n### 本地提示词库 1.3.0\n\n- 悬浮按钮支持鼠标和触屏拖动，贴边半收起，刷新后保留位置。\n- 按 `⌥P` / `Alt+P` 或点击按钮，在旁边打开无全屏遮罩的小窗，支持搜索、变量填空、插入与复制。\n- **+ 存** 可从聊天草稿或划选文字快速保存；列表按置顶、最近使用、更新时间排序。\n- 管理页保留置顶、复制和删除；偏好统一在宿主插件设置中管理。",
+          "url": "https://github.com/BytePioneer-AI/codexhost-ext-prompt-vault/releases/tag/v1.3.0"
+        },
+        {
+          "version": "1.2.0",
+          "publishedAt": "2026-11-22T03:38:42Z",
+          "notes": "Redesigned into a lightweight Notes-style prompt library + cross-shell Spotlight quick-picker widget (⌥P / Alt+P) that inserts directly into the chat composer and supports {{variable}} fill, pinning, and auto-save.",
+          "url": "https://github.com/BytePioneer-AI/codexhost-ext-prompt-vault/releases/tag/v1.2.0"
+        },
+        {
+          "version": "1.1.0",
+          "publishedAt": "2026-11-22T03:20:16Z",
+          "notes": "Polished consumer UI & copy: removed technical PID/slug/file-path clutter, removed auto-seeded English samples, added Chinese comma tag parsing & Cmd/Ctrl+S save.",
+          "url": "https://github.com/BytePioneer-AI/codexhost-ext-prompt-vault/releases/tag/v1.1.0"
+        }
+      ]
     },
     {
       "id": "second-brain",
@@ -736,7 +1063,7 @@
       "author": "sduhantao-maker",
       "repository": "https://github.com/sduhantao-maker/codexhost-second-brain",
       "stars": 2,
-      "downloads": 204,
+      "downloads": 207,
       "categories": [
         "workflow",
         "interface"
@@ -764,7 +1091,39 @@
         "desktop": 1,
         "web": 1,
         "backend": 1
-      }
+      },
+      "changelog": [
+        {
+          "version": "0.10.6",
+          "publishedAt": "2026-11-27T04:03:28Z",
+          "notes": "修复了侧栏悬停卡里新关联的 GitHub Issue 状态留白的问题。卡片会优先查询缺少状态的条目，一旦取得结果就显示「进行中」或「已关闭」。如果 GitHub 暂时没有返回状态，卡片会显示「状态待确认」，稍后自动更新。\n\nNewly linked GitHub issues could appear without a status in the sidebar hover card. The card now checks items with a missing status first and shows “Open” or “Closed” as soon as GitHub confirms it. While the status is unavailable, the card shows “Status unknown” and updates automatically when the lookup succeeds.",
+          "url": "https://github.com/sduhantao-maker/codexhost-second-brain/releases/tag/v0.10.6"
+        },
+        {
+          "version": "0.10.5",
+          "publishedAt": "2026-11-26T12:10:21Z",
+          "notes": "## 中文\n\n第二大脑换上了新的黑白图标。两条思路线在脑形轮廓内汇合，右上方多一条独立的弧线。缩到插件列表的大小，也能看清两层轮廓。\n\n如果你从 0.10.3 升级，这个安装包也包含 0.10.4 的修复。远程主机上的对话可以凝练主线。在 Web 和 Codex Desktop 上，打开第二大脑卡片时，原生会话预览会暂时隐藏。\n\n市场目录同步后可在插件中心更新，也可直接从本页下载 `second-brain.zip`。[完整更新记录](https://github.com/sduhantao-maker/codexhost-second-brain/blob/v0.10.5/CHANGELOG.md#0105)\n\n## English\n\nSecond Brain has a new black-and-ivory icon. Two lines meet inside a brain silhouette, with a separate arc that stays visible at small sizes.\n\nUpgrading from 0.10.3 also includes the fixes from 0.10.4. Conversations on remote hosts can now be summarized, and the native conversation preview is hidden while the Second Brain card is open in Web or Codex Desktop.\n\nDownload `second-brain.zip` below, or update in the plugin center once the catalog syncs. [Full changelog](https://github.com/sduhantao-maker/codexhost-second-brain/blob/v0.10.5/CHANGELOG.md#0105)",
+          "url": "https://github.com/sduhantao-maker/codexhost-second-brain/releases/tag/v0.10.5"
+        },
+        {
+          "version": "0.10.4",
+          "publishedAt": "2026-11-26T11:30:58Z",
+          "notes": "## 中文\n\n- **远程对话也有主线了。** 在 codexhost Web 侧栏悬停已连接主机上的对话，可以看到主机名、连接状态、主线和里程碑。远程对话有新回复时可自动凝练，也可以点「立即凝练」。从卡片新开的子对话会在同一台远程主机上运行。\n- **悬停时只显示一张卡片。** 第二大脑卡片打开时，Web 的黑色预览和 Codex Desktop 的原生预览会暂时隐藏。按 Esc 收起卡片，指针仍停在对话行上时，就能看到原生预览。\n- 修复了读取未发送草稿时产生的错误。远程主机重新连接后，插件也会补扫之前遗漏的对话。\n\n可在插件中心更新，或从本页下载 `second-brain.zip`。[完整更新记录](https://github.com/sduhantao-maker/codexhost-second-brain/blob/v0.10.4/CHANGELOG.md#0104)\n\n## English\n\n- **Mainlines for remote conversations.** Hover over a conversation on a connected host in the codexhost Web sidebar to see its host, connection status, mainline and milestones. New replies can trigger a summary automatically. You can also select **Summarize now**. Child conversations opened from the card run on the same remote host.\n- **One preview at a time.** The Second Brain card hides the native conversation preview in codexhost Web and Codex Desktop while it is open. Press Esc with the pointer still on the row to return to the native preview.\n- Fixed errors from trying to read unsent drafts. When a remote host reconnects, the plugin also scans for conversations it may have missed.\n\nUpdate in the plugin center or download `second-brain.zip` below. [Full changelog](https://github.com/sduhantao-maker/codexhost-second-brain/blob/v0.10.4/CHANGELOG.md#0104)",
+          "url": "https://github.com/sduhantao-maker/codexhost-second-brain/releases/tag/v0.10.4"
+        },
+        {
+          "version": "0.10.3",
+          "publishedAt": "2026-11-25T15:16:10Z",
+          "notes": "## 中文\n\n这一版修了两个用户会直接碰到的问题。\n\n- **PR 与 Issue 的 🔔 不再自己消失。** 以前打开或切换到提出 PR 的对话就算看过了，可主线胶囊默认关闭，打开对话时看不到新动态；同时开着两个停在不同对话上的窗口时，🔔 几秒内就被清掉。现在 🔔 只在你处理它时消失：🔔 显示着时点这个对话的侧栏行，在悬停卡片里点「知道了」，或在「PR 与 Issue」页签里点「跳转」。\n- **看不到对话行时也有提醒。** 对话在收起的分组里、滚出了列表或没有列出时，侧栏顶部显示「🔔 N」，点开列出这些新动态，每条可以「打开对话」或「知道了」。\n- **提醒更快。** 有 Codex Desktop 或 codexhost 的窗口开着时，每分钟读一次 GitHub 通知（原来每 3 分钟）。\n- **悬停卡片不再被会话预览盖住。** 新版 Codex Desktop（在 26.1120 上确认）的会话预览换了做法，插件认不出它，卡片没有让开。现在卡片会排在预览的下面、上面或旁边。\n\n第二大脑已经上架 codexhost 插件市场，在「插件 → 市场」里就能找到。也可以下载本页附件 `second-brain.zip`，在「插件 → 导入插件 → 本地 .zip」里安装。完整说明见 [CHANGELOG.md](https://github.com/sduhantao-maker/codexhost-second-brain/blob/main/CHANGELOG.md)。\n\n⭐ 如果第二大脑对你有帮助，欢迎给仓库点个 Star！\n\n## English\n\nThis release fixes two problems users run into directly.\n\n- **The 🔔 on PR and issue news no longer goes away by itself.** Opening or switching to the conversation a PR came from used to count as seeing its news, although the capsule is off by default and the conversation showed none of it; with two windows open on different conversations, the 🔔 was cleared within seconds. A 🔔 now goes away only when you act on it: select the conversation's sidebar row while its 🔔 shows, select **Got it** in the hover card, or **Go** in the **PRs and issues** tab.\n- **News shows even when its row does not.** When the conversation is in a collapsed group, scrolled away or not listed, a **🔔 N** at the top of the sidebar counts that news; select it to list the news, each with **Open conversation** and **Got it**.\n- **Faster alerts.** GitHub notifications are read every minute (it was every 3 minutes) while a Codex Desktop or codexhost window is open.\n- **The hover card is no longer covered by the conversation preview.** Newer Codex Desktop (seen in 26.1120) builds its conversation preview differently, so the extension did not recognize it and the card did not make room. The card now goes under, over or beside the preview.\n\nSecond Brain is listed in the codexhost extension marketplace, under **Plugins**. You can also download `second-brain.zip` from this release and choose **Plugins → Import plugin → Local .zip**. See [CHANGELOG.md](https://github.com/sduhantao-maker/codexhost-second-brain/blob/main/CHANGELOG.md) for the rest.\n\n⭐ If Second Brain is useful to you, please give the repository a star!\n\nLicense: LGPL-3.0-only; the package carries `LICENSE` and the GPL-3.0 text in `COPYING.txt`.",
+          "url": "https://github.com/sduhantao-maker/codexhost-second-brain/releases/tag/v0.10.3"
+        },
+        {
+          "version": "0.10.2",
+          "publishedAt": "2026-11-25T02:26:25Z",
+          "notes": "## 中文\n\n这一版改了插件介绍，并修了一处权限问题。\n\n- 插件介绍和 [README](https://github.com/sduhantao-maker/codexhost-second-brain#readme) 开头加上一句「有限的注意力，迅速收回。」，末尾加上反馈渠道和 Star 邀请；插件市场列表里的简介也以这句开头。\n- 修复：umask 为 077 时，安装或卸载 Agent 协作会把 `~/.claude/settings.json` 和 `~/.codex/AGENTS.md` 原有的权限收紧成只有自己能读写（比如 644 变成 600）。现在原有文件保持原来的权限；新建的文件仍按 umask。\n- 在 macOS 上用 codexhost 0.26.0 测试过。\n\n第二大脑已经上架 codexhost 插件市场，在「插件 → 市场」里就能找到。也可以下载本页附件 `second-brain.zip`，在「插件 → 导入插件 → 本地 .zip」里安装。完整说明见 [CHANGELOG.md](https://github.com/sduhantao-maker/codexhost-second-brain/blob/main/CHANGELOG.md)。\n\n⭐ 如果第二大脑对你有帮助，欢迎给仓库点个 Star！\n\n## English\n\nThis release updates the extension's introduction and fixes a permissions issue.\n\n- The extension's details and the [README](https://github.com/sduhantao-maker/codexhost-second-brain#readme) now open with \"Your attention is limited; get it back fast.\" and end with where to send feedback and an invitation to star the repository; the short description in the marketplace list starts with the same line.\n- Fix: with a umask of 077, installing or removing the agent integration narrowed the existing permissions of `~/.claude/settings.json` and `~/.codex/AGENTS.md` to owner-only (644 became 600, for example). An existing file now keeps its permissions; a new file still follows the umask.\n- Tested on macOS with codexhost 0.26.0.\n\nSecond Brain is listed in the codexhost extension marketplace, under **Plugins**. You can also download `second-brain.zip` from this release and choose **Plugins → Import plugin → Local .zip**. See [CHANGELOG.md](https://github.com/sduhantao-maker/codexhost-second-brain/blob/main/CHANGELOG.md) for the rest.\n\n⭐ If Second Brain is useful to you, please give the repository a star!\n\nLicense: LGPL-3.0-only; the package carries `LICENSE` and the GPL-3.0 text in `COPYING.txt`.",
+          "url": "https://github.com/sduhantao-maker/codexhost-second-brain/releases/tag/v0.10.2"
+        }
+      ]
     },
     {
       "id": "sidebar-delegation-badges",
@@ -784,7 +1143,7 @@
       "author": "lpmasser",
       "repository": "https://github.com/lpmasser/codexhost-sidebar-delegation-badges",
       "stars": 0,
-      "downloads": 261,
+      "downloads": 262,
       "categories": [
         "interface",
         "workflow"
@@ -822,8 +1181,8 @@
       },
       "author": "sduhantao-maker",
       "repository": "https://github.com/sduhantao-maker/codexhost-sidebar-thread-tree",
-      "stars": 4,
-      "downloads": 855,
+      "stars": 5,
+      "downloads": 1447,
       "categories": [
         "interface",
         "workflow"
@@ -853,7 +1212,39 @@
         "desktop": 1,
         "web": 1,
         "backend": 1
-      }
+      },
+      "changelog": [
+        {
+          "version": "0.2.0",
+          "publishedAt": "2026-11-28T08:08:25Z",
+          "notes": "- **上下文交接前后的会话并排相连。** 把对话的上下文交给另一个 Agent 之后，新会话和原会话以前在侧栏里是散开的。现在两者排在一起，各自保持原来的层级：接手的新会话在上，原会话紧跟在下，左侧用和委派树相同的圆角连线连起来。交接两次以上也连成一串。原会话即使排得很靠后，或者收在「展开显示」里，也会跟到新会话下方。\n- **网页端也能用。** codexhost 网页端的侧栏本身已经会收起委派的子会话，插件在网页端加上交接连线。挪到交接会话旁边的行保持网页原本的样子，点击、右键菜单和行上的按钮都交给网页自己的那一行处理。\n- **新增本机后台。** 插件的后台只在本机读取两样东西：codexhost 记录的交接关系，以及侧栏没有显示的会话在 codexhost 本地会话列表里的标题和状态。数据不会离开本机。\n- 需要 codexhost 0.24.0 或更高版本；交接连线需要 codexhost 0.27.0 或更高版本。\n\n---\n\n- **Threads joined by a context handoff stay side by side.** After you hand a conversation's context to another agent, the new Thread and the one it came from used to sit apart in the sidebar. They now stand next to each other, each at its own level: the one that received the context on top, the one it came from right below, joined on their left by the tree's own rounded line. A longer chain of handoffs reads the same way. The earlier Thread joins its successor even when it sits far down the list or behind **Show more**.\n- **Works in codexhost Web too.** Web's sidebar already folds delegated Threads; the extension adds the handoff links there. A row moved next to its handoff keeps Web's own look, and its click, right-click menu and buttons act on Web's own row.\n- **A local backend.** The extension's backend only reads, on this machine: codexhost's record of handoffs, and codexhost's local Thread list for a Thread the sidebar does not show. Nothing leaves this machine.\n- Needs codexhost 0.24.0 or later; handoff links need codexhost 0.27.0 or later.",
+          "url": "https://github.com/sduhantao-maker/codexhost-sidebar-thread-tree/releases/tag/v0.2.0"
+        },
+        {
+          "version": "0.1.5",
+          "publishedAt": "2026-11-23T02:19:24Z",
+          "notes": "- **Every child row can be archived and deleted again.** A delegated Thread that Desktop does not list in the sidebar, such as one started in a folder that is not a project, used to offer nothing on hover or right-click (#2). It now shows a **Chat actions** button, and right-click does the same: the Thread opens, and Desktop's own **Chat actions** menu appears, with rename, pin, archive and delete. The menu opens only once the main view shows that Thread.\n- Opening such a child now marks it as the open row and expands its parents, as for any other row.\n\n---\n\n- **每个子会话都能归档和删除了。** Desktop 侧栏里没有列出的子会话（比如在非项目文件夹里启动的委派会话），以前悬停和右键都没有任何操作（#2）。现在它会显示「聊天操作」按钮，右键也一样：插件打开这个会话，再弹出 Desktop 自己的「聊天操作」菜单，里面有重命名、置顶、归档和删除。菜单只在主界面已经显示这个会话后才弹出。\n- 打开这样的子会话时，它也会像其他行一样标为当前会话，上级自动展开。",
+          "url": "https://github.com/sduhantao-maker/codexhost-sidebar-thread-tree/releases/tag/v0.1.5"
+        },
+        {
+          "version": "0.1.4",
+          "publishedAt": "2026-11-21T07:53:00Z",
+          "notes": "- **Deleted Threads no longer linger in the tree.** A delegated Thread that was deleted used to stay under its parent as an untitled \"Codex\" row that could not be opened (#2). It is now left out, together with anything below it. Archived Threads are handled as before.\n- The details now invite feedback and stars.\n\n---\n\n- **已删除的会话不再留在树里。** 以前删除的子会话会留在父会话下面，显示成没有标题、点不开的“Codex”行（#2）。现在它和它下面的会话都不再显示；归档的会话处理方式不变。\n- 介绍里加上了反馈渠道和 Star 邀请。",
+          "url": "https://github.com/sduhantao-maker/codexhost-sidebar-thread-tree/releases/tag/v0.1.4"
+        },
+        {
+          "version": "0.1.3",
+          "publishedAt": "2026-11-21T04:52:53Z",
+          "notes": "Every row now works like a native one.\n\n- **Desktop's own actions on every row.** Rows the extension draws, delegated children and parents shown in another member's place, offer Desktop's pin and archive on hover and Desktop's own right-click menu (pin, rename, archive). Double-clicking the open Thread's title renames it.\n- **Connected across projects**, now described: a child started in another project still hangs under its parent, and its own project shows that parent above it.\n\nA Thread whose Desktop row is not mounted (for example one beyond **Show more**) offers these once its row is shown.\n\n---\n\n现在每一行都能像原生行一样操作。\n\n- **每一行都有 Desktop 自己的操作。** 插件画出的行，包括子会话和代画的父会话，悬停时提供置顶和归档，右键弹出 Desktop 自己的菜单（置顶、重命名、归档）。双击当前打开会话的标题即可重命名。\n- **跨项目也连在一起**，并写进了介绍：子会话即使属于另一个项目，也挂在父会话下方；在子会话自己的项目里，也会在它上方显示所属的父会话。\n\n如果某个会话的原生行还没挂载（比如在「展开显示」之后），等它显示出来后即可使用这些操作。",
+          "url": "https://github.com/sduhantao-maker/codexhost-sidebar-thread-tree/releases/tag/v0.1.3"
+        },
+        {
+          "version": "0.1.2",
+          "publishedAt": "2026-11-21T02:37:33Z",
+          "notes": "Fixes the collapse arrow on codexhost 0.23.0.\n\n- codexhost 0.23.0 moved the sidebar Agent icon out of the title container. On parent rows that carry their own tree, the arrow no longer appeared over the icon and could not be clicked, so those trees could not be collapsed. Thanks to @xzxxn777 for the fix in #1.\n\nUpdate it from **Settings → Plugins**, or import `sidebar-thread-tree.zip` below.\n\n---\n\n修复 codexhost 0.23.0 上的折叠箭头。\n\n- codexhost 0.23.0 把侧栏 Agent 图标移出了标题容器。树直接画在父会话原生行上时，箭头不再出现在图标位置，也无法点击，这些树因此收不回去。感谢 @xzxxn777 在 #1 中的修复。\n\n可在「设置 → 插件」中更新，也可以导入下面的 `sidebar-thread-tree.zip`。",
+          "url": "https://github.com/sduhantao-maker/codexhost-sidebar-thread-tree/releases/tag/v0.1.2"
+        }
+      ]
     },
     {
       "id": "the-althing",
@@ -873,7 +1264,7 @@
       "author": "mythezone",
       "repository": "https://github.com/mythezone/codexhost-ext-the-althing",
       "stars": 3,
-      "downloads": 263,
+      "downloads": 267,
       "categories": [
         "workflow",
         "tools"
@@ -901,7 +1292,39 @@
         "desktop": 1,
         "web": 1,
         "backend": 1
-      }
+      },
+      "changelog": [
+        {
+          "version": "1.2.0",
+          "publishedAt": "2026-11-25T07:39:52Z",
+          "notes": "## What's Changed\n\n### Embedded Codex Desktop (`codex-desktop` 26.1120 + CodexHost 0.26.1)\n- **Top-level sidebar entry always visible by default**: Mounts **The Althing / 议事厅** persistently right below **New chat / 新聊天** and **Bot (Automations)**, strictly above **Pinned / 置顶** (with native typography/radius alignment and `sidebarEntryVisibility` setting defaulting to `\"always\"`).\n- **Reliable per-project council display**: Matches Codex Desktop `26.1120` project headers (`[data-sidebar-cycle-item]`, collapsed projects with leading `<svg>` icons, horizontal flex header bars with `+` buttons), excludes the **Pinned / 置顶** section from hijacking project matches, normalizes `codex://threads/<id>` / `local:<id>` IDs, dynamically refreshes Host threads/projects, and maps subdirectory councils to their parent sidebar project.\n- **Native Electron polish**: Adds `-webkit-app-region: no-drag` to overlay & sidebar buttons, syncs `data-theme=\"dark\" | \"light\"`, highlights active state with `aria-current=\"page\"`, and cleanly yields overlay focus when clicking **New chat / 新聊天**, **Bot**, or **Skills / 技能**.\n\n### Reliable `/althing` Command in ProseMirror & External Harnesses\n- **ProseMirror compatibility**: Supports `.ProseMirror[contenteditable=\"true\"]` even with internal `contenteditable=\"false\"` decoration/widget nodes, `Text` node event targets, and fullwidth `／althing`.\n- **Zero composer-tree interference**: Floats the `/althing` command pill on `document.body` (tracked via `api.dom.mount`) above the composer instead of mutating inside `[data-codex-composer-root]`, with `mousedown.preventDefault()` so clicking never blurs ProseMirror.\n- **Reliable clearing & capture**: Clears ProseMirror via native selection + `execCommand(\"selectAll\")` / `execCommand(\"delete\")` / `ClipboardEvent(\"paste\")` (while preserving Lexical `beforeinput` support) and intercepts `Enter` / `Tab` on `window` capture before CodexHost's `document` capture handlers or native `/` menus.\n- **Active project detection**: Reads `[data-above-composer-conversation-id]` and `[data-app-action-sidebar-thread-active]` so `/althing` targets the currently open project automatically.\n\n### Backend Stability\n- Raised CodexHost bridge timeouts (`delegate/start` & `thread/send` to 30s, `harness/inspect` to 10s, default RPCs to 12s) to prevent premature failures when cold-starting or resuming external harnesses.",
+          "url": "https://github.com/mythezone/codexhost-ext-the-althing/releases/tag/v1.2.0"
+        },
+        {
+          "version": "1.1.0",
+          "publishedAt": "2026-11-24T07:43:08Z",
+          "notes": "## What's New in v1.1.0 — Zero-Friction Instant Convene\n\n- **Direct `/althing <topic>` launch (like `/goal`)**: Enter `/althing <topic>` (single-line or multi-line) in Desktop or Web chat and press **Enter** or click **Send** to convene immediately with zero multi-step forms. Includes `Tab` autocomplete (`/alt` → `/althing `), active workspace detection, and optional flags (`--debate`, `--rapid`, `--standard`, `--experts N`, `--custom`).\n- **Smart seat, role, count & protocol allocation**: Automatically selects optimal panel size, diverse ready CodexHost collaboration agents (with your Host model & thinking defaults), and domain-aware roles — then refines each seat's role during AI agenda planning in the same turn.\n- **Automatic Round 1 kickoff & live Kickoff Card**: Automatically dispatches the opening round once agendas are planned (configurable via **Auto-dispatch opening round after AI planning** in plugin settings or paused anytime on the live Kickoff Card).\n- **1-Screen Quick Convene modal & Hub Quick Convene bar**: Replaced the 3-step forced wizard with a single-screen Quick Convene modal (smart preview + collapsible manual customization) and added an inline Quick Convene bar on the Council Hub.\n- **Full 5-language `i18n` & updated multilingual guides**: All new flows localized in English (default), Simplified Chinese, Traditional Chinese, Japanese, and Korean.",
+          "url": "https://github.com/mythezone/codexhost-ext-the-althing/releases/tag/v1.1.0"
+        },
+        {
+          "version": "1.0.8",
+          "publishedAt": "2026-11-23T09:40:28Z",
+          "notes": "The workspace, Desktop sidebar, and `/althing` chat suggestion now follow CodexHost in English, Simplified Chinese, Traditional Chinese, Japanese, or Korean. Choose **Interface language** in the plugin settings to override the Host. English is the fallback when the Host has no supported language.\n\nReport controls, contents, and offline council navigation use the same language. Existing report bodies, authored documents and signed scripts are preserved. Japanese and Korean send buttons also work with `/althing`.\n\nThe project now has illustrated English, Chinese, Japanese, and Korean guides, with new English screenshots taken from a sample council. Download **the-althing.zip** for manual installation.",
+          "url": "https://github.com/mythezone/codexhost-ext-the-althing/releases/tag/v1.0.8"
+        },
+        {
+          "version": "1.0.7",
+          "publishedAt": "2026-11-23T08:21:32Z",
+          "notes": "Configure experts and the moderator using your live CodexHost collaboration directory. Each ready agent shows its preferred model and thinking level. Add configured agents together, or choose individual models, reasoning levels and roles. Model-specific options include fast variants and readable Cursor thinking levels.\n\nUse **Configure roles & agents** in the expert roster or council actions to change assignments for future rounds. Published contributions keep their attribution. Changing an assignment starts a new thread for that seat on its next round.\n\n本版新增多 Agent 协作目录和会后可编辑的专家及主持人配置。也更新了中英文使用说明、议事厅封面和四张市场截图。",
+          "url": "https://github.com/mythezone/codexhost-ext-the-althing/releases/tag/v1.0.7"
+        },
+        {
+          "version": "1.0.6",
+          "publishedAt": "2026-11-23T07:32:37Z",
+          "notes": "Desktop hides council groups for projects without topics and uses the native sidebar text size. The top-level entry appears during active councils by default, with always-show and always-hide options.\n\nType `/althing` or `/althing Meeting topic` in CodexHost Desktop or Web chat to choose the workspace, experts and models. The first expert can also chair the council, or you can select a separate moderator. The moderator can propose agendas and sub-agendas before any expert round is dispatched.\n\n在桌面或网页聊天框输入 `/althing 会议主题`，即可选模型、配置主持人并请其规划议程。侧栏自动隐藏空项目的议事厅，顶部入口可在设置中调整。",
+          "url": "https://github.com/mythezone/codexhost-ext-the-althing/releases/tag/v1.0.6"
+        }
+      ]
     },
     {
       "id": "theme-background",
@@ -921,7 +1344,7 @@
       "author": "TimYuhong",
       "repository": "https://github.com/TimYuhong/codexhost-theme-background",
       "stars": 0,
-      "downloads": 102,
+      "downloads": 103,
       "categories": [
         "appearance",
         "interface"
@@ -949,7 +1372,39 @@
         "page": 1,
         "desktop": 1,
         "web": 1
-      }
+      },
+      "changelog": [
+        {
+          "version": "1.1.4",
+          "publishedAt": "2026-11-27T08:25:58Z",
+          "notes": "## Theme Background v1.1.4\n\n### Fixes\n- **Codex Desktop Otter Pet Overflow & Stacking**: Override Codex Desktop's multiline composer `overflow-y: auto` specifically on `[data-composer-surface-variant]:has(> .tb-otter-pet)` and raise `.tb-otter-pet` to `z-index: 12` (above `ComposerLayoutBody`'s `z-index: 10`), so the full 2.5D pixel-voxel otter and mini coding laptop sit cleanly on top of both Thread and Home composers without clipping.\n- **Codex Desktop Above-Composer Rail Riding**: Automatically perch the otter pet on top of Codex Desktop's active attached above-composer rail (`[data-composer-rail][data-composer-rail-placement=\"above\"]`, such as queued follow-up / Steer rows) with intact `16px` top corners and zero obstruction of `Steer` / delete / `...` controls, then hop cleanly back onto the composer as soon as the rail clears.\n- **Active Page Composer Targeting**: Prefer the active page's `[data-codex-composer-root]` composer, skip inline `document` composers, observe `data-app-shell-active-page` and `data-composer-rail-item` transitions with zero streaming overhead, and bind typing listeners to the matching composer root via `closest()`.\n\n### Checksums\n- `theme-background-1.1.4.zip` (`1,357,545 B`)\n- SHA-256: `b97eff3f5cceeb214425b5dd13bf502c72352222fc02a9cb1ac3d06b18b3246d`",
+          "url": "https://github.com/TimYuhong/codexhost-theme-background/releases/tag/v1.1.4"
+        },
+        {
+          "version": "1.1.3",
+          "publishedAt": "2026-11-27T01:50:58Z",
+          "notes": "## Theme Background v1.1.3 / 主题背景 v1.1.3\n\n### What's Updated / 更新内容\n\n- **Accurate Storage & Migration Docs / 修正跨端存储与迁移说明**\n  - Clarified in manifest.json, README.md, and README.zh.md that Codex Desktop (desktop-extension-data) and CH Web (web-native-extension-data) use separate Host storage directories, while browsers connected to the same CH Web server sync automatically.\n  - Documented the built-in one-click JSON file/text import & export flow for mirroring configurations between Desktop and CH Web, alongside per-browser IndexedDB relinking for local uploaded media.\n\n### Package Checksum / 安装包校验\n\n- `theme-background-1.1.3.zip` (`1357221 bytes`)\n- SHA-256: `ea4ad457ad83d1bc0cc70ed21d5f9e4d80bdafd1accdb585fc93e9febe7ecba6`",
+          "url": "https://github.com/TimYuhong/codexhost-theme-background/releases/tag/v1.1.3"
+        },
+        {
+          "version": "1.1.2",
+          "publishedAt": "2026-11-27T01:22:17Z",
+          "notes": "## Theme Background v1.1.2 / 主题背景 v1.1.2\n\n### What's Improved / 更新内容\n\n- **Smooth Static HD Built-in Wallpapers (Zero Frame Drops) / 内置默认壁纸改回高清静态图（丝滑零掉帧）**\n  - Replaced the animated WebP built-in `default.webp` with a crisp `1920×1080` static WebP (`240 KiB`) rendered once onto canvas with zero ongoing frame decoding or frame drops, trimming the extension package by **81%** (`7.28 MiB → 1.29 MiB`).\n  - Restored strict `512 KiB` per-preset budgets while keeping full user support for local GIF/MP4/WebM uploads in the Custom Theme Studio.\n- **Non-Intrusive Enable (Opt-In Presets) / 启用无打扰，方案完全由用户自主挑选**\n  - Freshly enabling the extension now preserves the native Host appearance untouched (`source: none`, `accent: null`, `schemeOverride: auto`) instead of forcing a built-in theme immediately.\n  - All 4 curated static HD suites (**Default · Moonlit Sakurabridge**, **Rainy Forest**, **Nordic Minimal**, **Glacial Glass**) remain one click away alongside the independent Custom Theme Studio.\n\n### Package Checksum / 安装包校验\n\n- `theme-background-1.1.2.zip` (`1,357,049 bytes`)\n- SHA-256: `0326eb46d0119558d7e206baf17ce55ad79f5a263d42a079ca262ee88e05135c`",
+          "url": "https://github.com/TimYuhong/codexhost-theme-background/releases/tag/v1.1.2"
+        },
+        {
+          "version": "1.1.1",
+          "publishedAt": "2026-11-27T00:40:01Z",
+          "notes": "## Theme Background v1.1.1 / 主题背景 v1.1.1\n\n### What's Updated / 更新内容\n\n- **Marketplace & Manifest Description Refresh / 插件市场介绍文案更新**\n  - Updated bilingual `manifest.json` description & details to accurately reflect the 4 curated suites led by animated **Default · Moonlit Sakurabridge / 默认 · 月夜樱桥** (`Rainy Forest`, `Nordic Minimal`, `Glacial Glass`).\n  - Highlighted high user customizability and extensibility: independent Custom Theme Studio (up to 20 custom themes), local image/video/font import, 30-image rotation pools, generative Mesh/Shader/Pattern backdrops, full HSV/HEX/RGB/eyedropper palette studio, 5-zone surface control (including translucent right-side Changes panel), day/night scheduling, JSON import/export, and the interactive pixel otter composer pet.\n\n### Package Checksum / 安装包校验\n\n- `theme-background-1.1.1.zip` (`7,285,575 bytes`)\n- SHA-256: `beb4a12b0efe34b41f7921b751cf4cd2fc014a0edc4cc1f2e273995be4badbbb`",
+          "url": "https://github.com/TimYuhong/codexhost-theme-background/releases/tag/v1.1.1"
+        },
+        {
+          "version": "1.1.0",
+          "publishedAt": "2026-11-26T16:45:14Z",
+          "notes": "## Theme Background v1.1.0 / 主题背景 v1.1.0\n\n### Highlights / 更新内容\n\n- **4 Built-in Curated Theme Suites & Animated Default / 四套内置主题与开箱动态默认方案**\n  - Fresh installs now activate **Default · Moonlit Sakurabridge / 默认 · 月夜樱桥** out of the box with a seamless-looping animated WebP backdrop, dark palette (`#00ef07`), translucent surfaces, and Modern Sans typography — while keeping **Restore native host / 恢复原生宿主** one click away.\n  - Curated 4-suite lineup: **Default · Moonlit Sakurabridge**, **Rainy Forest / 雨林森屿**, **Nordic Minimal / 云岚雅白**, and **Glacial Glass / 冰湖琉璃**, plus refreshed `1280×800` preview images.\n- **Independent Custom Theme Studio / 独立自定义主题工坊**\n  - Create, edit, duplicate, and switch custom theme profiles independently from built-in presets, with local image/video/font upload, remote HTTPS wallpapers, generative Mesh/Shader/Pattern backdrops, full HSV/HEX/RGB color wheel & wallpaper color extraction, and automatic static poster capture for local video profile cards.\n- **Interactive Composer Otter Pet / 输入框像素水獭挂件**\n  - Added a 2.5D pixel-voxel CodexHost otter & mini coding laptop perched on the composer card edge across CH Web and Codex Desktop, reacting to typing, focus, and clicks, automatically riding above queue/todo docks and hopping back cleanly when docks close, and pausing when hidden or under `prefers-reduced-motion`.\n- **Visual Polish & Runtime Optimization / 界面细节与性能资源优化**\n  - Restored true single-layer translucency on the right-side Changes review panel (`变更`) so it responds cleanly to the Cards & Panels opacity and frost controls.\n  - Synced Windows titlebar & window chrome color with the active theme scheme and accent; refined hero composer positioning and reorganized bilingual READMEs.\n  - Deferred hidden settings-tab asset/preview decoding, generated lightweight static WebP posters for animated preset thumbnails, avoided pre-read/read-only asset fetches, bounded Desktop preset cache, and eliminated event-listener retention on card re-renders.\n\n### Package Checksum / 安装包校验\n\n- `theme-background-1.1.0.zip` (`7,285,071 bytes`)\n- SHA-256: `e61df6ba8da0c14be442200a38dafa13d0765f1fcf5a29d76ed0928875c8510b`",
+          "url": "https://github.com/TimYuhong/codexhost-theme-background/releases/tag/v1.1.0"
+        }
+      ]
     }
   ]
 }
