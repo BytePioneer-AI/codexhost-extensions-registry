@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-28T06:39:05.392Z",
+  "generatedAt": "2026-11-28T06:41:47.968Z",
   "extensions": [
     {
       "id": "auto-archive-guard",
@@ -260,6 +260,44 @@
       "apis": {
         "page": 1,
         "widget": 1
+      }
+    },
+    {
+      "id": "git-branch-status",
+      "version": "0.3.1",
+      "name": {
+        "en": "Git Branch Status",
+        "zh-CN": "Git 分支状态"
+      },
+      "description": {
+        "en": "Show live read-only Git branch, sync status, and changed files below the Web composer",
+        "zh-CN": "在 Web 输入框下方实时展示只读 Git 分支、同步状态与变更文件清单"
+      },
+      "details": {
+        "en": "Displays the active local session's Git branch, worktree/rebase/merge indicators, upstream ahead/behind counts, and changed file list in the Web composer dock with one-click copy. Uses a sandboxed read-only Git backend that never executes repository filters, hooks, or network requests.",
+        "zh-CN": "在 Web 输入框下方实时展示当前本地会话的 Git 分支、Worktree/Rebase/Merge 状态徽标、上游领先/落后计数与变更文件列表，支持一键复制分支/提交/路径。后台采用隔离的只读 Git 检查机制，绝不执行仓库 filter、hook 或网络请求。"
+      },
+      "author": "ABC-xiaoxuan",
+      "repository": "https://github.com/ABC-xiaoxuan/codexhost-git-branch-status",
+      "stars": 0,
+      "categories": [
+        "tools",
+        "workflow"
+      ],
+      "trustTier": "community",
+      "icon": "https://github.com/ABC-xiaoxuan/codexhost-git-branch-status/releases/download/v0.3.1/icon.png",
+      "downloadUrl": "https://github.com/ABC-xiaoxuan/codexhost-git-branch-status/releases/download/v0.3.1/codexhost-git-branch-status-v0.3.1.zip",
+      "sha256": "2bddd16460ec5e6002427137db4d124368ca4d18a776fc50eab09cdc99153978",
+      "slots": [],
+      "publishedAt": "2026-11-28T05:57:15Z",
+      "updatedAt": "2026-11-28T05:57:15Z",
+      "format": "codexhost",
+      "targets": [
+        "web"
+      ],
+      "apis": {
+        "web": 1,
+        "backend": 1
       }
     },
     {
