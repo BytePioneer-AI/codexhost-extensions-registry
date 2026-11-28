@@ -13,6 +13,7 @@ const githubRepoPattern =
   /https:\/\/github\.com\/([\w-]+)\/([\w-][\w.-]*?)(?:\.git)?(?:[/?#][^\s)\]>]*)?(?=[\s)\]>]|$)/iu;
 const githubLoginPattern = /^[a-z0-9](?:[a-z0-9_-]{0,37}[a-z0-9])?$/iu;
 const frontendScriptFilePattern = /\.[cm]?[jt]sx?$/iu;
+const childProcessPattern = /\bchild_process\b/u;
 const frontendAutoApproveRiskChecks = [
   ["document.cookie", /\bdocument\.cookie\b/u],
   ["sendBeacon", /\bsendBeacon\b/u],
@@ -276,9 +277,92 @@ export function evaluateAutoApproval({
   };
 }
 
-function extractRepositoryUrl(issueBody) {
+function canonicalPath(path) {
+  return String(path ?? "")
+    .replace(/\\/gu, "/")
+    .replace(/^\.\//u, "");
+}
+
+export function isSubmissionIssue(issue) {
+  const title = String(issue?.title ?? "");
+  const body = String(issue?.body ?? "");
+  return (
+    title.startsWith("[Desktop extension]") ||
+    title.startsWith("[Manual review]") ||
+    /###\s*(?:GitHub repository URL|Repository URL)/iu.test(body)
+  );
+}
+
+export function detectBackendChildProcessFiles(manifest, files) {
+  if (!manifest || typeof manifest !== "object" || !files) return [];
+  const backendScript =
+    manifest.manifestVersion === 2 ? manifest.backend?.entry : manifest.backend?.script;
+  if (!backendScript) return [];
+
+  const normalizedBackend = canonicalPath(backendScript);
+  const backendDir = normalizedBackend.includes("/")
+    ? normalizedBackend.slice(0, normalizedBackend.lastIndexOf("/") + 1)
+    : undefined;
+  const frontendFiles = new Set(
+    [
+      manifest.desktop?.script,
+      ...(manifest.manifestVersion === 2
+        ? [manifest.page?.entry, manifest.widget?.entry, manifest.web?.entry]
+        : []),
+    ]
+      .filter(Boolean)
+      .map(canonicalPath),
+  );
+  const frontendDirs = new Set(
+    [...frontendFiles]
+      .map((entry) => {
+        const slash = entry.lastIndexOf("/");
+        return slash > 0 ? entry.slice(0, slash + 1) : undefined;
+      })
+      .filter((dir) => dir && dir !== backendDir),
+  );
+  const isFrontendFile = (file) => {
+    const normalized = canonicalPath(file);
+    if (frontendFiles.has(normalized)) return true;
+    for (const dir of frontendDirs) {
+      if (normalized.startsWith(dir)) return true;
+    }
+    return false;
+  };
+
+  const entries = files instanceof Map ? [...files.entries()] : [...files];
+  const backendHits = [];
+  for (const [file, content] of entries) {
+    if (typeof file !== "string") continue;
+    const normalized = canonicalPath(file);
+    if (
+      !frontendFiles.has(normalized) &&
+      normalized !== normalizedBackend &&
+      !frontendScriptFilePattern.test(file)
+    ) {
+      continue;
+    }
+    let code;
+    try {
+      code = typeof content === "string" ? content : utf8.decode(content);
+    } catch {
+      continue;
+    }
+    if (!childProcessPattern.test(code)) continue;
+    if (isFrontendFile(file)) {
+      return [];
+    }
+    backendHits.push(file);
+  }
+  return backendHits;
+}
+
+export function extractRepositoryUrl(issueBody) {
   const body = String(issueBody ?? "");
-  const sectionMatch = /###\s*GitHub repository URL\s*\r?\n+([\s\S]*?)(?:\r?\n###\s|$)/iu.exec(body);
+  const sectionMatch =
+    /###\s*(?:GitHub repository URL|Repository URL[^\r\n]*)\s*\r?\n+([\s\S]*?)(?:\r?\n###\s|$)/iu.exec(
+      body,
+    );
   const searchArea = sectionMatch ? sectionMatch[1] : body;
   const match = githubRepoPattern.exec(searchArea);
   if (!match) {
@@ -559,10 +643,7 @@ async function main() {
     `https://api.github.com/repos/${repoFull}/issues/${issueNumber}`,
     authHeaders(),
   );
-  const isSubmission =
-    String(issue.title ?? "").startsWith("[Desktop extension]") ||
-    /###\s*GitHub repository URL/iu.test(String(issue.body ?? ""));
-  if (!isSubmission) {
+  if (!isSubmissionIssue(issue)) {
     await setOutput("status", "skip");
     console.log(`Issue #${issueNumber} is not an extension submission; skipping.`);
     return;
@@ -592,7 +673,13 @@ async function main() {
     return;
   }
 
-  const source = { id, repository, trustTier: "community" };
+  const backendChildProcessFiles = detectBackendChildProcessFiles(manifest, files);
+  const source = {
+    id,
+    repository,
+    trustTier: "community",
+    ...(backendChildProcessFiles.length > 0 ? { allowChildProcess: true } : {}),
+  };
   const filename = `${id}.json`;
   await writeFile(new URL(filename, sourcesDirectory), `${JSON.stringify(source, null, 2)}\n`, {
     encoding: "utf8",

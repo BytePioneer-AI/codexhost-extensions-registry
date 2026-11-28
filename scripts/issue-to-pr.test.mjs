@@ -2,7 +2,10 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
   buildPrPreview,
+  detectBackendChildProcessFiles,
   evaluateAutoApproval,
+  extractRepositoryUrl,
+  isSubmissionIssue,
   scanFrontendAutoApproveRisks,
 } from "./issue-to-pr.mjs";
 
@@ -338,5 +341,76 @@ describe("buildPrPreview", () => {
       manualMd,
       /\| 审核方式 \| 🟡 需维护者人工审核（包含本地 Node 后端（manifest\.backend）） \|/u,
     );
+  });
+});
+
+describe("isSubmissionIssue and extractRepositoryUrl", () => {
+  it("accepts both standard and manual-review submission templates", () => {
+    assert.equal(
+      isSubmissionIssue({
+        title: "[Desktop extension] My Ext",
+        body: "### GitHub repository URL\n\nhttps://github.com/alice/my-ext",
+      }),
+      true,
+    );
+    assert.equal(
+      isSubmissionIssue({
+        title: "[Manual review] git-branch-status",
+        body: "### Repository URL / 扩展仓库地址\n\nhttps://github.com/alice/git-branch-status",
+      }),
+      true,
+    );
+    assert.equal(
+      isSubmissionIssue({
+        title: "[Alert] Extension registry sync worker unhealthy",
+        body: "Worker health check failed.",
+      }),
+      false,
+    );
+
+    assert.deepEqual(
+      extractRepositoryUrl(
+        "### Repository URL / 扩展仓库地址\n\nhttps://github.com/ABC-xiaoxuan/codexhost-git-branch-status\n\n### Extension introduction\n...",
+      ),
+      {
+        owner: "ABC-xiaoxuan",
+        repo: "codexhost-git-branch-status",
+        repository: "https://github.com/ABC-xiaoxuan/codexhost-git-branch-status",
+      },
+    );
+  });
+});
+
+describe("detectBackendChildProcessFiles", () => {
+  it("returns backend files using child_process when frontend is clean", () => {
+    const manifest = {
+      manifestVersion: 2,
+      web: { apiVersion: 1, entry: "web/index.mjs" },
+      backend: { apiVersion: 1, entry: "backend/index.mjs" },
+    };
+    const files = new Map([
+      ["web/index.mjs", Buffer.from("export function activate() {}\n")],
+      ["backend/index.mjs", Buffer.from('import { execFile } from "node:child_process";\n')],
+    ]);
+    assert.deepEqual(detectBackendChildProcessFiles(manifest, files), ["backend/index.mjs"]);
+  });
+
+  it("returns empty array when frontend uses child_process or manifest has no backend", () => {
+    const manifest = {
+      manifestVersion: 2,
+      web: { apiVersion: 1, entry: "web/index.mjs" },
+      backend: { apiVersion: 1, entry: "backend/index.mjs" },
+    };
+    const frontendHit = new Map([
+      ["web/index.mjs", Buffer.from('import { exec } from "node:child_process";\n')],
+      ["backend/index.mjs", Buffer.from('import { execFile } from "node:child_process";\n')],
+    ]);
+    assert.deepEqual(detectBackendChildProcessFiles(manifest, frontendHit), []);
+
+    const noBackend = {
+      manifestVersion: 2,
+      web: { apiVersion: 1, entry: "web/index.mjs" },
+    };
+    assert.deepEqual(detectBackendChildProcessFiles(noBackend, frontendHit), []);
   });
 });
