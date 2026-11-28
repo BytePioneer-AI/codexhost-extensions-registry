@@ -1,0 +1,6 @@
+{
+  "id": "git-branch-status",
+  "repository": "https://github.com/ABC-xiaoxuan/codexhost-git-branch-status",
+  "trustTier": "community",
+  "allowChildProcess": true
+}
