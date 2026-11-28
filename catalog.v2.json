@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-28T07:30:18.936Z",
+  "generatedAt": "2026-11-28T07:32:50.225Z",
   "extensions": [
     {
       "id": "auto-archive-guard",
@@ -822,7 +822,7 @@
       "author": "sduhantao-maker",
       "repository": "https://github.com/sduhantao-maker/codexhost-sidebar-thread-tree",
       "stars": 4,
-      "downloads": 460,
+      "downloads": 471,
       "categories": [
         "interface",
         "workflow"
