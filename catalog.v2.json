@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-28T12:00:53.722Z",
+  "generatedAt": "2026-11-28T13:40:45.858Z",
   "extensions": [
     {
       "id": "auto-archive-guard",
@@ -20,7 +20,7 @@
       "author": "biground",
       "repository": "https://github.com/biground/codexhost-plugin-auto-archive",
       "stars": 0,
-      "downloads": 132,
+      "downloads": 133,
       "categories": [
         "workflow",
         "tools"
@@ -82,7 +82,7 @@
     },
     {
       "id": "ch-context",
-      "version": "0.4.1",
+      "version": "1.0.0",
       "name": {
         "en": "Context Insights",
         "zh-CN": "上下文洞察"
@@ -98,22 +98,22 @@
       "author": "ABC-xiaoxuan",
       "repository": "https://github.com/ABC-xiaoxuan/ch-context",
       "stars": 0,
-      "downloads": 274,
+      "downloads": 278,
       "categories": [
         "analytics",
         "interface"
       ],
       "trustTier": "community",
-      "icon": "https://github.com/ABC-xiaoxuan/ch-context/releases/download/v0.4.1/icon.png",
+      "icon": "https://github.com/ABC-xiaoxuan/ch-context/releases/download/v1.0.0/icon.png",
       "screenshots": [
-        "https://github.com/ABC-xiaoxuan/ch-context/releases/download/v0.4.1/preview.png",
-        "https://github.com/ABC-xiaoxuan/ch-context/releases/download/v0.4.1/preview-dark.png"
+        "https://github.com/ABC-xiaoxuan/ch-context/releases/download/v1.0.0/preview.png",
+        "https://github.com/ABC-xiaoxuan/ch-context/releases/download/v1.0.0/preview-dark.png"
       ],
-      "downloadUrl": "https://github.com/ABC-xiaoxuan/ch-context/releases/download/v0.4.1/ch-context-0.4.1.zip",
-      "sha256": "7c526de63a314a3f8975148454961ec596e08b8273c7306c3d882255e67bc4cb",
+      "downloadUrl": "https://github.com/ABC-xiaoxuan/ch-context/releases/download/v1.0.0/ch-context-1.0.0.zip",
+      "sha256": "bad7c3fb3c6d2c8f4e0a08822bc286c9d3c430887258d25c8a7e0487e10152ca",
       "slots": [],
       "publishedAt": "2026-11-23T15:06:28Z",
-      "updatedAt": "2026-11-28T11:59:21Z",
+      "updatedAt": "2026-11-28T13:37:28Z",
       "format": "codexhost",
       "targets": [
         "web"
@@ -122,6 +122,12 @@
         "web": 1
       },
       "changelog": [
+        {
+          "version": "1.0.0",
+          "publishedAt": "2026-11-28T13:37:28Z",
+          "notes": "## Highlights in v1.0.0\n\n### DSH Crisp Visual System & Layout Rhythm\n- **DSH Crisp Default Palette**: Introduced `DSH Crisp` (`DSH 原味`) as the default light/dark palette with WCAG AA contrast tokens and high-contrast segmented active pills, while keeping `Apple Graphite`, `Warm Paper`, and `Precision Slate` fully compatible in extension-owned Settings.\n- **Context Stats Ledger + Current Context Hero**: Rebuilt the top row into a two-column `dsh-context`-inspired Context Stats Ledger (5 semantic KPI tiles with clickable Window Clues: Errors / Large ≥2K / Events + 2×2 tool/command/file/volume ledger) paired with the Current Context hero card (13px hatched capacity bar with 75%/90% reference zones, observation sparkline, and integrated Top 3 Largest Records by character volume).\n- **Symmetric Dual Donuts (Honest Telemetry)**: Paired **Token Stats** (retaining `≥` lower-bound cost and independent cache rows) with **Payload Distribution** (strictly measured loaded-window text characters, explicitly labeled as `chars` rather than token estimates) with hover/click cross-dimming synchronized with the sequence strip.\n\n### Full-Width Stacked / DNA Activity Timeline\n- **Vertical Stacked & Chronological DNA Bar Chart**: Replaced the swimlane scatter plot with a full-width vertical bar chart featuring left Y-axis character ticks, alternating Turn bands, **DNA mode** (lazy `O(n log n)` chronological run sampling), **Step / Turn** granularity switching, and **Total / Delta** scale modes.\n- **Milestones, Collision-Free Step Flags & Turn Ribbon**: Automatically surfaces honest **Peak payload** and **Tool error** circular milestone pins with dashed drop poles (targeting the peak record inside Turn buckets and showing `×N` error counts), plot-pixel collision-free `#seq` step flags, a proportional interactive Turn Ribbon, and a 3-row Step Summary + interactive category breakdown bar.\n\n### Context Browser & Overview Upgrades\n- **Squarified Treemap, DNA Split Bar & Dual-Pane Split View**: Upgraded the character-volume Treemap to true Bruls–Huizing–van Wijk squarified packing (`O(1)` aspect evaluation, narrow-column `%` overflow guard), added a real chronological **DNA split** bar, and added a 3-way **Categories / Sequence / Split** dual-pane workbench with automatic active-row scroll sync.\n- **Overview Polish**: Added hover/click cross-dimming to the aggregate Token Distribution donut and refined the Avg Cache Hit KPI accent.\n\n### Verification\n- `npm run check` (`tsc --noEmit`, 95/95 unit tests including `timeline-model.test.ts`, legacy + native builds, package & Shadow CSS verification)\n- `npm run test:market` (14/14 native Web extension lifecycle, Shadow DOM isolation, and `DSH Crisp` preference sync tests)\n- `npm run test:browser` (linked timeline/browser, DNA/Turn/Delta/Milestone/Split E2E checks, lossless JSON, Focus Reader modal, overview exports, and 16 responsive/theme/locale visual audits with 0 errors across all viewports and 0 desktop/tablet warnings)\n- Independent read-only code review completed with all verified findings resolved\n- Native Web package: `ch-context-1.0.0.zip` (`sha256: bad7c3fb3c6d2c8f4e0a08822bc286c9d3c430887258d25c8a7e0487e10152ca`)",
+          "url": "https://github.com/ABC-xiaoxuan/ch-context/releases/tag/v1.0.0"
+        },
         {
           "version": "0.4.1",
           "publishedAt": "2026-11-28T11:59:21Z",
@@ -145,12 +151,6 @@
           "publishedAt": "2026-11-23T15:06:28Z",
           "notes": "## 上下文洞察 / Context Insights 0.3.2\n\n全新 **苹果素灰（Apple Neutral）** 视觉系统与双视图架构升级。原生 CodexHost Host 扩展，使用 manifestVersion: 2 和公开 WebExtensionApi。本版仅支持 **CH Web / PWA**；不声明 Desktop、跨端 page/widget 或 backend，启用后不会启动扩展后台进程。\n\nMajor Apple Neutral UI redesign and dual-view workspace for CodexHost Web (manifestVersion: 2, public WebExtensionApi, owned Shadow DOM, zero backend process).\n\n### 本版更新 / What's New\n\n- **苹果素灰（Apple Neutral）深浅双主题**：纯中性苹果灰层级、macOS 浮起分段控件、克制苹果蓝选中态与 HIG 校准数据色，优先继承宿主 --dsw-alias-* 变量。\n- **双视图导航（总览 / 会话洞察）**：新增「全部会话总览」画廊（工作区筛选、搜索、排序、按需迷你占用环与缺失遥测虚线态），单会话页升级为轻量面包屑浮层切换器。\n- **三联遥测驾驶舱置顶**：① 当前上下文窗口（65%/85% 动态警戒、75%/90% 刻度线、剩余容量胶囊与内嵌实时观测曲线）；② 累计用量环形图（新增 \neasoningOutputTokens 含推理输出与成本来源标识）；③ 性能与缓存（内凹 KPI 槽 + 紧凑可点击活动脉冲条）。\n- **轮次分带事件轨 & 三合一信号卡**：时间线支持 T1/T2 轮次分带、callId 配对连线、错误标记与配对跳转；左侧收纳为文件活动（扩展名徽标、读写搜筛选与逐次展开跳转）、命令记录（程序分布筛选、Shell 语法着色与三态过滤）、会话关系谱系树。\n- **上下文浏览器精修**：支持「仅错误」筛选、配对调用↔输出一键跨筛选跳转，以及原生分段视图切换。\n\n### 安装 / Install\n\n在 CodexHost 0.25.0 或更新版本的「插件 → 插件中心」导入 ch-context-0.3.2.zip，或直接导入仓库 URL https://github.com/ABC-xiaoxuan/ch-context，启用后从侧栏「上下文洞察」进入。\n\n### 验证 / Validation\n\n- Strict TypeScript check, 65 focused Node unit tests, legacy/native builds and static/Shadow-CSS validation passed.\n- Full browser regression (16 locale/theme/viewport audits, zero horizontal overflow) and 13 native WebExtensionApi tests passed.\n- Independent pre-release code review completed with all 11 verified findings resolved.\n- Screenshots use synthetic test data; unknown Harness telemetry remains unavailable (—) without fabricated zeros or inferred prompt breakdown.\n\nApache-2.0; upstream dsh-context and bundled React/Marked notices are included. Marketplace listing remains subject to registry-maintainer review (PR #12).",
           "url": "https://github.com/ABC-xiaoxuan/ch-context/releases/tag/v0.3.2"
-        },
-        {
-          "version": "0.2.0",
-          "publishedAt": "2026-11-23T07:34:18Z",
-          "notes": "## 上下文洞察 / Context Insights 0.2.0\n\n原生 CodexHost Host 扩展，使用 `manifestVersion: 2` 和公开 `WebExtensionApi`。本版仅支持 **CH Web / PWA**；不声明 Desktop、跨端 page/widget 或 backend，启用后不会启动扩展后台进程。\n\nNative CodexHost Web extension using the public v2 Host extension contract. Web only, with an owned Shadow DOM and self-contained ESM; no private React/Cordis objects, ModuleLoader bootstrap, credential files or backend process.\n\n### 安装 / Install\n\n在 CodexHost 0.25.0 或更新版本的「插件 → 插件中心」导入 `ch-context-0.2.0.zip`，或导入仓库 URL，启用后从侧栏「上下文洞察」进入。面板中选择要查看的会话，语言下拉支持自动 / English / 中文。\n\nImport the ZIP or repository URL in CodexHost Plugin Center, enable it and open Context Insights from the sidebar. The native package is distinct from the optional legacy DSH compatibility entry.\n\n### 功能 / Features\n\n- 紧凑统计、宿主真实用量、缓存、费用、TPS 和首个输出延迟。\n- 联动活动时间线与分类浏览器，支持搜索、键盘、富文本/表格/代码与原文复制。\n- 文件和命令记录跳转、严格调用/结果配对、显式工具错误与内容截断标记。\n- 保留来源的父会话、分叉、会话树和子代理关系。\n- 有界观测与只读数据；不推测缺失的完整 Prompt 组成、逐请求历史 Token 或执行阶段耗时。\n\nCompact native usage/context insights, linked event inspection, safe Markdown and raw-text fidelity, file/command/result navigation, explicit native errors and provenance-aware relationships. Metrics depend on Harness telemetry. Screenshots contain synthetic test data.\n\n### 验证 / Validation\n\n- Strict typecheck, 65 focused Node tests and native/compatibility package validation passed.\n- 12 native-entry browser scenarios passed; 16 locale/theme/viewport audits reported no errors or warnings.\n- Real isolated CodexHost 0.25.0 ZIP import, enable, native sidebar/data UI, zero-backend verification and disable cleanup passed. Test services/data were removed; the live Web PID was unchanged.\n- Official registry manifest parser, ZIP reader and script static rules passed locally.\n\nApache-2.0; upstream dsh-context and bundled React/Marked notices are included. No npm publication is required. Marketplace listing remains subject to registry-maintainer approval.",
-          "url": "https://github.com/ABC-xiaoxuan/ch-context/releases/tag/v0.2.0"
         }
       ]
     },
@@ -172,7 +172,7 @@
       "author": "Solren-zhen",
       "repository": "https://github.com/Solren-zhen/codexhost-claude-style",
       "stars": 0,
-      "downloads": 70,
+      "downloads": 72,
       "categories": [
         "appearance",
         "interface"
@@ -276,7 +276,7 @@
       "author": "Danny",
       "repository": "https://github.com/ai-dachui/codexhost-prompt-enhancer",
       "stars": 1,
-      "downloads": 2,
+      "downloads": 3,
       "categories": [
         "tools",
         "workflow"
@@ -389,7 +389,7 @@
       "author": "ABC-xiaoxuan",
       "repository": "https://github.com/ABC-xiaoxuan/codexhost-git-branch-status",
       "stars": 1,
-      "downloads": 6,
+      "downloads": 7,
       "categories": [
         "tools",
         "workflow"
@@ -505,7 +505,7 @@
       "author": "biground",
       "repository": "https://github.com/biground/codex-host-theme-hdd-fairy",
       "stars": 0,
-      "downloads": 85,
+      "downloads": 86,
       "categories": [
         "appearance",
         "interface",
@@ -579,7 +579,7 @@
       "author": "ABC-xiaoxuan",
       "repository": "https://github.com/ABC-xiaoxuan/ch-mcp-hub",
       "stars": 0,
-      "downloads": 123,
+      "downloads": 127,
       "categories": [
         "integrations",
         "tools"
@@ -644,7 +644,7 @@
       "author": "ErkundenSie",
       "repository": "https://github.com/ErkundenSie/codexhost-mcp-hub",
       "stars": 1,
-      "downloads": 109,
+      "downloads": 110,
       "categories": [
         "integrations",
         "tools",
@@ -720,7 +720,7 @@
       "author": "sduhantao-maker",
       "repository": "https://github.com/sduhantao-maker/codexhost-thinkshift",
       "stars": 0,
-      "downloads": 4,
+      "downloads": 6,
       "categories": [
         "interface"
       ],
@@ -779,7 +779,7 @@
       "author": "SgAlice",
       "repository": "https://github.com/SgAlice/codexhost-prism-facets",
       "stars": 1,
-      "downloads": 125,
+      "downloads": 126,
       "categories": [
         "appearance",
         "interface",
@@ -863,7 +863,7 @@
       "author": "vastsa & codexhost community",
       "repository": "https://github.com/Solren-zhen/codexhost-prompt-enhancement",
       "stars": 0,
-      "downloads": 99,
+      "downloads": 100,
       "categories": [
         "workflow",
         "tools"
@@ -993,7 +993,7 @@
       "author": "codexhost",
       "repository": "https://github.com/BytePioneer-AI/codexhost-ext-prompt-vault",
       "stars": 0,
-      "downloads": 241,
+      "downloads": 242,
       "categories": [
         "tools",
         "workflow"
@@ -1188,7 +1188,7 @@
       "author": "sduhantao-maker",
       "repository": "https://github.com/sduhantao-maker/codexhost-sidebar-thread-tree",
       "stars": 5,
-      "downloads": 1604,
+      "downloads": 1654,
       "categories": [
         "interface",
         "workflow"
@@ -1270,7 +1270,7 @@
       "author": "mythezone",
       "repository": "https://github.com/mythezone/codexhost-ext-the-althing",
       "stars": 3,
-      "downloads": 267,
+      "downloads": 269,
       "categories": [
         "workflow",
         "tools"
